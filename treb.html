@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <link rel="icon" type="image/png" href="images/icon.png">
+    <title>Мои требования ✨</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Pangolin&family=Comic+Neue:wght@400;700&display=swap"
+        rel="stylesheet">
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: #4a4e69; 
+            background-image: radial-gradient(#3d405b 20%, transparent 20%);
+            background-size: 30px 30px;
+            margin: 0;
+            padding: 20px 10px;
+            display: flex;
+            justify-content: flex-start;
+            align-items: center;
+            min-height: 100vh;
+            flex-direction: column;
+            font-family: 'Comic Neue', cursive;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        #sakura-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        h1 {
+            font-family: 'Pangolin', cursive;
+            color: #05bdf5;
+            margin: 20px 0 10px 0;
+            text-shadow: 3px 3px 0px #fff;
+            font-size: 36px;
+            text-align: center;
+            transform: rotate(-1deg);
+            z-index: 2;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #eee;
+            font-size: 16px;
+            margin-bottom: 25px;
+            font-weight: bold;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+            z-index: 2;
+        }
+
+        /* --- СЕТКА ТРЕБОВАНИЙ --- */
+        .table-container {
+            background: #fffdf0;
+            border: 6px solid #333;
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 12px 0px rgba(0, 0, 0, 0.3);
+            max-width: 750px;
+            width: 100%;
+            transform: rotate(0.5deg);
+            margin-bottom: 30px;
+            z-index: 2;
+        }
+
+        .requirements-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+        }
+
+        .req-card {
+            background: #fff;
+            border: 3px solid #333;
+            border-radius: 12px;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+            text-align: center;
+            gap: 12px;
+            min-height: 110px;
+            box-shadow: 0 4px 0 #333;
+            transition: transform 0.1s ease;
+        }
+        
+        .req-card:hover {
+            transform: translateY(-2px);
+        }
+
+        .req-card-text {
+            font-size: 16px;
+            font-weight: bold;
+            color: #444;
+            line-height: 1.3;
+        }
+
+        .btn-more {
+            background: #ffde59;
+            border: 3px solid #333;
+            border-radius: 8px;
+            padding: 6px 16px;
+            font-size: 14px;
+            font-weight: bold;
+            color: #333;
+            cursor: pointer;
+            box-shadow: 0 4px 0 #333;
+            font-family: 'Pangolin', cursive;
+            transition: all 0.1s ease;
+            width: fit-content;
+        }
+        .btn-more:active {
+            box-shadow: 0 1px 0 #333;
+            transform: translateY(3px);
+        }
+
+        /* --- ОВЕРЛЕЙ МОДАЛКИ --- */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(4px);
+            z-index: 100;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+            padding: 20px;
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        /* Главный контейнер для карточки и стрелок */
+        .modal-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            max-width: 560px;
+            width: 100%;
+            justify-content: center;
+        }
+
+        /* --- КАРТОЧКА --- */
+        .modal-card {
+            background: #fffdf0;
+            border: 6px solid #333;
+            border-radius: 16px;
+            padding: 30px 25px 20px 25px;
+            box-shadow: 0 15px 0px rgba(0, 0, 0, 0.4);
+            width: 100%;
+            max-width: 400px;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            transform: scale(0.8) rotate(-2deg);
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.25);
+            order: 2; /* Карточка всегда посередине между стрелками на ПК */
+        }
+
+        .modal-overlay.active .modal-card {
+            transform: scale(1) rotate(0deg);
+        }
+
+        /* --- ЕДИНСТВЕННЫЕ ДВЕ СТРЕЛКИ --- */
+        .modal-arrow {
+            background: #ffde59;
+            border: 4px solid #333;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            font-size: 20px;
+            font-weight: bold;
+            color: #333;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 5px 0 #333;
+            transition: all 0.1s ease;
+            user-select: none;
+            flex-shrink: 0;
+            z-index: 105;
+        }
+        .modal-arrow:active {
+            box-shadow: 0 1px 0 #333;
+            transform: translateY(4px);
+        }
+
+        .prev-arrow { order: 1; } /* Левая стрелка перед карточкой */
+        .next-arrow { order: 3; } /* Правая стрелка после карточки */
+
+        .modal-close-x {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            font-size: 28px;
+            font-weight: bold;
+            color: #333;
+            cursor: pointer;
+            user-select: none;
+            transition: transform 0.1s ease;
+        }
+        .modal-close-x:hover { transform: scale(1.2); }
+
+        .modal-title {
+            font-family: 'Pangolin', cursive;
+            font-size: 22px;
+            color: #333;
+            margin: 0 0 15px 0;
+            border-bottom: 3px dashed #333;
+            padding-bottom: 5px;
+            width: 100%;
+        }
+
+        .modal-text {
+            font-size: 16px;
+            color: #444;
+            line-height: 1.5;
+            margin: 0 0 15px 0;
+            min-height: 72px;
+        }
+
+        /* --- ПОЛАРОИД 📸 --- */
+        .polaroid {
+            background: #ffffff;
+            padding: 10px 10px 20px 10px;
+            border: 3px solid #333;
+            box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+            width: 180px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            user-select: none;
+            transform: rotate(-3deg);
+            margin-bottom: 20px;
+        }
+
+        .polaroid img {
+            width: 100%;
+            height: 130px;
+            object-fit: cover;
+            border: 2px solid #333;
+            border-radius: 2px;
+        }
+
+        .polaroid-caption {
+            font-family: 'Pangolin', cursive;
+            font-size: 13px;
+            color: #555;
+            margin-top: 8px;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .btn-close-bottom, .btn-back {
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+            border: 4px solid #333;
+            border-radius: 16px;
+            padding: 10px 24px;
+            font-size: 16px;
+            font-weight: bold;
+            color: white;
+            text-decoration: none;
+            box-shadow: 0 5px 0px #333;
+            transition: all 0.1s ease;
+            font-family: 'Pangolin', cursive;
+            cursor: pointer;
+        }
+        
+        .btn-close-bottom { background: #ff5757; transform: rotate(1deg); }
+        .btn-close-bottom:active { box-shadow: 0 1px 0 #333; transform: translateY(4px) rotate(2deg); }
+
+        .btn-back { background: #57b9ff; transform: rotate(-1deg); margin-top: 10px; z-index: 2; font-size: 18px; padding: 12px 28px; box-shadow: 0 6px 0px #333; }
+        .btn-back:active { box-shadow: 0 2px 0px #333; transform: translateY(4px) rotate(-2deg); }
+
+        /* --- МОБИЛЬНАЯ АДАПТАЦИЯ ДЛЯ СТРЕЛОК --- */
+        @media (max-width: 650px) {
+            h1 { font-size: 28px; }
+            .requirements-grid { grid-template-columns: 1fr; gap: 12px; }
+            .req-card { min-height: auto; }
+            
+            /* На мобильных перестраиваем контейнер в колонку */
+            .modal-wrapper { 
+                flex-direction: column; 
+                gap: 15px; 
+            }
+            
+            /* Карточку поднимаем наверх */
+            .modal-card { 
+                order: 1; 
+                padding: 25px 15px 15px 15px; 
+            }
+            
+            /* Стрелочки спускаем вниз и ставим их в один горизонтальный ряд */
+            .prev-arrow { 
+                order: 2; 
+                margin-right: 20px; /* Отступ между кнопками на мобилке */
+            }
+            .next-arrow { 
+                order: 3; 
+            }
+
+            /* Чтобы кнопки встали в один ряд на мобильном, сбрасываем блочное поведение */
+            .modal-wrapper {
+                display: block;
+                text-align: center;
+            }
+            .modal-card {
+                display: inline-flex;
+                text-align: center;
+                margin-bottom: 15px;
+            }
+            .modal-arrow {
+                display: inline-flex;
+            }
+
+            .modal-title { font-size: 18px; }
+            .modal-text { font-size: 14px; min-height: auto; }
+            .btn-back { font-size: 16px; padding: 10px 22px; }
+        }
+    </style>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+
+<body>
+
+    <canvas id="sakura-canvas"></canvas>
+
+    <h1>Мои требования к Кате 📜</h1>
+    <div class="subtitle">Список моих требований👇</div>
+
+    <div class="table-container">
+        <div class="requirements-grid">
+            
+            <div class="req-card">
+                <div class="req-card-text">Без зависимости от чужого мнения</div>
+                <button class="btn-more" data-index="1">Подробнее ✨</button>
+            </div>
+
+            <div class="req-card">
+                <div class="req-card-text">Уметь договариваться и искать компромиссы</div>
+                <button class="btn-more" data-index="2">Подробнее ✨</button>
+            </div>
+
+            <div class="req-card">
+                <div class="req-card-text">Уметь говорить прямо и главное все</div>
+                <button class="btn-more" data-index="3">Подробнее ✨</button>
+            </div>
+
+            <div class="req-card">
+                <div class="req-card-text">Не сравнивай меня с бывшими</div>
+                <button class="btn-more" data-index="4">Подробнее ✨</button>
+            </div>
+            <div class="req-card">
+                <div class="req-card-text">Не шастать по клубам, впискам и по другим сомнительным мероприятиям, местам(исключение если только со мной)</div>
+                <button class="btn-more" data-index="5">Подробнее ✨</button>
+            </div>
+            <div class="req-card">
+                <div class="req-card-text">Быть со мной как душой так и телом, без исключений</div>
+                <button class="btn-more" data-index="6">Подробнее ✨</button>
+            </div>
+            <div class="req-card">
+                <div class="req-card-text">Хотеть планировать со мной свою жизнь, поездки, походы и тд и чтобы я там обязательно был с тобой</div>
+                <button class="btn-more" data-index="7">Подробнее ✨</button>
+            </div>
+            <div class="req-card">
+                <div class="req-card-text">Быть со мной не потому что так удобно, а потому что и вправду хочет быть рядом</div>
+                <button class="btn-more" data-index="8">Подробнее ✨</button>
+            </div>
+            <div class="req-card">
+                <div class="req-card-text">То что между нами, остается между нами</div>
+                <button class="btn-more" data-index="9">Подробнее ✨</button>
+            </div>
+            <div class="req-card">
+                <div class="req-card-text">Без потребительского отношения ко мне</div>
+                <button class="btn-more" data-index="10">Подробнее ✨</button>
+            </div>
+            <div class="req-card">
+                <div class="req-card-text">Если у нас рождается ребенок, то ему отдаем половину нашего имущества сразу(если так можно по закону)</div>
+                <button class="btn-more" data-index="11">Подробнее ✨</button>
+            </div>
+
+        </div>
+    </div>
+
+    <a href="index.html" class="btn-back">◀ Вернуться к дневнику</a>
+
+
+    <div class="modal-overlay" id="modalOverlay">
+        <div class="modal-wrapper">
+            
+            <button class="modal-arrow prev-arrow">◀</button>
+
+            <div class="modal-card">
+                <div class="modal-close-x" id="closeX">×</div>
+                <div class="modal-title" id="modalTitle">Заголовок</div>
+                <div class="modal-text" id="modalText">Текст описания...</div>
+                
+                <div class="polaroid">
+                    <img id="modalImg" src="" alt="Фото">
+                    <div class="polaroid-caption" id="modalCaption">Подпись</div>
+                </div>
+
+                <button class="btn-close-bottom" id="closeBtn">Закрыть 🌸</button>
+            </div>
+
+            <button class="modal-arrow next-arrow">▶</button>
+
+        </div>
+    </div>
+
+
+    <script>
+        // --- БАЗА ДАННЫХ ДЛЯ ВСПЛЫВАЮЩЕГО ОКНА ---
+        const detailsData = {
+            1: {
+                title: "Без зависимости от чужого мнения",
+                text: "Я не люблю когда человек слепо идет за чужим мнением. Это может разрушить многое в жизни, если наслушаешься чужих советов, которые не могут быть применены например в наших ситуациях",
+                img: "treb/1.jpg",
+                caption: "Управление человеком на картинке"
+            },
+            2: {
+                title: "Уметь договариваться и искать компромиссы",
+                text: "Я не люблю конфликты оставлять не решеными, надо все заканчивать с каким то результатом, либо компромисс или уже на крайняк уступка от кого либо. Ведь если не решишь, то это будет влиять на будущие решения, выборы и ситуации в общем",
+                img: "treb/2.jpg",
+                caption: "Борьба на руках"
+            },
+            3: {
+                title: "Уметь говорить прямо и главное все",
+                text: "Я не хочу чтобы ты боялась что то говорить, можешь сгладить углы, но чтобы сказала, не бойся не кусаюсь. При этом что то умолчавать про что то какую то важную деталь в отношениях или в браке тоже не надо.",
+                img: "treb/3.jpg",
+                caption: "Мало фоток в инете"
+            },
+            4: {
+                title: "Не сравнивай меня с бывшими",
+                text: "Сравнивать меня с каким то мужиком, а если это бывший еще, это очень больно и неприятно на сердце. Я думаю, тебе бы тоже не хотелось, если бы я назвал имя какой то девушки например в каком то личном. А также не хочу слышать сравнения с бывшим ни в хорошую, ни в плохую сторону. Я отдельный человек со своими достоинствами и недостатками.",
+                img: "treb/4.jpg",
+                caption: "Стейтхем сказал честное слово"
+            },
+            5: {
+                title: "Не шастать по клубам, впискам и по другим сомнительным мероприятиям, местам(исключение если только со мной)",
+                text: "В такие места ходят чтобы пофлиртовать, или поебаться в туалете чаще всего, так что тут я думаю все понятно. Если со мной идти в такое место, то еще ладно",
+                img: "treb/5.jpg",
+                caption: "Ночной клуб в майнкрафте"
+            },
+            6: {
+                title: "Быть со мной как душой так и телом, без исключений",
+                text: "Чувства и эмоции так само важны для меня как и физическая близость. Если ты мне будешь давать их, то я отвечу обязательно взаимностью и даже больше",
+                img: "treb/6.jpg",
+                caption: "Что они делают? 🤔"
+            },
+            7: {
+                title: "Хотеть планировать со мной свою жизнь, поездки, походы и тд и чтобы я там обязательно был с тобой",
+                text: "Создавать общие планы, обдумывать их это залог того, что мы вместе хотим идти по жизни и развиваться вместе. Фоткать друг друга, будить по утрам, днем, что пора уже на экскурсию или пробежку, или бежать за автобусом.",
+                img: "treb/7.jpg",
+                caption: "Когда не знаешь где север, а где юг. И вы как дураки лыбу тянете"
+            },
+            8: {
+                title: "Быть со мной не потому что так удобно, а потому что и вправду хочет быть рядом",
+                text: "Удобство это хорошо, но если это единственная причина, то это не совсем любовь. Это скорее просто хороший вариант, чтобы переждать или найти кого то другого.",
+                img: "treb/8.jpg",
+                caption: "Тут мужик рвется к водке, а женщина себе хочет ее оставить"
+            },
+            9: {
+                title: "То что между нами, остается между нами",
+                text: "Я не хочу выносить деликатные или очень чувствительные темы на общеее обсуждение, я хочу чтобы мы их сами решали или оставалось между нами, никаким друзьям, подругам и тд.",
+                img: "treb/9.png",
+                caption: "Это мужик решил рассказать как его друг геем стал, но никому сказал не говорить"
+            },
+            10: {
+                title: "Без потребительского отношения ко мне",
+                text: "Не надо видеть во мне ресурс, мне и государства хватает. ",
+                img: "treb/10.png",
+                caption: "Бурильщик дыр, который умрет в 50"
+            },
+            11: {
+                title: "Если у нас рождается ребенок, то ему отдаем половину нашего имущества сразу(если так можно по закону)",
+                text: "Хочу чтобы наш ребенок был обеспечен сразу из детства, что если не дай Бог его разлюбит кто то из нас и будет на него пофигу, чтобы осталось имущество, которое ему поможет в жизни.",
+                img: "treb/11.jpg",
+                caption: "В 7 лет, а уже столько пенсионерок сбил"
+            }
+        };
+
+        let currentRequirementIndex = 1;
+        const totalRequirements = Object.keys(detailsData).length;
+
+        function updateModalContent(index) {
+            const data = detailsData[index];
+            if(data) {
+                currentRequirementIndex = index;
+                $('#modalTitle').text(data.title);
+                $('#modalText').text(data.text);
+                $('#modalImg').attr('src', data.img);
+                $('#modalCaption').text(data.caption);
+            }
+        }
+
+        $('.btn-more').on('click', function() {
+            const index = $(this).data('index');
+            updateModalContent(index);
+            $('#modalOverlay').addClass('active');
+        });
+
+        function changeRequirement(direction) {
+            let newIndex = currentRequirementIndex;
+            
+            if (direction === 'next') {
+                newIndex = currentRequirementIndex + 1;
+                if (newIndex > totalRequirements) newIndex = 1; 
+            } else if (direction === 'prev') {
+                newIndex = currentRequirementIndex - 1;
+                if (newIndex < 1) newIndex = totalRequirements; 
+            }
+            
+            $('.modal-card').css('transform', 'scale(0.95)');
+            setTimeout(() => {
+                updateModalContent(newIndex);
+                $('.modal-card').css('transform', 'scale(1)');
+            }, 100);
+        }
+
+        $('.next-arrow').on('click', function(e) {
+            e.stopPropagation(); 
+            changeRequirement('next');
+        });
+
+        $('.prev-arrow').on('click', function(e) {
+            e.stopPropagation();
+            changeRequirement('prev');
+        });
+
+        function closeModal() {
+            $('#modalOverlay').removeClass('active');
+        }
+
+        $('#closeX').on('click', closeModal);
+        $('#closeBtn').on('click', closeModal);
+        
+        $('#modalOverlay').on('click', function(e) {
+            if ($(e.target).is('#modalOverlay') || $(e.target).is('.modal-wrapper')) {
+                closeModal();
+            }
+        });
+
+
+        // --- Скрипт анимации лепестков сакуры ---
+        const canvas = document.getElementById('sakura-canvas');
+        const ctx = canvas.getContext('2d');
+
+        let width = canvas.width = window.innerWidth;
+        let height = canvas.height = window.innerHeight;
+
+        window.addEventListener('resize', () => {
+            width = canvas.width = window.innerWidth;
+            height = canvas.height = window.innerHeight;
+        });
+
+        const numPetals = 30; 
+        const petals = [];
+
+        class Petal {
+            constructor() {
+                this.x = Math.random() * width;
+                this.y = Math.random() * height - height;
+                this.r = Math.random() * 6 + 4;
+                this.d = Math.random() * numPetals;
+                this.horizontalSpeed = Math.random() * 1 + 0.5;
+                this.verticalSpeed = Math.random() * 1.2 + 0.8;
+                this.flip = Math.random();
+                this.flipSpeed = Math.random() * 0.03 + 0.01;
+            }
+
+            draw() {
+                if (this.y > height || this.x > width || this.x < -10) {
+                    this.x = Math.random() * width;
+                    this.y = -20;
+                    this.verticalSpeed = Math.random() * 1.2 + 0.8;
+                    this.horizontalSpeed = Math.random() * 1 + 0.5;
+                }
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.r, 0, Math.PI, false);
+                ctx.lineTo(this.x, this.y - this.r * this.flip);
+                ctx.closePath();
+                ctx.fillStyle = 'rgba(255, 153, 177, 1.0)'; 
+                ctx.fill();
+            }
+
+            update() {
+                this.y += this.verticalSpeed;
+                this.x += Math.sin(this.d) * this.horizontalSpeed;
+                this.d += 0.01;
+                this.flip += this.flipSpeed;
+                if (this.flip > 1 || this.flip < -1) {
+                    this.flipSpeed = -this.flipSpeed;
+                }
+            }
+        }
+
+        for (let i = 0; i < numPetals; i++) {
+            petals.push(new Petal());
+        }
+
+        function animate() {
+            ctx.clearRect(0, 0, width, height);
+            petals.forEach(petal => {
+                petal.draw();
+                petal.update();
+            });
+            requestAnimationFrame(animate);
+        }
+
+        animate();
+    </script>
+</body>
+
+</html>

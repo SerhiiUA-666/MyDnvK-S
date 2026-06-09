@@ -1,0 +1,744 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Операция: Райдер Кати 🕵️‍♂️</title>
+    <link href="https://fonts.googleapis.com/css2?family=Pangolin&family=Comic+Neue:wght@400;700&family=Special+Elite&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/png" href="images/icon.png">
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            background: #121214;
+            color: #a7a9be;
+            font-family: 'Comic Neue', cursive;
+            margin: 0;
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            justify-content: center;
+            overflow-x: hidden;
+        }
+
+.btn-back-diary {
+  /* Фиксируем в верхнем левом углу, чтобы не мешать игре */
+  position: fixed;
+  top: 20px;
+  left: 20px;
+  z-index: 9999; /* Поверх всех игровых элементов */
+  
+  /* Флекс-контейнер для выравнивания иконки и текста */
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  
+  /* Оформление */
+  padding: 10px 18px;
+  background-color: rgba(255, 255, 255, 0.8);
+  color: #555;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+  
+  /* Скругление и мягкая пастельная граница */
+  border-radius: 30px;
+  border: 1px solid rgba(255, 182, 193, 0.6); 
+  
+  /* Эффекты тени и размытия фона */
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  
+  /* Плавный переход для анимаций */
+  transition: all 0.3s ease;
+  cursor: pointer;
+  user-select: none;
+}
+
+/* Эффект при наведении */
+.btn-back-diary:hover {
+  background-color: #fff;
+  color: #333;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+  border-color: rgba(255, 182, 193, 1);
+}
+
+/* Эффект при клике */
+.btn-back-diary:active {
+  transform: translateY(0);
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+}
+
+/* --- Адаптивность для мобильных экранов --- */
+@media (max-width: 768px) {
+  .btn-back-diary {
+    top: 12px;
+    left: 12px;
+    padding: 8px 14px;
+    font-size: 13px;
+  }
+}
+
+@media (max-width: 480px) {
+  .btn-back-diary {
+    /* На совсем маленьких экранах можно оставить только иконку, чтобы сэкономить место */
+    padding: 8px;
+    border-radius: 50%;
+  }
+  .btn-back-diary span {
+    display: none; /* Прячем текст «Дневник», оставляя стрелочку */
+  }
+}
+
+        /* HUD */
+        .hud {
+            width: 100%;
+            max-width: 650px;
+            background: #fffffe;
+            color: #2d3748;
+            padding: 14px;
+            border-radius: 12px;
+            margin-bottom: 8px;
+            border: 3px solid #ff8906;
+            font-family: 'Pangolin', cursive;
+            font-size: 14px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+            font-weight: bold;
+        }
+        .hud-row { display: flex; justify-content: space-between; align-items: center; width: 100%; }
+        .timer-box { color: #e53e3e; font-size: 16px; animation: pulse 1s infinite alternate; }
+
+        /* КАРТА ПУТИ */
+        .map-container {
+            background: #edf2f7;
+            border: 2px solid #cbd5e0;
+            border-radius: 8px;
+            padding: 6px;
+            display: flex;
+            justify-content: space-around;
+            font-size: 12px;
+            color: #4a5568;
+            width: 100%;
+        }
+        .map-node { padding: 2px 6px; border-radius: 4px; transition: all 0.2s; text-align: center; }
+        .map-node.active { background: #ff8906; color: white; font-weight: bold; transform: scale(1.05); }
+        .map-node.locked { text-decoration: line-through; opacity: 0.5; color: #e53e3e; }
+
+        @keyframes pulse {
+            from { transform: scale(1); opacity: 1; }
+            to { transform: scale(1.05); opacity: 0.8; }
+        }
+
+        /* Карточка */
+        .game-card {
+            background: #fffffe;
+            color: #2b2c34;
+            border: 4px solid #111;
+            border-radius: 16px;
+            width: 100%;
+            max-width: 650px;
+            padding: 24px;
+            box-shadow: 0 12px 40px rgba(0,0,0,0.6);
+            display: flex;
+            flex-direction: column;
+            transition: all 0.3s ease;
+        }
+        
+        /* ТЕМАТИЧЕСКИЕ ЦВЕТА СЦЕН */
+        .game-card.fail-bg { background: #2d1313; color: #fffffe; border-color: #f56565; }
+        .game-card.fail-bg .scene-text { color: #feb2b2; }
+        .game-card.fail-bg .btn-choice { background: #e53e3e; color: white; border-color: #742a2a; }
+        
+        .game-card.win-bg { background: #132d1b; color: #fffffe; border-color: #48bb78; }
+        .game-card.win-bg .scene-text { color: #c6f6d5; }
+        .game-card.win-bg .btn-choice { background: #38a169; color: white; border-color: #22543d; }
+
+        /* ЭКРАН БРИФИНГА */
+        .game-card.briefing-bg {
+            background: #f4ebd0;
+            border: 5px double #5c4033;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            color: #2b1a0a;
+            font-family: 'Special Elite', serif;
+            position: relative;
+        }
+        .game-card.briefing-bg::before {
+            content: "МОЁ ДЕЛО";
+            position: absolute;
+            top: 12px; right: 15px;
+            border: 2px dashed #a04040;
+            color: #a04040;
+            font-size: 10px; padding: 2px 6px; font-weight: bold;
+        }
+        .game-card.briefing-bg .scene-text { color: #3d2b1f; font-size: 15px; font-weight: normal; }
+        .game-card.briefing-bg .btn-choice {
+            background: #d4a373; border-color: #5c4033; color: #fff;
+            font-family: 'Special Elite', serif; box-shadow: 0 4px 0 #5c4033;
+        }
+
+        .scene-img { font-size: 65px; text-align: center; margin-bottom: 12px; }
+        .scene-text { font-size: 16px; line-height: 1.6; margin-bottom: 22px; font-weight: 700; white-space: pre-wrap; }
+
+        /* Кнопки */
+        .choices-container { display: flex; flex-direction: column; gap: 12px; }
+        .btn-choice {
+            background: #ff8906; border: 3px solid #111; border-radius: 10px;
+            padding: 14px; font-size: 15px; font-weight: bold; color: #fffffe;
+            cursor: pointer; font-family: 'Pangolin', cursive; box-shadow: 0 4px 0 #111;
+            transition: all 0.1s ease; text-align: left;
+        }
+        .btn-choice:active { box-shadow: 0 1px 0 #111; transform: translateY(3px); }
+        .btn-choice.rare { background: #38a169; }
+        .btn-choice.special { background: #7f5af0; }
+
+        /* Окно Документов */
+        .modal-overlay {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.95); z-index: 1000; justify-content: center; align-items: center; padding: 15px;
+        }
+        .modal-overlay.active { display: flex; }
+        .secret-container { display: flex; gap: 15px; width: 100%; max-width: 750px; align-items: stretch; }
+        .secret-side-card { background: #dfd5b6; border: 4px solid #5a2020; border-radius: 12px; flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 65px; box-shadow: 4px 4px 12px rgba(0,0,0,0.5); position: relative; }
+        .secret-side-card::after { content: "НАХОДКА"; position: absolute; bottom: 8px; font-size: 9px; font-weight: bold; color: #5a2020; font-family: 'Pangolin', cursive; }
+        .secret-card { background: #f2ebd9; border: 5px double #742a2a; border-radius: 12px; flex: 2; padding: 25px; color: #2d3748; box-shadow: 0 0 30px rgba(229, 62, 62, 0.4); display: flex; flex-direction: column; justify-content: space-between; align-items: center; }
+        .stamp-top-secret { border: 4px dashed #742a2a; color: #742a2a; font-family: 'Pangolin', cursive; font-size: 20px; font-weight: bold; text-align: center; padding: 4px 12px; transform: rotate(-2deg); margin-bottom: 15px; }
+        .secret-desc { font-weight: bold; font-size: 16px; text-align: left; line-height: 1.6; color: #1a202c; width: 100%; }
+        .btn-close-secret { margin-top: 20px; width: 100%; background: #742a2a; color: white; border: 3px solid #111; padding: 12px; font-family: 'Pangolin', cursive; font-size: 15px; border-radius: 8px; cursor: pointer; box-shadow: 0 3px 0 #111; }
+
+        /* ========================================= */
+        /* АДАПТАЦИЯ ДЛЯ МОБИЛЬНЫХ ТЕЛЕФОНОВ (PHONES)*/
+        /* ========================================= */
+        @media (max-width: 600px) {
+            body { padding: 8px; justify-content: flex-start; }
+            
+            /* Адаптация HUD */
+            .hud { padding: 12px; font-size: 13px; gap: 8px; }
+            .hud-row { flex-direction: column; align-items: flex-start; gap: 6px; }
+            .timer-box { font-size: 14px; align-self: flex-start; }
+            
+            /* Адаптация Карты */
+            .map-container { flex-wrap: wrap; gap: 6px; justify-content: center; padding: 8px; }
+            .map-node { font-size: 11px; padding: 4px 8px; flex: 1 1 calc(33% - 10px); text-align: center; }
+            
+            /* Адаптация Карточки Игры */
+            .game-card { padding: 18px 14px; border-width: 3px; border-radius: 12px; }
+            .scene-img { font-size: 50px; margin-bottom: 8px; }
+            .scene-text { font-size: 14px; margin-bottom: 16px; }
+            .btn-choice { padding: 12px; font-size: 13px; }
+            
+            /* Адаптация Всплывающего окна (Модалка) */
+            .secret-container { flex-direction: column; gap: 8px; }
+            .secret-side-card { height: 70px; font-size: 35px; flex-direction: row; gap: 15px; }
+            .secret-side-card::after { position: static; font-size: 10px; }
+            .secret-card { padding: 18px; flex: none; width: 100%; }
+            .stamp-top-secret { font-size: 16px; margin-bottom: 10px; padding: 4px 8px; }
+            .secret-desc { font-size: 14px; }
+            .btn-close-secret { font-size: 13px; padding: 10px; margin-top: 15px; }
+        }
+        @media (max-width: 380px) {
+            .map-node { flex: 1 1 40%; }
+            .game-card.briefing-bg::before { font-size: 8px; top: 8px; right: 8px; }
+        }
+    </style>
+</head>
+<body>
+
+    <a href="index.html" class="btn-back-diary">
+  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M19 12H5M12 19l-7-7 7-7"/>
+  </svg>
+  <span>Дневник</span>
+</a>
+    <div class="hud" id="game-hud" style="display: none;">
+        <div class="hud-row">
+            <div>📄 Требований: <span id="docs-val">0/16</span></div>
+            <div class="timer-box" id="timer-container" style="display: none;">⏳ Паника: <span id="timer-val">30</span>с</div>
+            <div>🎒 Мой супер секретный карман: <span id="inventory-list">Пусто</span></div>
+        </div>
+        <div class="map-container" id="game-map">
+            <div class="map-node" id="node-hall">Прихожая</div>
+            <div class="map-node" id="node-kitchen">Кухня</div>
+            <div class="map-node" id="node-bathroom">Ванная</div>
+            <div class="map-node" id="node-living">Гостиная</div>
+            <div class="map-node" id="node-bedroom">Спальня</div>
+        </div>
+    </div>
+
+    <div class="game-card" id="main-card">
+        <div class="scene-img" id="scene-icon">📁</div>
+        <div class="scene-text" id="scene-description">Вскрываю секретную папку с делом...</div>
+        <div class="choices-container" id="choices-block"></div>
+    </div>
+
+    <div class="modal-overlay" id="secret-modal">
+        <div class="secret-container">
+            <div class="secret-side-card" id="secret-left-img">📸</div>
+            <div class="secret-card">
+                <div class="stamp-top-secret">🔥 ТРЕБОВАНИЯ К ПАРНЮ/МУЖУ 🔥</div>
+                <div class="secret-desc" id="secret-text-slot">Пытаюсь разобрать почерк...</div>
+                <button class="btn-close-secret" onclick="closeSecretCard()">Прячу листок в карман и продолжаю поиск 📂</button>
+            </div>
+            <div class="secret-side-card" id="secret-right-img">📸</div>
+        </div>
+    </div>
+
+    <script>
+        let foundDocs = [];
+        let inventory = [];
+        let nextSceneAfterDoc = "";
+        let visitCounts = {}; 
+        let countdownInterval = null;
+        const TIME_LIMIT = 30; 
+
+        const limitedZones = ['kitchen_zone', 'bathroom_zone', 'living_zone', 'bedroom_interior'];
+
+        // Связь сцен с отображением на карте пути
+        const zoneToMapNode = {
+            'hallway_start': 'node-hall',
+            'bedroom_approach': 'node-hall',
+            'kitchen_zone': 'node-kitchen',
+            'bathroom_zone': 'node-bathroom',
+            'living_zone': 'node-living',
+            'living_hide_sofa': 'node-living',
+            'living_hide_curtain': 'node-living',
+            'bedroom_interior': 'node-bedroom',
+            'cat_disposed_meat': 'node-bedroom',
+            'cat_disposed_laser': 'node-bedroom',
+            'cat_disposed_valerian': 'node-bedroom',
+            'search_desk': 'node-bedroom',
+            'search_bedside': 'node-bedroom',
+            'search_makeup': 'node-bedroom',
+            'final_choice_zone': 'node-bedroom'
+        };
+
+        const requirements = {
+            1: {text: "1. Я не буду сидеть в декрете (няни, он, не я)"},
+            2: {text: "2. Мои деньги,это мои деньги(потому что без работы мне скучно и я обязательно хочу работать), его это наши "},
+            3: {text: "3. Если у нас будут дети,то мальчиков называет он, а девочек я, чтобы не было такого что кто-то из нас назвал  детей в честь какой-то прошлой симпатии"},
+            4: {text: "4. Он обязательно дарит мне цветы, не только по праздникам!"},
+            5: {text: "5. Мы обязательно планируем свидания по очереди хотя бы два раза в месяц"},
+            6: {text: "6. Он дает мне пароли от всех своих соцсетей и я ему от своих ( это вообще самый обязательный пункт)"},
+            7: {text: "7. Мы ищем хотя бы 1 совместное увлечение вне дома, чтобы у нас были общие темы для разговора"},
+            8: {text: "8. я хочу свадьбу,но не хочу чтобы мне кричали горько и нужно было целоваться при всех, ну короче я походу не хочу свадьбу, но я обязательно хочу какой-нибудь медовый месяц в путешествие на отдыхе где мы будем только друг для друга"},
+            9: {text: "9. Никаких 50/50 , по дому делаем все вместе"},
+            10: {text: "10. Брачный договор обязательно, где прописано,что если кто-то изменит и плевать какая измена, физическая или эмоциональная все имущество переходит в руки жертвы, и должны быть доказательства, а не просто мне друг/подруга сказали"},
+            11: {text: "11. Обязательно животные которые я захочу"},
+            12: {text: "12. Хочу чтобы он тоже со мной говорил что мены тупые спермобаки"},
+            13: {text: "13. Оплачивает мне психиатра и препараты"},
+            14: {text: "14. Ходить если понадобится со мной на совместные сеансы"},
+            15: {text: "15. Покупает мне пневматическое оружие, (винтовку,пистолет 24кдж) хочу стрелять по мишеням и банкам"},
+            16: {text: "16. Давать мне деньги депать в казик"}
+        };
+
+        const dynamicTexts = {
+            kitchen_zone: [
+                "Так, я прокрался на Кухню. Блин, чувствую себя грабителем. Катя вовсю шумит кастрюлями у плиты, блин и она в одном фартуке. Отлично она отвлечена. Справа вижу открытую аптечку с вальерьянкой, а на столе лежит колбаска. Что мне стащить?",
+                "Блин, я снова залез на Кухню. Катя затихла и убавила огонь. Сердце стучит быстро. Если я останусь тут или зайду еще раз, она меня точно поймает"
+            ],
+            bathroom_zone: [
+                "Я по тизму зашёл в Ванную Кати. Емае, сколько тут баночек, трусов не стираных, кремов и масок. Глаза разбегаются. Опа, на стиральной машинке стоит стакан с зубными щётками. Попробую там пошарить?",
+                "Опять я в этой Ванной. Воздух пахнет шампунем и её духами. Слышу, как в коридоре прозвучали её шаги! Бляя, это мой последний безопасный шанс убежать отсюда!"
+            ],
+            living_zone: [
+                "Слышу шаги в коридоре! А ну ка, я в Гостиной. Вот это тут чистота, даже трогать ничего страшно. Стоп... Катя идет сюда, кажется она забыла телефон на диване! Мне нужно срочно нужно спрятаться!",
+                "Так, я вернулся в Гостиную. Катя вроде ушла обратно на кухню, но врубила своего декстера в телике как фон. Сюда соваться больше нельзя, слишком опасно."
+            ],
+            bedroom_interior: [
+                "Ура, замок поддался! Я пробрался в её Спальню, сейчас я найду все самое интерсное. Но радоваться рано... Прямо посреди ковра сидит этот огромный кошара Мафин, и у него волосы дыбом. Если он сейчас мяукнет, мне жопа. Чем мне его занять?",
+                "Я снова стою в Спальне. мафин подозрительно смотрит на меня и недовольно лупит хвостом по полу. Нужно действовать быстрее!"
+            ]
+        };
+
+        const story = {
+            briefing: {
+                icon: "📁",
+                text: "ЛИЧНОЕ ДОСЬЕ И МОЙ СЕКРЕТНЫЙ ПЛАН: «ОПЕРАЦИЯ ПО ПОИСКУ ТРЕБОВАНИЙ»\n--------------------------------------------\nОБЪЕКТ ИССЛЕДОВАНИЯ: Катя (Она мне сильно нравится).\nМОЯ ТЕКУЩАЯ ЛОКАЦИЯ: Её квартира, в которой она будет сегодня.\nМОЯ ЦЕЛЬ: Найти скрытые записи с её требованиями к будущему парню/мужу, пока она занята готовкой.\nМОЯ ПАМЯТКА: Нужно действовать скрытно. Если я буду метаться в одну и ту же комнату больше 2 раз, я вызову подозрения. На каждый шаг у меня ровно 30 секунд.\n\nКАК Я БУДУ ПРОНИКАТЬ?",
+                choices: [
+                    { text: "Попробую тихонько взломать замок скрепкой", next: "entry_fail_lockpick" },
+                    { text: "Постучусь в дверь и быстро спрячусь за мусоропроводом", next: "entry_fail_knock" },
+                    { text: "Открою дверь дубликатом ключа, который я сделал пока она не видела", next: "hallway_start", start: true }
+                ],
+                isBriefing: true
+            },
+            
+            entry_fail_lockpick: {
+                icon: "🔓",
+                text: "ПЛОХАЯ КОНЦОВКА 1: «МОЙ НОВЫЙ СТАТУС: СТАЛКЕР»\n\nУ меня в руках с громким щелчком ломается скрепка и намертво застревает в замке. В этот же миг дверь открывается — на пороге стоит Катя. \n\nОна видит у меня в руках инструменты взломщика, бледнеет и кричит: «Ты что, охерел?! Ты как мой адрес вообще узнал?!». Мои оправдания она даже не слушает. Катя вызывает полицию, блокирует меня везде и рассказывает друзьям, что я сумасшедший сталкер. Моим отношениям крышка, короче смерть",
+                choices: [{ text: "🔄 Начать операцию заново", next: "briefing", reset: true }]
+            },
+            entry_fail_knock: {
+                icon: "✊",
+                text: "ПЛОХАЯ КОНЦОВКА 2: «МОЙ ПОЗОР ПЕРЕД ЕЕ РОДИТЕЛЯМИ»\n\nЯ стучу в дверь и резво прыгаю за мусоропровод. Но дверь открывает не Катя, а её отец, который, оказывается, приехал в гости без предупреждения! Он моментально замечает меня, прячущегося за трубой в нелепой позе шпиона.\n\n«Эй, ты кто такой тут рыщешь?». На все это выходит Катя, узнает меня и от стыда закрывает лицо руками. Её отец устроил мне жесткую беседу на лестничной клетке, а Катя прислала СМС: «Больше никогда мне не звони, мне так стыдно...»",
+                choices: [{ text: "🔄 Начать операцию заново", next: "briefing", reset: true }]
+            },
+            caught_living: {
+                icon: "🧍‍♀️",
+                text: "ПЛОХАЯ КОНЦОВКА 3: «МОЙ ВЕЧНЫЙ ФРЕНДЗОН»\n\nКатя заходит в комнату и ловит меня прямо посреди неё, пока я роюсь в её вещах. Она застывает в полном шоке: «Ты как вошел сюда?! И что ты делаешь в моих шкафах с лифчиками?!»\n\nЯ начинаю дрожать и врать, но это выглядит так жалко что лучше бы я молчал. Катя разочарованно качает головой: «Я думала, ты надежный парень... А ты обычный извращенец. Меня с позором выставляют за дверь.",
+                choices: [{ text: "🔄 Попробовать еще раз", next: "briefing", reset: true }]
+            },
+            kitchen_panic_fail: {
+                icon: "🍳",
+                text: "ПЛОХАЯ КОНЦОВКА 4: «КУХОННЫЙ ИЗГОЙ»\n\nЯ слишком долго возился и тупил на Кухне. Катя резко оборачивается, ловя меня с поличным. Я вступоре стою на месте сжимая в руках её аптечку. \n\n«Ты крадешь мои антидепресанты?!» — вскрикивает она. Всё доверие между нами рушится за секунду. Катя забирает у меня ключи, и дает пинка под жопу и выставляет на улицу».",
+                choices: [{ text: "🔄 Попробовать еще раз", next: "briefing", reset: true }]
+            },
+            caught_bedroom_event: {
+                icon: "🧍‍♀️",
+                text: "ПЛОХАЯ КОНЦОВКА 5: «МОЙ ЧЕРНЫЙ СПИСОК ВЕКА»\n\nМоя рука дрогнула и тяжелая шкатулка с косметикой грохотом падает, разбивая её любимое зеркальце. В спальню залетает Катя. Видя этот погром который я устроил, она приходит в ярость.\n\nНе говоря ни слова, она выливает на меня стакан холодной воды, швыряет мне в голову мои кроссовки и выталкивает в коридор в одном носке и на улицу",
+                choices: [{ text: "🔄 Попробовать еще раз", next: "briefing", reset: true }]
+            },
+            ending_closet_trapped: {
+                icon: "🔒",
+                text: "ПЛОХАЯ КОНЦОВКА 6: «МОЁ УНИЖЕНИЕ В ШКАФУ»\n\nЯ забиваюсь в шкаф-купе среди её платьев. Катя заходит замечает мой торчащий кроссовок, молча закрывает раздвижные двери снаружи и намертво подпирает их шваброй. \n\nПосле этого она звонит моей маме со словами: «Заберите вашего шпиона он у меня в шкафу заперт иначе я его буду пытать». Это самый дикий позор в моей жизни. Отношения уничтожены, а надо мной теперь ржут абсолютно все знакомые.",
+                choices: [{ text: "🔄 Начать операцию заново", next: "briefing", reset: true }]
+            },
+
+            // ХОРОШИЕ КОНЦОВКИ
+            ending_partial_win: {
+                icon: "🏃‍♂️",
+                text: "ХОРОШАЯ КОНЦОВКА 1: «Я - ОСТОРОЖНЫЙ РОМАНТИК»\n\nЯ успешно десантировался через окно, но из-за спешки успел добыть всего пару требований. \n\nЯ узнал лишь верхушку айсберга её требований. На свиданиях я угадываю её желания через раз: то угадаю, то жестко накосячу. ну я вроде и неплохой парень, но Катя частенько вздыхает и хочет что когда-нибудь я начну понимать её идеально без подсказок. Надо бы вернуться и собрать весь список!",
+                choices: [{ text: "🔄 Собрать все листы ради Идеала", next: "briefing", reset: true }]
+            },
+            ending_diplomacy: {
+                icon: "🤝",
+                text: "ХОРОШАЯ КОНЦОВКА 2: «СТРАТЕГИЯ ЧИСТОГО СЕРДЦА»\n\nЯ смело вышел к Кате и честно признался: «Я просто безумно хочу быть для тебя тем самым и очень боялся ошибиться...»\n\nКатя в шоке, но мой поступок кажется ей невероятно милым , честным и романтичным но немного стремным. Она смеется, забирает свои требования и говорит: «Глупенький, мог бы просто спросить!». В этот же вечер она приглашает мне остаться с ней дома, чтобы никто больше не проник!",
+                choices: [{ text: "🔄 Сыграть еще раз", next: "briefing", reset: true }]
+            },
+            ending_good_spy: {
+                icon: "😎",
+                text: "ХОРОШАЯ КОНЦОВКА 3: «Я - ПЕРСПЕКТИВНЫЙ ПАРЕНЬ»\n\nЯ технично выкрал половину важных требований и незаметно покинул её квартиру.\n\nТеперь на наших свиданиях я творю настоящие чудеса: все время приношу любимые цветы, помню каждую деталь из её сериалов. Катя в полном восторге хвастается подругам: «Мой парень просто телепат! Он идеален!». Я заложил железобетонный фундамент для наших отношений.",
+                choices: [{ text: "🔄 Начать заново", next: "briefing", reset: true }]
+            },
+            ending_perfect_win: {
+                icon: "🏆",
+                text: "ХОРОШАЯ КОНЦОВКА 4: «Я - АБСОЛЮТНЫЙ ЖЕНИХ»\n\nЭто просто триумф! Я умудрился собрать ВСЕ её скрытые требования до единого и ушёл абсолютно незамеченным.\n\nТеперь я знаю все про ее требования до меня: от оружия что она хочет, до того что находится в ее шкатулке. На свидании она просто в шоке, как будто я читаю ее мысли, я ей предлагаю жить вместе, но она меня перебивает и говорит бери меня в жены!",
+                choices: [{ text: "🔄 Сыграть еще раз ради удовольствия", next: "briefing", reset: true }]
+            },
+
+            // ЛОКАЦИИ И МАРШРУТЫ
+            hallway_start: {
+                icon: "🚪",
+                text: "Я стою в Прихожей. Катя вовсю шумит посудой на Кухне. Дверь в её Спальню заперта на замок. Мне нужно осмотреться вокруг и раздобыть ключ. Куда мне податься?",
+                choices: [
+                    { text: "🚶‍♂️ Прокрадусь на Кухню", next: "kitchen_zone" },
+                    { text: "🚶‍♂️ Проверю Ванную комнату", next: "bathroom_zone" },
+                    { text: "🚶‍♂️ Исследую Гостиную", next: "living_zone" },
+                    { text: "🚪 Подойти к запертой двери Спальни", next: "bedroom_approach" }
+                ]
+            },
+            kitchen_zone: {
+                icon: "🍳",
+                text: "", 
+                choices: [
+                    { text: "🧪 Стяну Валерьянку из аптечки", next: "hallway_start", item: "Валерьянка" },
+                    { text: "🥩 Стащу кусок сырокопченой Колбасы", next: "hallway_start", item: "Колбаса" },
+                    { text: "◀ Тихо отступлю обратно в Прихожую", next: "hallway_start" }
+                ]
+            },
+            bathroom_zone: {
+                icon: "🛁",
+                text: "", 
+                choices: [
+                    { text: "🔦 Прихвачу её лазерную указку", next: "hallway_start", item: "Лазерная указка" },
+                    { text: "🔑 Проверю стаканчик и заберу Ключ от Спальни", next: "hallway_start", item: "Ключ от Спальни" },
+                    { text: "◀ Срочно выбегу обратно в коридор", next: "hallway_start" }
+                ]
+            },
+            living_zone: {
+                icon: "📺",
+                text: "", 
+                choices: [
+                    { text: "🏃‍♂️ Рыбкой прыгну под массивный диван", next: "living_hide_sofa" },
+                    { text: "🖼️ Закутаюсь в плотную штору у окна", next: "living_hide_curtain" },
+                    { text: "⚡ Рвану на авось (Шанс 30% найти листки)", next: "living_zone", chance: true, successDocs: [15, 16], failNext: "caught_living" },
+                    { text: "◀ Вернуться в Прихожую", next: "hallway_start" }
+                ]
+            },
+            living_hide_sofa: {
+                icon: "🕵️‍♂️",
+                text: "Я забился под диван. Катя зашла в комнату, напевая какую-то песню, спокойно взяла телефон со стола и вышла. У меня аж ладони вспотели от страха.",
+                choices: [
+                    { text: "Вылезу и вернусь в прихожую", next: "hallway_start" },
+                    { text: "Осторожно выползу и осмотрю гостиную еще раз", next: "living_zone" }
+                ]
+            },
+            living_hide_curtain: {
+                icon: "🕴️",
+                text: "Штора полностью меня укрыла. Катя подошла, поправила цветок на подоконнике прямо перед моим носом... Я затаил дыхание. К счастью, она ушла.",
+                choices: [
+                    { text: "Облегченно вздохну и выйду в прихожую", next: "hallway_start" },
+                    { text: "Перебегу обратно в центр комнаты", next: "living_zone" }
+                ]
+            },
+            bedroom_approach: {
+                icon: "🚪",
+                text: "Я в упор стою у двери её Спальни. На ней висит тот самый аккуратный замочек.",
+                choices: [
+                    { text: "🔑 Проверну Ключ из Ванной в замке", next: "bedroom_interior", requireItem: "Ключ от Спальни" },
+                    { text: "◀ Вернусь назад в Прихожую", next: "hallway_start" }
+                ]
+            },
+            bedroom_interior: {
+                icon: "🛏️",
+                text: "", 
+                choices: [
+                    { text: "🥩 Брошу коту Мафину Колбасу", next: "cat_disposed_meat", requireItem: "Колбаса" },
+                    { text: "🔦 Включу лазерный эпилятор на ковре", next: "cat_disposed_laser", requireItem: "Лазерная указка" },
+                    { text: "🧴 Натру старый кошачий мячик Валерьянкой", next: "cat_disposed_valerian", requireItem: "Валерьянка" },
+                    { text: "◀ Выйти обратно (кот может замяукать!)", next: "caught_bedroom_event" }
+                ]
+            },
+            cat_disposed_meat: {
+                icon: "🐈",
+                text: "Ура, кот утащил колбасу под кровать! Путь к личным вещам Кати полностью свободен.",
+                choices: [
+                    { text: "💻 Обыщу её Рабочий Стол", next: "search_desk" },
+                    { text: "🛏️ Перерою Прикроватные Тумбочки", next: "search_bedside" },
+                    { text: "💄 Исследую Косметический Столик", next: "search_makeup" }
+                ]
+            },
+            cat_disposed_laser: {
+                icon: "🔴",
+                text: "Кот безумно несется за красной точкой прямо в шкаф. Я мгновенно захлопываю за ним дверцу! Хе-хе, посиди пока там.",
+                choices: [
+                    { text: "💻 Обыщу её Рабочий Стол", next: "search_desk" },
+                    { text: "🛏️ Перерою Прикроватные Тумбочки", next: "search_bedside" },
+                    { text: "💄 Исследовать Косметический Столик", next: "search_makeup" }
+                ]
+            },
+            cat_disposed_valerian: {
+                icon: "🤪",
+                text: "Кот дико балдеет от запаха валерьянки, трётся мордой о мячик и засыпает на ковре кверху лапами. Отлично.",
+                choices: [
+                    { text: "💻 Обыщу её Рабочий Стол", next: "search_desk" },
+                    { text: "🛏️ Перерою Прикроватные Тумбочки", next: "search_bedside" },
+                    { text: "💄 Исследовать Косметический Столик", next: "search_makeup" }
+                ]
+            },
+            
+            // ОБЫСК СПАЛЬНИ
+            search_desk: {
+                icon: "💻",
+                text: "Я стою у её рабочего стола. Повсюду аккуратно разложены её тетради по учебе. Где посмотреть?",
+                choices: [
+                    { text: "📂 Проверю бумаги в верхнем ящике стола", next: "search_desk", docs: [1, 2, 3] },
+                    { text: "🗒️ Загляну под клавиатуру компьютера", next: "search_desk", docs: [4, 5, 6, 7] },
+                    { text: "🛏️ Перейду к осмотру Тумбочек у кровати", next: "search_bedside" },
+                    { text: "💄 Перейду к Косметическому столику", next: "search_makeup" },
+                    { text: "🏃‍♂️ Бежать к точке эвакуации!", next: "final_choice_zone" }
+                ]
+            },
+            search_bedside: {
+                icon: "🛏️",
+                text: "Я подобрался к тумбочке возле её кровати. Сердце колотится.",
+                choices: [
+                    { text: "🪶 Аккуратно залезу рукой под её подушку", next: "search_bedside", docs: [8, 9, 10] },
+                    { text: "🗝️ Попробую открыть нижний выдвижной ящик", next: "search_bedside", docs: [11, 12, 13, 14] },
+                    { text: "💻 Вернусь обратно к Рабочему столу", next: "search_desk" },
+                    { text: "💄 Перейти к Косметическому столику", next: "search_makeup" },
+                    { text: "🏃‍♂️ Мне пора отступать!", next: "final_choice_zone" }
+                ]
+            },
+            search_makeup: {
+                icon: "💄",
+                text: "Я у косметического столика. Он просто завален духами, помадами и зеркалами.",
+                choices: [
+                    { text: "💍 Аккуратно обыщу бархатную Шкатулку", next: "found_comb_item" },
+                    { text: "💻 Вернусь обратно к Рабочему столу", next: "search_desk" },
+                    { text: "🛏️ Вернусь к осмотру Прикроватных тумбочек", next: "search_bedside" },
+                    { text: "🏃‍♂️ Мне пора спешно отходить к зоне эвакуации!", next: "final_choice_zone" }
+                ]
+            },
+            
+            found_comb_item: {
+                icon: "?",
+                text: "В бархатной шкатулке я нахожу не секретные записи, а нахожу странный прибор в виде фалоса. Заберу его с собой как трофей. Хм... надеюсь она не сразу заметит.",
+                choices: [
+                    { text: "? Положить странный предмет в карман и продолжить поиски", next: "search_makeup", item: "Вибратор" }
+                ]
+            },
+
+            final_choice_zone: {
+                icon: "🏃‍♂️",
+                text: "Чёрт! В коридоре послышались шаги Кати! Она идет прямо сюда, в спальню! У меня буквально секунды на решение, иначе провал!",
+                choices: [
+                    { text: "🪟 Рискну и выпрыгну в открытое окно в кусты!", next: "check_win_status" },
+                    { text: "🤝 Выйду к ней навстречу и честно во всём сознаюсь", next: "ending_diplomacy" },
+                    { text: "🚪 Попробую спрятаться в шкафу-купе среди платьев", next: "ending_closet_trapped" }
+                ]
+            },
+            check_win_status: {
+                icon: "📊",
+                text: "Я благополучно приземлился в кусты и резво отбежал за угол дома. Фух, ушёл! Сердце бешено колотится в груди. Пора посчитать мои трофеи...",
+                choices: [
+                    { text: "🔍 Подсчитаю количество добытых требований", next: "calculate_endings" }
+                ]
+            }
+        };
+
+        function renderScene(sceneKey) {
+            if (!story[sceneKey]) return;
+            
+            clearInterval(countdownInterval);
+            const mainCard = document.getElementById('main-card');
+            mainCard.className = 'game-card';
+            
+            let isFail = sceneKey.includes('fail') || sceneKey.includes('caught') || sceneKey.startsWith('ending_closet_trapped');
+            let isWin = sceneKey.startsWith('ending_') && !isFail;
+
+            if (story[sceneKey].isBriefing) {
+                mainCard.classList.add('briefing-bg');
+                document.getElementById('game-hud').style.display = 'none';
+            } else if (isWin) {
+                mainCard.classList.add('win-bg');
+                document.getElementById('game-hud').style.display = 'none';
+            } else if (isFail) {
+                mainCard.classList.add('fail-bg');
+                document.getElementById('game-hud').style.display = 'none';
+            } else {
+                document.getElementById('game-hud').style.display = 'flex';
+                document.getElementById('timer-container').style.display = 'block';
+                startActionTimer(sceneKey);
+            }
+
+            updateHUD();
+            updateMap(sceneKey);
+
+            const sceneData = story[sceneKey];
+            document.getElementById('scene-icon').innerText = sceneData.icon;
+            
+            let textToShow = sceneData.text;
+            if (limitedZones.includes(sceneKey)) {
+                visitCounts[sceneKey] = (visitCounts[sceneKey] || 0) + 1;
+                if (visitCounts[sceneKey] > 2) {
+                    renderScene(sceneKey === 'kitchen_zone' ? 'kitchen_panic_fail' : 'caught_living');
+                    return;
+                } else {
+                    textToShow = dynamicTexts[sceneKey][visitCounts[sceneKey] - 1];
+                }
+            }
+            
+            document.getElementById('scene-description').innerText = textToShow;
+            
+            const choicesBlock = document.getElementById('choices-block');
+            choicesBlock.innerHTML = '';
+            
+            sceneData.choices.forEach(c => {
+                if (c.requireItem && !inventory.includes(c.requireItem)) return; 
+                
+                const btn = document.createElement('button');
+                btn.className = 'btn-choice';
+                if (c.docs || c.chance) btn.classList.add('special');
+                if (c.item) btn.classList.add('rare');
+                btn.innerText = c.text;
+                
+                btn.onclick = () => handleChoice(c);
+                choicesBlock.appendChild(btn);
+            });
+        }
+
+        function handleChoice(c) {
+            if (c.reset) {
+                foundDocs = [];
+                inventory = [];
+                visitCounts = {};
+                renderScene(c.next);
+                return;
+            }
+            if (c.item && !inventory.includes(c.item)) {
+                inventory.push(c.item);
+                updateHUD();
+            }
+            if (c.chance) {
+                if (Math.random() < 0.3) {
+                    showSecret(c.successDocs, c.next);
+                } else {
+                    renderScene(c.failNext);
+                }
+                return;
+            }
+            if (c.docs) {
+                showSecret(c.docs, c.next);
+                return;
+            }
+            if (c.next === "calculate_endings") {
+                calculateEndings();
+                return;
+            }
+            
+            renderScene(c.next);
+        }
+
+        function showSecret(docIds, nextKey) {
+            let texts = [];
+            docIds.forEach(id => {
+                if (!foundDocs.includes(id)) {
+                    foundDocs.push(id);
+                    texts.push(`${requirements[id].text}`);
+                }
+            });
+            
+            if (texts.length === 0) {
+                // Если все документы в этом тайнике уже найдены, просто идем дальше
+                renderScene(nextKey);
+                return;
+            }
+
+            clearInterval(countdownInterval);
+            document.getElementById('secret-text-slot').innerText = texts.join('\n\n');
+            document.getElementById('secret-modal').classList.add('active');
+            nextSceneAfterDoc = nextKey;
+            updateHUD();
+        }
+
+        function closeSecretCard() {
+            document.getElementById('secret-modal').classList.remove('active');
+            renderScene(nextSceneAfterDoc);
+        }
+
+        function startActionTimer(sceneKey) {
+            let time = TIME_LIMIT;
+            document.getElementById('timer-val').innerText = time;
+            countdownInterval = setInterval(() => {
+                time--;
+                document.getElementById('timer-val').innerText = time;
+                if (time <= 0) {
+                    clearInterval(countdownInterval);
+                    renderScene('caught_living'); 
+                }
+            }, 1000);
+        }
+
+        function updateHUD() {
+            document.getElementById('docs-val').innerText = `${foundDocs.length}/16`;
+            document.getElementById('inventory-list').innerText = inventory.length > 0 ? inventory.join(', ') : 'Пусто';
+        }
+
+        function updateMap(sceneKey) {
+            document.querySelectorAll('.map-node').forEach(node => node.classList.remove('active'));
+            const nodeId = zoneToMapNode[sceneKey];
+            if (nodeId) {
+                document.getElementById(nodeId).classList.add('active');
+            }
+        }
+
+        function calculateEndings() {
+            let count = foundDocs.length;
+            if (count === 16) renderScene('ending_perfect_win');
+            else if (count >= 7) renderScene('ending_good_spy');
+            else if (count > 0) renderScene('ending_partial_win');
+            else renderScene('ending_diplomacy'); 
+        }
+
+        window.onload = () => {
+            renderScene('briefing');
+        };
+    </script>
+</body>
+</html>

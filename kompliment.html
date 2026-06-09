@@ -1,0 +1,1030 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <link rel="icon" type="image/png" href="images/icon.png">
+    <title>Комплимент дня ✨</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Pangolin&family=Comic+Neue:wght@400;700&display=swap"
+        rel="stylesheet">
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: #ffde59;
+            background-image: radial-gradient(#ffbd59 20%, transparent 20%);
+            background-size: 30px 30px;
+            margin: 0;
+            padding: 10px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            height: 100dvh;
+            overflow: hidden;
+            flex-direction: column;
+            font-family: 'Comic Neue', cursive;
+        }
+
+        h1 {
+            font-family: 'Pangolin', cursive;
+            color: #333;
+            margin: 0 0 5px 0;
+            text-shadow: 2px 2px 0px #fff;
+            font-size: 26px;
+            line-height: 1.2;
+        }
+
+        .streak-badge {
+            background: #ff5757;
+            color: white;
+            border: 3px solid #333;
+            border-radius: 20px;
+            padding: 4px 15px;
+            font-size: 14px;
+            font-weight: bold;
+            font-family: 'Pangolin', cursive;
+            box-shadow: 3px 3px 0px #333;
+            margin-bottom: 10px;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        /* --- ГЛАВНАЯ КАРТОЧКА --- */
+        .generator-card {
+            background: #fff0f5;
+            border: 5px solid #333;
+            border-radius: 20px;
+            padding: 15px;
+            text-align: center;
+            box-shadow: 0 10px 0px rgba(0, 0, 0, 0.2);
+            max-width: 430px;
+            width: 100%;
+            max-height: 85vh; 
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+        }
+
+        .archive-badge {
+            display: none;
+            background: #57b9ff;
+            color: white;
+            border: 2px solid #333;
+            border-radius: 8px;
+            padding: 2px 8px;
+            font-size: 12px;
+            font-weight: bold;
+            margin-bottom: 8px;
+            align-self: center;
+            font-family: 'Pangolin', cursive;
+            box-shadow: 2px 2px 0px #333;
+        }
+
+        .preamble {
+            background: #fff;
+            border: 3px solid #333;
+            border-radius: 12px;
+            padding: 8px 12px;
+            margin-bottom: 10px;
+            font-size: 13px;
+            color: #555;
+            line-height: 1.3;
+            font-weight: 700;
+        }
+
+        .compliment-box {
+            background: #fff;
+            border: 4px dashed #ff8da1;
+            border-radius: 16px;
+            min-height: 80px;
+            margin: 5px 0 10px 0;
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            font-weight: bold;
+            color: #444;
+            box-shadow: inset 0 0 15px rgba(255, 141, 161, 0.15);
+        }
+
+        .hidden-compliment {
+            color: #aaa;
+            font-size: 14px;
+            font-style: italic;
+        }
+
+        .day-photo {
+            display: none;
+            width: 100%;
+            max-height: 140px;
+            object-fit: cover;
+            border: 3px solid #333;
+            border-radius: 12px;
+            margin-top: 10px;
+            box-shadow: 3px 3px 0px #333;
+        }
+
+        /* --- СТРЕЛКИ НАВИГАЦИИ СВЕРХУ --- */
+        .nav-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 5px 0 12px 0;
+            background: #fff;
+            border: 3px solid #333;
+            border-radius: 12px;
+            padding: 4px 10px;
+            box-shadow: 3px 3px 0px #333;
+        }
+
+        .btn-nav {
+            background: #ffbd59;
+            border: 2px solid #333;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 14px;
+            padding: 4px 12px;
+            box-shadow: 0 2px 0px #333;
+            font-family: 'Pangolin', cursive;
+        }
+
+        .btn-nav:active:not(:disabled) {
+            transform: translateY(2px);
+            box-shadow: 0 0px 0px #333;
+        }
+
+        .btn-nav:disabled {
+            background: #e0e0e0;
+            color: #aaa;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
+        .nav-date-display {
+            font-weight: bold;
+            font-size: 14px;
+            color: #333;
+            font-family: 'Pangolin', cursive;
+        }
+
+        .btn-generate {
+            background: #ff7eb3;
+            border: 4px solid #333;
+            border-radius: 14px;
+            padding: 10px 20px;
+            font-size: 18px;
+            font-weight: bold;
+            color: white;
+            cursor: pointer;
+            box-shadow: 0 5px 0px #333;
+            font-family: 'Pangolin', cursive;
+            width: 100%;
+        }
+
+        .btn-generate:active {
+            box-shadow: 0 1px 0px #333;
+            transform: translateY(4px);
+        }
+
+        .warning-box {
+            display: none;
+            background: #fffdf0;
+            border: 3px solid #333;
+            border-radius: 10px;
+            padding: 6px 10px;
+            margin-top: 8px;
+            font-size: 12px;
+            font-weight: bold;
+            color: #ff5757;
+        }
+
+        .timer-box {
+            display: none;
+            margin-top: 8px;
+            font-size: 12px;
+            color: #666;
+            background: rgba(0,0,0,0.04);
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-weight: bold;
+        }
+
+        /* --- КОМПАКТНЫЙ КАСТОМНЫЙ КАЛЕНДАРЬ --- */
+        .archive-section {
+            border-top: 3px dashed #333;
+            margin-top: 15px;
+            padding-top: 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            margin-bottom: 8px;
+            font-family: 'Pangolin', cursive;
+            font-size: 14px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .btn-cal-nav {
+            background: #ffbd59;
+            border: 2px solid #333;
+            border-radius: 6px;
+            cursor: pointer;
+            padding: 2px 8px;
+            font-size: 11px;
+            box-shadow: 0 1.5px 0px #333;
+        }
+
+        .btn-cal-nav:active {
+            transform: translateY(1.5px);
+            box-shadow: none;
+        }
+
+        .calendar-weekdays {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            width: 100%;
+            text-align: center;
+            font-size: 11px;
+            font-weight: bold;
+            color: #777;
+            margin-bottom: 4px;
+        }
+
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 4px;
+            width: 100%;
+        }
+
+        .calendar-day {
+            aspect-ratio: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            font-weight: bold;
+            border-radius: 6px;
+            color: #ccc; 
+            user-select: none;
+            border: 2px solid transparent;
+        }
+
+        .calendar-day.has-data {
+            background: #fff;
+            border: 2px solid #333;
+            color: #333;
+            cursor: pointer;
+            box-shadow: 1px 1px 0px #333;
+        }
+
+        .calendar-day.has-data:active {
+            transform: translateY(1px);
+            box-shadow: none;
+        }
+
+        .calendar-day.current-view {
+            background: #57b9ff !important;
+            color: white !important;
+            border-color: #333 !important;
+        }
+
+        .calendar-day.is-today {
+            border: 2px solid #ff5757;
+            background: #fff0f5;
+        }
+
+        /* --- МАТЕМАТИЧЕСКАЯ БЛОКИРОВКА --- */
+        .math-game-box {
+            display: none;
+            background: #fffdf0;
+            border: 4px solid #333;
+            border-radius: 16px;
+            padding: 15px;
+            margin: 10px 0;
+        }
+
+        .math-title {
+            color: #ff5757;
+            font-size: 16px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .math-question {
+            font-size: 24px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 12px;
+            font-family: 'Pangolin', cursive;
+        }
+
+        .math-input {
+            width: 70%;
+            padding: 8px;
+            font-size: 18px;
+            border: 3px solid #333;
+            border-radius: 10px;
+            text-align: center;
+            outline: none;
+            font-family: 'Pangolin', cursive;
+            margin-bottom: 10px;
+        }
+
+        .btn-math-submit {
+            background: #25d366;
+            color: white;
+            border: 3px solid #333;
+            border-radius: 10px;
+            padding: 8px 15px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 4px 0px #333;
+            font-family: 'Pangolin', cursive;
+        }
+
+        .math-progress {
+            font-size: 12px;
+            color: #666;
+            margin-top: 8px;
+        }
+
+        .math-error-msg {
+            color: #ff5757;
+            font-size: 13px;
+            font-weight: bold;
+            margin-top: 5px;
+            min-height: 18px;
+        }
+
+        /* --- КАСТОМНОЕ МОДАЛЬНОЕ ОКНО УСПЕХА --- */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .modal-box {
+            background: #fff;
+            border: 5px solid #333;
+            border-radius: 20px;
+            padding: 25px 20px;
+            text-align: center;
+            box-shadow: 0 10px 0px rgba(0,0,0,0.3);
+            max-width: 320px;
+            width: 100%;
+            animation: popUp 0.3s ease-out;
+        }
+
+        .modal-title {
+            font-family: 'Pangolin', cursive;
+            font-size: 26px;
+            color: #25d366;
+            margin-bottom: 10px;
+            text-shadow: 1px 1px 0px #333;
+        }
+
+        .modal-text {
+            font-size: 16px;
+            color: #444;
+            margin-bottom: 20px;
+            font-weight: bold;
+            line-height: 1.4;
+        }
+
+        .btn-modal-ok {
+            background: #ffbd59;
+            color: #333;
+            border: 3px solid #333;
+            border-radius: 12px;
+            padding: 10px 25px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 4px 0px #333;
+            font-family: 'Pangolin', cursive;
+        }
+
+        .btn-modal-ok:active {
+            transform: translateY(4px);
+            box-shadow: 0 0px 0px #333;
+        }
+
+        @keyframes popUp {
+            0% { transform: scale(0.8); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .links-container {
+            display: flex;
+            justify-content: center;
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        .btn-redirect {
+            background: #57b9ff;
+            border: 3px solid #333;
+            border-radius: 12px;
+            padding: 6px 16px;
+            font-size: 15px;
+            font-weight: bold;
+            color: white;
+            text-decoration: none;
+            box-shadow: 0 4px 0px #333;
+            font-family: 'Pangolin', cursive;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="streak-badge">
+        🔥 Серия: <span id="streak-count">0</span> дн.
+    </div>
+
+    <div class="generator-card">
+        <div class="archive-badge" id="archive-indicator">📜 АРХИВНЫЙ ПРОСМОТР</div>
+        <h1 id="page-title">Комплимент на сегодня</h1>
+        
+        <div id="main-content-wrapper">
+            <div class="preamble" id="preamble-text">
+                Каждый день Катя ты будешь получать от меня комплимент. Но тут действует строгое правило: <strong>только 1 комплимент в день</strong>. Чтобы короче тебе было хорошо и приятно. И фото дня случайное, чтобы могла помечтать
+            </div>
+            
+            <div class="compliment-box">
+                <div id="compliment-text">
+                    <span class="hidden-compliment">Тут спрятаны мои слова 🎁</span>
+                </div>
+                <img src="" alt="Фото дня" class="day-photo" id="day-photo">
+            </div>
+
+            <div class="nav-container">
+                <button class="btn-nav" id="prev-day-btn">◀</button>
+                <span class="nav-date-display" id="nav-date-display">00.00.0000</span>
+                <button class="btn-nav" id="next-day-btn">▶</button>
+            </div>
+
+            <button class="btn-generate" id="generate-btn">Открыть комплимент! 💌</button>
+            <div class="warning-box" id="warning-message"></div>
+
+            <div class="timer-box" id="timer-container">
+                Следующий комплимент через: <span id="countdown">00:00:00</span> ✨
+            </div>
+        </div>
+
+        <div class="math-game-box" id="math-game-box">
+            <div class="math-title">Ой! Ты пропустила день! Ясно все с тобой</div>
+            <div style="font-size: 13px; margin-bottom: 10px; color:#555;">Чтобы восстановить серию, надо будет подумать немного Кать, надо решить 5 примеров</div>
+            <div class="math-question" id="math-question">2 + 2</div>
+            <input type="number" class="math-input" id="math-answer" placeholder="Ответ...">
+            <br>
+            <button class="btn-math-submit" id="math-submit-btn">Проверить! 🚀</button>
+            <div class="math-error-msg" id="math-error-msg"></div>
+            <div class="math-progress" id="math-progress">Пример 1 из 5</div>
+        </div>
+
+        <div class="archive-section" id="archive-section">
+            <div class="calendar-header">
+                <button class="btn-cal-nav" id="cal-prev-month">◀</button>
+                <span id="cal-month-year-title">Месяц Год</span>
+                <button class="btn-cal-nav" id="cal-next-month">▶</button>
+            </div>
+            <div class="calendar-weekdays">
+                <div>Пн</div><div>Вт</div><div>Ср</div><div>Чт</div><div>Пт</div><div>Сб</div><div>Вс</div>
+            </div>
+            <div class="calendar-grid" id="calendar-grid"></div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="success-modal">
+        <div class="modal-box">
+            <div class="modal-title">Ура! 🎉</div>
+            <div class="modal-text">Молодец, восстановила в следующий раз по жопе получишь<br>Пропуск прощен, а серия дней сохранена</div>
+            <button class="btn-modal-ok" id="modal-ok-btn">Супер! 🚀</button>
+        </div>
+    </div>
+
+    <div class="links-container">
+        <a href="index.html" class="btn-redirect">🔙 Обратно в дневник</a>
+    </div>
+
+    <script>
+        // --- РУЧНОЙ МАССИВ ДАННЫХ (Формат дат строго ДД.ММ.ГГГГ) ---
+        const dailyData = [
+            { date: "07.06.2026", text: "Сегодня ты неотразимая Кать, моей фантазии и фантазировать не надо ничего", photo: "komp_image/1k.jpg" },
+            { date: "08.06.2026", text: "Твоя харизма поражает меня до глубины чувств", photo: "komp_image/2k.jpg" },
+            { date: "09.06.2026", text: "Есть красивые глаза, а есть твои серо-голубые, которые заставляют забыть о чем я хотел сказать", photo: "komp_image/3k.jpg" },
+            { date: "10.06.2026", text: "Катя, ты словно луч света, который находит дорогу даже через темные облака", photo: "komp_image/4k.jpg" },
+            { date: "11.06.2026", text: "Твоя красота не заканчивается внешностью, она продолжается в характере", photo: "komp_image/5k.jpg" },
+            { date: "12.06.2026", text: "Твоя милота и смех является моей мотивации к жизни", photo: "komp_image/6k.jpg" },
+            { date: "13.06.2026", text: "Ты как будто случайность, которая оказалась слишком прекрасной для случайности.", photo: "komp_image/7k.jpg" },
+            { date: "14.06.2026", text: "Катя, ты  словно редкая звезда которую замечают не сразу, но навсегда ее запоминают.", photo: "komp_image/8k.jpg" },
+            { date: "15.06.2026", text: "Ты словно красивый секрет, который хочется бережно хранить и никому не показывать.", photo: "komp_image/9k.jpg" },
+            { date: "16.06.2026", text: "В тебе есть глубина, которую невозможно увидеть с первого взгляда", photo: "komp_image/10k.jpg" },
+            { date: "17.06.2026", text: "Если бы у свободы был цвет он наверное, был бы таким же, как твои глаза", photo: "komp_image/11k.jpg" },
+            { date: "18.06.2026", text: "С тобой Кать всегда хочется говорить честно и слушать внимательно каждое твое слово", photo: "komp_image/12k.jpg" },
+            { date: "19.06.2026", text: "Ты выглядишь как вдохновение, которое случайно стало человеком", photo: "komp_image/13k.jpg" },
+            { date: "20.06.2026", text: "Твоей улыбкой и смехом можно убивать грусть", photo: "komp_image/14k.jpg" },
+            { date: "21.06.2026", text: "Рядом с тобой хочется становиться лучше каждый день.", photo: "komp_image/15k.jpg" },
+            { date: "22.06.2026", text: "Ты делаешь окружающий мир чуточку добрее своим существованием, а для меня счастливым", photo: "komp_image/16k.jpg" },
+            { date: "23.06.2026", text: "Твой голос способен успокаивать лучше любимой музыки моей", photo: "komp_image/17k.jpg" },
+            { date: "24.06.2026", text: "С тобой даже я начинаю терять контроль над собой", photo: "komp_image/18k.jpg" },
+            { date: "25.06.2026", text: "В тебе есть что-то по-настоящему незабываемое.", photo: "komp_image/19k.jpg" },
+            { date: "26.06.2026", text: "Ты делаешь даже серые дни немного ярче для меня.", photo: "komp_image/20k.jpg" },
+            { date: "27.06.2026", text: "У тебя самое доброе сердце во вселенной! ❤️", photo: "komp_image/21k.jpg" },
+            { date: "28.06.2026", text: "У тебя самое доброе сердце во вселенной! ❤️", photo: "komp_image/22k.jpg" },
+            { date: "29.06.2026", text: "У тебя самое доброе сердце во вселенной! ❤️", photo: "komp_image/23k.jpg" },
+            { date: "30.06.2026", text: "У тебя самое доброе сердце во вселенной! ❤️", photo: "komp_image/24k.jpg" },
+            { date: "01.07.2026", text: "У тебя самое доброе сердце во вселенной! ❤️", photo: "komp_image/25k.jpg" },
+            { date: "02.07.2026", text: "У тебя самое доброе сердце во вселенной! ❤️", photo: "komp_image/26k.jpg" },
+            { date: "03.07.2026", text: "У тебя самое доброе сердце во вселенной! ❤️", photo: "komp_image/27k.jpg" },
+            { date: "04.07.2026", text: "У тебя самое доброе сердце во вселенной! ❤️", photo: "komp_image/28k.jpg" },
+            { date: "05.07.2026", text: "У тебя самое доброе сердце во вселенной! ❤️", photo: "komp_image/29k.jpg" },
+            { date: "06.07.2026", text: "У тебя самое доброе сердце во вселенной! ❤️", photo: "komp_image/30k.jpg" },
+            { date: "07.07.2026", text: "У тебя самое доброе сердце во вселенной! ❤️", photo: "komp_image/31k.jpg" },
+            { date: "08.07.2026", text: "У тебя самое доброе сердце во вселенной! ❤️", photo: "komp_image/32k.jpg" },
+            { date: "09.07.2026", text: "У тебя самое доброе сердце во вселенной! ❤️", photo: "komp_image/33k.jpg" },
+            { date: "10.07.2026", text: "У тебя самое доброе сердце во вселенной! ❤️", photo: "komp_image/34k.jpg" },
+            { date: "11.07.2026", text: "У тебя самое доброе сердце во вселенной! ❤️", photo: "komp_image/35k.jpg" },
+            { date: "12.07.2026", text: "У тебя самое доброе сердце во вселенной! ❤️", photo: "komp_image/36k.jpg" },
+            { date: "13.07.2026", text: "У тебя самое доброе сердце во вселенной! ❤️", photo: "komp_image/37k.jpg" },
+            { date: "14.07.2026", text: "У тебя самое доброе сердце во вселенной! ❤️", photo: "komp_image/38k.jpg" },
+            { date: "15.07.2026", text: "У тебя самое доброе сердце во вселенной! ❤️", photo: "komp_image/39k.jpg" },
+            { date: "16.07.2026", text: "У тебя самое доброе сердце во вселенной! ❤️", photo: "komp_image/40k.jpg" },
+            { date: "17.07.2026", text: "У тебя самое доброе сердце во вселенной! ❤️", photo: "komp_image/41k.jpg" },
+            { date: "18.07.2026", text: "У тебя самое доброе сердце во вселенной! ❤️", photo: "komp_image/42k.jpg" },
+            { date: "19.07.2026", text: "У тебя самое доброе сердце во вселенной! ❤️", photo: "komp_image/43k.jpg" },
+            { date: "20.07.2026", text: "У тебя самое доброе сердце во вселенной! ❤️", photo: "komp_image/44k.jpg" },
+            { date: "21.07.2026", text: "У тебя самое доброе сердце во вселенной! ❤️", photo: "komp_image/45k.jpg" },
+            { date: "22.07.2026", text: "У тебя самое доброе сердце во вселенной! ❤️", photo: "komp_image/46k.jpg" },
+            { date: "23.07.2026", text: "У тебя самое доброе сердце во вселенной! ❤️", photo: "komp_image/47k.jpg" },
+            { date: "24.07.2026", text: "У тебя самое доброе сердце во вселенной! ❤️", photo: "komp_image/48k.jpg" },
+            { date: "25.07.2026", text: "У тебя самое доброе сердце во вселенной! ❤️", photo: "komp_image/49k.jpg" },
+            { date: "26.07.2026", text: "У тебя самое доброе сердце во вселенной! ❤️", photo: "komp_image/50k.jpg" },
+            { date: "27.07.2026", text: "У тебя самое доброе сердце во вселенной! ❤️", photo: "komp_image/51k.jpg" },
+            { date: "28.07.2026", text: "У тебя самое доброе сердце во вселенной! ❤️", photo: "komp_image/52k.jpg" },
+            { date: "29.07.2026", text: "У тебя самое доброе сердце во вселенной! ❤️", photo: "komp_image/53k.jpg" },
+            { date: "30.07.2026", text: "У тебя самое доброе сердце во вселенной! ❤️", photo: "komp_image/54k.jpg" },
+            { date: "31.07.2026", text: "У тебя самое доброе сердце во вселенной! ❤️", photo: "komp_image/55k.jpg" },
+            { date: "01.08.2026", text: "У тебя самое доброе сердце во вселенной! ❤️", photo: "komp_image/56k.jpg" },
+            { date: "02.08.2026", text: "У тебя самое доброе сердце во вселенной! ❤️", photo: "komp_image/57k.jpg" },
+            { date: "03.08.2026", text: "У тебя самое доброе сердце во вселенной! ❤️", photo: "komp_image/58k.jpg" },
+            { date: "04.08.2026", text: "У тебя самое доброе сердце во вселенной! ❤️", photo: "komp_image/59k.jpg" },
+            { date: "05.08.2026", text: "У тебя самое доброе сердце во вселенной! ❤️", photo: "komp_image/60k.jpg" },
+            { date: "06.08.2026", text: "У тебя самое доброе сердце во вселенной! ❤️", photo: "image/foto.png" },
+            { date: "07.08.2026", text: "У тебя самое доброе сердце во вселенной! ❤️", photo: "image/foto.png" },
+            { date: "08.08.2026", text: "У тебя самое доброе сердце во вселенной! ❤️", photo: "image/foto.png" },
+            { date: "09.08.2026", text: "У тебя самое доброе сердце во вселенной! ❤️", photo: "image/foto.png" },
+            { date: "10.08.2026", text: "У тебя самое доброе сердце во вселенной! ❤️", photo: "image/foto.png" },
+            { date: "11.08.2026", text: "У тебя самое доброе сердце во вселенной! ❤️", photo: "image/foto.png" },
+            { date: "12.08.2026", text: "У тебя самое доброе сердце во вселенной! ❤️", photo: "image/foto.png" },
+            { date: "13.08.2026", text: "У тебя самое доброе сердце во вселенной! ❤️", photo: "image/foto.png" },
+            { date: "14.08.2026", text: "У тебя самое доброе сердце во вселенной! ❤️", photo: "image/foto.png" },
+            { date: "15.08.2026", text: "У тебя самое доброе сердце во вселенной! ❤️", photo: "image/foto.png" },
+            { date: "16.08.2026", text: "У тебя самое доброе сердце во вселенной! ❤️", photo: "image/foto.png" },
+            { date: "17.08.2026", text: "У тебя самое доброе сердце во вселенной! ❤️", photo: "image/foto.png" },
+            { date: "18.08.2026", text: "У тебя самое доброе сердце во вселенной! ❤️", photo: "image/foto.png" },
+            { date: "19.08.2026", text: "У тебя самое доброе сердце во вселенной! ❤️", photo: "image/foto.png" },
+            { date: "20.08.2026", text: "У тебя самое доброе сердце во вселенной! ❤️", photo: "image/foto.png" },
+            { date: "21.08.2026", text: "У тебя самое доброе сердце во вселенной! ❤️", photo: "image/foto.png" },
+            { date: "22.08.2026", text: "У тебя самое доброе сердце во вселенной! ❤️", photo: "image/foto.png" },
+            { date: "23.08.2026", text: "У тебя самое доброе сердце во вселенной! ❤️", photo: "image/foto.png" },
+            { date: "24.08.2026", text: "У тебя самое доброе сердце во вселенной! ❤️", photo: "image/foto.png" },
+            { date: "25.08.2026", text: "У тебя самое доброе сердце во вселенной! ❤️", photo: "image/foto.png" },
+            { date: "26.08.2026", text: "У тебя самое доброе сердце во вселенной! ❤️", photo: "image/foto.png" },
+            { date: "27.08.2026", text: "У тебя самое доброе сердце во вселенной! ❤️", photo: "image/foto.png" },
+            { date: "28.08.2026", text: "У тебя самое доброе сердце во вселенной! ❤️", photo: "image/foto.png" },
+            { date: "29.08.2026", text: "У тебя самое доброе сердце во вселенной! ❤️", photo: "image/foto.png" },
+            { date: "30.08.2026", text: "У тебя самое доброе сердце во вселенной! ❤️", photo: "image/foto.png" },
+            { date: "31.08.2026", text: "У тебя самое доброе сердце во вселенной! ❤️", photo: "image/foto.png" },
+            { date: "01.09.2026", text: "У тебя самое доброе сердце во вселенной! ❤️", photo: "image/foto.png" },
+            { date: "02.09.2026", text: "У тебя самое доброе сердце во вселенной! ❤️", photo: "image/foto.png" },
+            { date: "03.09.2026", text: "У тебя самое доброе сердце во вселенной! ❤️", photo: "image/foto.png" },
+            { date: "04.09.2026", text: "У тебя самое доброе сердце во вселенной! ❤️", photo: "image/foto.png" },
+            { date: "05.09.2026", text: "У тебя самое доброе сердце во вселенной! ❤️", photo: "image/foto.png" },
+            { date: "06.09.2026", text: "У тебя самое доброе сердце во вселенной! ❤️", photo: "image/foto.png" },
+            { date: "07.09.2026", text: "У тебя самое доброе сердце во вселенной! ❤️", photo: "image/foto.png" },
+            { date: "08.09.2026", text: "У тебя самое доброе сердце во вселенной! ❤️", photo: "image/foto.png" },
+            { date: "09.09.2026", text: "У тебя самое доброе сердце во вселенной! ❤️", photo: "image/foto.png" },
+            { date: "10.09.2026", text: "У тебя самое доброе сердце во вселенной! ❤️", photo: "image/foto.png" },
+            { date: "11.09.2026", text: "У тебя самое доброе сердце во вселенной! ❤️", photo: "image/foto.png" },
+            { date: "12.09.2026", text: "У тебя самое доброе сердце во вселенной! ❤️", photo: "image/foto.png" },
+            { date: "13.09.2026", text: "У тебя самое доброе сердце во вселенной! ❤️", photo: "image/foto.png" },
+            { date: "14.09.2026", text: "У тебя самое доброе сердце во вселенной! ❤️", photo: "image/foto.png" },
+            { date: "15.09.2026", text: "У тебя самое доброе сердце во вселенной! ❤️", photo: "image/foto.png" },
+            { date: "16.09.2026", text: "У тебя самое доброе сердце во вселенной! ❤️", photo: "image/foto.png" },
+            { date: "17.09.2026", text: "У тебя самое доброе сердце во вселенной! ❤️", photo: "image/foto.png" },
+            { date: "18.09.2026", text: "У тебя самое доброе сердце во вселенной! ❤️", photo: "image/foto.png" },
+            { date: "19.09.2026", text: "У тебя самое доброе сердце во вселенной! ❤️", photo: "image/foto.png" },
+            { date: "20.09.2026", text: "У тебя самое доброе сердце во вселенной! ❤️", photo: "image/foto.png" },
+            { date: "21.09.2026", text: "У тебя самое доброе сердце во вселенной! ❤️", photo: "image/foto.png" },
+            { date: "22.09.2026", text: "У тебя самое доброе сердце во вселенной! ❤️", photo: "image/foto.png" },
+            { date: "23.09.2026", text: "У тебя самое доброе сердце во вселенной! ❤️", photo: "image/foto.png" },
+            { date: "24.09.2026", text: "У тебя самое доброе сердце во вселенной! ❤️", photo: "image/foto.png" },
+            { date: "25.09.2026", text: "У тебя самое доброе сердце во вселенной! ❤️", photo: "image/foto.png" },
+            { date: "26.09.2026", text: "У тебя самое доброе сердце во вселенной! ❤️", photo: "image/foto.png" },
+            { date: "27.09.2026", text: "У тебя самое доброе сердце во вселенной! ❤️", photo: "image/foto.png" },
+            { date: "28.09.2026", text: "У тебя самое доброе сердце во вселенной! ❤️", photo: "image/foto.png" },
+            { date: "29.09.2026", text: "У тебя самое доброе сердце во вселенной! ❤️", photo: "image/foto.png" },
+            { date: "30.09.2026", text: "Ты делаешь этот мир значительно уютнее ☕", photo: "" }
+        ];
+
+        const warningPhrases = [
+            "Слыш, токо один раз на день!",
+            "Сколько не пытайся, все тщетно только завтра будет новый",
+            "Комплименты не бесконечные, но ради тебя буду стараться😉",
+            "Ну давай еще раз нажми",
+            "Ничего не выйдет, Кать хоть 100 раз нажми",
+            "Завтра все будет",
+            "НИТ",
+            "Ну давай давай нажимай на меня о да еще раз",
+            "Давай изнасилуй эту кнопку",
+            "Лучше по письке своей нажми",
+            "Ну не сегодня Кать, завтрааааа",
+            "Эй ты, хватит на меня нажимать",
+            "Кать, тебе же сказано, один раз на день."
+        ];
+
+        const generateBtn = document.getElementById('generate-btn');
+        const complimentText = document.getElementById('compliment-text');
+        const dayPhoto = document.getElementById('day-photo');
+        const warningBox = document.getElementById('warning-message');
+        const timerContainer = document.getElementById('timer-container');
+        const countdownElement = document.getElementById('countdown');
+        const archiveIndicator = document.getElementById('archive-indicator');
+        const pageTitle = document.getElementById('page-title');
+        const preambleText = document.getElementById('preamble-text');
+        const streakCountElement = document.getElementById('streak-count');
+        const mainContentWrapper = document.getElementById('main-content-wrapper');
+        const archiveSection = document.getElementById('archive-section');
+        
+        const prevDayBtn = document.getElementById('prev-day-btn');
+        const nextDayBtn = document.getElementById('next-day-btn');
+        const navDateDisplay = document.getElementById('nav-date-display');
+        
+        const calendarGrid = document.getElementById('calendar-grid');
+        const calMonthYearTitle = document.getElementById('cal-month-year-title');
+        const calPrevMonthBtn = document.getElementById('cal-prev-month');
+        const calNextMonthBtn = document.getElementById('cal-next-month');
+
+        const mathGameBox = document.getElementById('math-game-box');
+        const mathQuestion = document.getElementById('math-question');
+        const mathAnswer = document.getElementById('math-answer');
+        const mathSubmitBtn = document.getElementById('math-submit-btn');
+        const mathErrorMsg = document.getElementById('math-error-msg');
+        const mathProgress = document.getElementById('math-progress');
+
+        const successModal = document.getElementById('success-modal');
+        const modalOkBtn = document.getElementById('modal-ok-btn');
+
+        const todayStr = new Date().toLocaleDateString('ru-RU');
+        let availableDates = [];
+        let currentNavIndex = -1;
+        let isPenalized = false;
+
+        let calYear = new Date().getFullYear();
+        let calMonth = new Date().getMonth(); 
+        const monthNames = ["Январь", "Февраль", "Март", "Апрель", "Май", "Июнь", "Июль", "Август", "Сентябрь", "Октябрь", "Ноябрь", "Декабрь"];
+
+        let mathStep = 1;
+        let currentCorrectAnswer = 0;
+
+        function parseDateStr(str) {
+            const [d, m, y] = str.split('.').map(Number);
+            return new Date(y, m - 1, d);
+        }
+
+        function getDaysDifference(dateStr1, dateStr2) {
+            const d1 = parseDateStr(dateStr1);
+            const d2 = parseDateStr(dateStr2);
+            d1.setHours(0,0,0,0);
+            d2.setHours(0,0,0,0);
+            return Math.floor((d2 - d1) / (1000 * 60 * 60 * 24));
+        }
+
+        function init() {
+            const todayObj = parseDateStr(todayStr);
+            availableDates = dailyData
+                .map(item => item.date)
+                .filter(date => parseDateStr(date) <= todayObj)
+                .sort((a, b) => parseDateStr(a) - parseDateStr(b));
+
+            currentNavIndex = availableDates.indexOf(todayStr);
+            if (currentNavIndex === -1 && availableDates.length > 0) {
+                currentNavIndex = availableDates.length - 1;
+            }
+
+            checkStreakAndPenalties();
+
+            if (isPenalized) {
+                mainContentWrapper.style.display = 'none';
+                archiveSection.style.display = 'none';
+                mathGameBox.style.display = 'block';
+                generateMathQuestion();
+            } else {
+                renderDay(availableDates[currentNavIndex]);
+            }
+        }
+
+        function checkStreakAndPenalties() {
+            const lastDate = localStorage.getItem('lastComplimentDate');
+            let streak = parseInt(localStorage.getItem('complimentStreak')) || 0;
+            const mathPassedToday = localStorage.getItem('mathPassedToday') === todayStr;
+
+            if (lastDate) {
+                if (lastDate === todayStr || mathPassedToday) {
+                    isPenalized = false;
+                } else {
+                    const diff = getDaysDifference(lastDate, todayStr);
+                    if (diff === 1) {
+                        isPenalized = false;
+                    } else if (diff > 1) {
+                        isPenalized = true;
+                    }
+                }
+            } else {
+                isPenalized = false;
+                streak = 0;
+            }
+            streakCountElement.innerText = streak;
+        }
+
+        function renderDay(targetDate) {
+            navDateDisplay.innerText = targetDate;
+            const dayData = dailyData.find(item => item.date === targetDate);
+            const isToday = (targetDate === todayStr);
+
+            warningBox.style.display = 'none';
+            timerContainer.style.display = 'none';
+
+            prevDayBtn.disabled = (currentNavIndex <= 0);
+            nextDayBtn.disabled = (currentNavIndex >= availableDates.length - 1);
+
+            const [d, m, y] = targetDate.split('.').map(Number);
+            calMonth = m - 1;
+            calYear = y;
+            renderCustomCalendar();
+
+            if (isToday) {
+                pageTitle.innerText = "Комплимент на сегодня";
+                preambleText.style.display = "block";
+                archiveIndicator.style.display = "none";
+                generateBtn.style.display = "block";
+
+                const isOpenedToday = localStorage.getItem('lastComplimentDate') === todayStr;
+                if (isOpenedToday) {
+                    displayContent(dayData);
+                    generateBtn.innerText = "Попробовать еще раз! 🔮";
+                    startTimer();
+                } else {
+                    complimentText.innerHTML = `<span class="hidden-compliment">Тут спрятано что-то приятное... 🎁</span>`;
+                    dayPhoto.style.display = "none";
+                    generateBtn.innerText = "Открыть комплимент! 💌";
+                }
+            } else {
+                pageTitle.innerText = `Секрет за ${targetDate} 📜`;
+                preambleText.style.display = "none";
+                archiveIndicator.style.display = "block";
+                generateBtn.style.display = "none";
+                displayContent(dayData);
+            }
+        }
+
+        function displayContent(data) {
+            if (!data) {
+                complimentText.innerHTML = "<span style='color:#999; font-size:13px;'>Текст не записан... 📝</span>";
+                dayPhoto.style.display = "none";
+                return;
+            }
+            complimentText.innerHTML = data.text;
+            complimentText.style.color = "#d81b60";
+
+            if (data.photo && data.photo.trim() !== "") {
+                dayPhoto.src = data.photo;
+                dayPhoto.style.display = "block";
+            } else {
+                dayPhoto.style.display = "none";
+            }
+        }
+
+        function renderCustomCalendar() {
+            calendarGrid.innerHTML = "";
+            calMonthYearTitle.innerText = `${monthNames[calMonth]} ${calYear}`;
+
+            let firstDayIndex = new Date(calYear, calMonth, 1).getDay();
+            firstDayIndex = firstDayIndex === 0 ? 6 : firstDayIndex - 1;
+            const totalDays = new Date(calYear, calMonth + 1, 0).getDate();
+
+            for (let i = 0; i < firstDayIndex; i++) {
+                const blank = document.createElement('div');
+                blank.classList.add('calendar-day');
+                calendarGrid.appendChild(blank);
+            }
+
+            for (let day = 1; day <= totalDays; day++) {
+                const dayCell = document.createElement('div');
+                dayCell.classList.add('calendar-day');
+                dayCell.innerText = day;
+
+                const dStr = day.toString().padStart(2, '0');
+                const mStr = (calMonth + 1).toString().padStart(2, '0');
+                const formattedDate = `${dStr}.${mStr}.${calYear}`;
+
+                const hasData = availableDates.includes(formattedDate);
+                const isToday = (formattedDate === todayStr);
+                const isCurrentView = (formattedDate === availableDates[currentNavIndex]);
+
+                if (isToday) dayCell.classList.add('is-today');
+
+                if (hasData) {
+                    dayCell.classList.add('has-data');
+                    if (isCurrentView) dayCell.classList.add('current-view');
+
+                    dayCell.addEventListener('click', () => {
+                        currentNavIndex = availableDates.indexOf(formattedDate);
+                        renderDay(formattedDate);
+                    });
+                }
+
+                calendarGrid.appendChild(dayCell);
+            }
+        }
+
+        calPrevMonthBtn.addEventListener('click', () => {
+            calMonth--;
+            if (calMonth < 0) {
+                calMonth = 11;
+                calYear--;
+            }
+            renderCustomCalendar();
+        });
+
+        calNextMonthBtn.addEventListener('click', () => {
+            calMonth++;
+            if (calMonth > 11) {
+                calMonth = 0;
+                calYear++;
+            }
+            renderCustomCalendar();
+        });
+
+        generateBtn.addEventListener('click', () => {
+            const isOpenedToday = localStorage.getItem('lastComplimentDate') === todayStr;
+            const dayData = dailyData.find(item => item.date === todayStr);
+
+            if (!isOpenedToday) {
+                let streak = parseInt(localStorage.getItem('complimentStreak')) || 0;
+                const lastDate = localStorage.getItem('lastComplimentDate');
+
+                if (lastDate) {
+                    const diff = getDaysDifference(lastDate, todayStr);
+                    if (diff > 1) {
+                        streak += diff; 
+                    } else {
+                        streak++;
+                    }
+                } else {
+                    streak = 1;
+                }
+
+                localStorage.setItem('complimentStreak', streak);
+                streakCountElement.innerText = streak;
+
+                localStorage.setItem('lastComplimentDate', todayStr);
+                displayContent(dayData);
+                generateBtn.innerText = "Попробовать еще раз! 🔮";
+                startTimer();
+            } else {
+                displayContent(dayData);
+                const randomWarning = warningPhrases[Math.floor(Math.random() * warningPhrases.length)];
+                warningBox.innerText = randomWarning;
+                warningBox.style.display = 'block';
+            }
+        });
+
+        prevDayBtn.addEventListener('click', () => {
+            if (currentNavIndex > 0) {
+                currentNavIndex--;
+                renderDay(availableDates[currentNavIndex]);
+            }
+        });
+
+        nextDayBtn.addEventListener('click', () => {
+            if (currentNavIndex < availableDates.length - 1) {
+                currentNavIndex++;
+                renderDay(availableDates[currentNavIndex]);
+            }
+        });
+
+        function generateMathQuestion() {
+            mathProgress.innerText = `Пример ${mathStep} из 5`;
+            mathAnswer.value = "";
+            mathErrorMsg.innerText = "";
+
+            let a, b;
+            if (mathStep === 1) { 
+                a = Math.floor(Math.random() * 20) + 5; b = Math.floor(Math.random() * 20) + 5;
+                currentCorrectAnswer = a + b; mathQuestion.innerText = `${a} + ${b}`;
+            } else if (mathStep === 2) { 
+                a = Math.floor(Math.random() * 30) + 15; b = Math.floor(Math.random() * 14) + 2;
+                currentCorrectAnswer = a - b; mathQuestion.innerText = `${a} - ${b}`;
+            } else if (mathStep === 3) { 
+                a = Math.floor(Math.random() * 7) + 2; b = Math.floor(Math.random() * 8) + 2;
+                currentCorrectAnswer = a * b; mathQuestion.innerText = `${a} × ${b}`;
+            } else if (mathStep === 4) { 
+                b = Math.floor(Math.random() * 7) + 2; currentCorrectAnswer = Math.floor(Math.random() * 7) + 2;
+                a = b * currentCorrectAnswer; mathQuestion.innerText = `${a} ÷ ${b}`;
+            } else { 
+                a = Math.floor(Math.random() * 40) + 10; b = Math.floor(Math.random() * 40) + 10;
+                currentCorrectAnswer = a + b; mathQuestion.innerText = `${a} + ${b}`;
+            }
+        }
+
+        mathSubmitBtn.addEventListener('click', () => {
+            const userAnswer = parseInt(mathAnswer.value);
+            if (isNaN(userAnswer)) {
+                mathErrorMsg.innerText = "Введите число!";
+                return;
+            }
+
+            if (userAnswer === currentCorrectAnswer) {
+                if (mathStep < 5) {
+                    mathStep++;
+                    generateMathQuestion();
+                } else {
+                    localStorage.setItem('mathPassedToday', todayStr); 
+                    isPenalized = false;
+                    successModal.style.display = 'flex'; 
+                }
+            } else {
+                localStorage.setItem('complimentStreak', 0); 
+                streakCountElement.innerText = 0;
+                
+                mathErrorMsg.innerText = "Неправильно Кать, серия сгорела, а примеры заново решай!😢";
+                mathStep = 1;
+                setTimeout(() => { generateMathQuestion(); }, 2000);
+            }
+        });
+
+        modalOkBtn.addEventListener('click', () => {
+            successModal.style.display = 'none';
+            mathGameBox.style.display = 'none';
+            mainContentWrapper.style.display = 'block';
+            archiveSection.style.display = 'flex';
+            renderDay(availableDates[currentNavIndex]);
+        });
+
+        let timerInterval;
+        function startTimer() {
+            timerContainer.style.display = 'block';
+            if (timerInterval) clearInterval(timerInterval);
+            
+            function updateClock() {
+                const now = new Date();
+                const tomorrow = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
+                const diff = tomorrow - now;
+
+                if (diff <= 0) {
+                    location.reload();
+                    return;
+                }
+
+                const hours = Math.floor(diff / 3600000).toString().padStart(2, '0');
+                const minutes = Math.floor((diff % 3600000) / 60000).toString().padStart(2, '0');
+                const seconds = Math.floor((diff % 60000) / 1000).toString().padStart(2, '0');
+
+                countdownElement.innerText = `${hours}:${minutes}:${seconds}`;
+            }
+
+            updateClock();
+            timerInterval = setInterval(updateClock, 1000);
+        }
+
+        init();
+    </script>
+
+</body>
+</html>
