@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Фильмы</title>
+    <link rel="icon" type="image/png" href="films/ficon.png">
+    <link href="https://fonts.googleapis.com/css2?family=Pangolin&family=Comic+Neue:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
+
+    <style>
+        * { box-sizing: border-box; }
+        body { margin: 0; padding: 0; font-family: 'Comic Neue', cursive; min-height: 100vh; background-color: #fffdf0; }
+
+        /* ЭКРАН АВТОРИЗАЦИИ */
+        #auth-screen {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: #fffdf0; z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 20px;
+        }
+        .auth-card {
+            background: #fffdf0; border: 5px solid #333; border-radius: 24px;
+            width: 90%; max-width: 400px; padding: 30px; box-shadow: 0 12px 0px #333;
+            text-align: center;
+        }
+        .auth-card h1 { font-family: 'Pangolin', cursive; margin-bottom: 25px; color: #333; }
+        
+        .remember-me-wrapper { display: flex; align-items: center; gap: 8px; margin: 15px 0; cursor: pointer; font-weight: bold; font-size: 14px; user-select: none; }
+        .remember-me-wrapper input { width: 18px; height: 18px; accent-color: #76e150; cursor: pointer; border: 2px solid #333; }
+
+        /* ИНТЕРФЕЙС ДНЕВНИКА */
+        #main-app { display: none; }
+
+        /* ФОН, РАЗРЫВ БУМАГИ И СЕТКА ВОДЯНЫХ ЗНАКОВ */
+        .page-split-container { position: fixed; top: 0; left: 0; width: 100%; height: 100vh; display: flex; z-index: 1; pointer-events: none; }
+        .side { width: 50%; height: 100%; position: relative; overflow: hidden; }
+        
+        .side-blue { background-color: #e6f2ff; }   /* Сторона Сережи */
+        .side-pink { background-color: #ffe6eb; }   /* Сторона Кати */
+        
+        .watermark-grid {
+            position: absolute;
+            top: -10%; left: -10%; width: 120%; height: 120%;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 50px 40px;
+            justify-content: space-around;
+            align-content: space-around;
+            transform: rotate(-15deg);
+            user-select: none;
+            pointer-events: none;
+        }
+        .watermark-grid span {
+            font-family: 'Pangolin', cursive;
+            font-size: 26px;
+            font-weight: bold;
+            color: #333;
+            opacity: 0.1;
+            white-space: nowrap;
+        }
+
+        .paper-rip-divider {
+            position: absolute; left: 50%; top: 0; bottom: 0; width: 40px; transform: translateX(-50%);
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='60' viewBox='0 0 40 60'%3E%3Cpath d='M12 0 L18 10 L8 20 L22 30 L12 40 L18 50 L10 60 L30 60 L22 50 L28 40 L18 30 L28 20 L21 10 L30 0 Z' fill='%23fffdf0' stroke='%23333333' stroke-width='3' stroke-linejoin='round'/%3E%3C/svg%3E");
+            background-repeat: repeat-y;
+            z-index: 2;
+        }
+
+        /* НАВБАР */
+        .top-navbar {
+            position: fixed; top: 15px; left: 50%; transform: translateX(-50%); width: 90%; max-width: 950px;
+            background: #fffdf0; border: 4px solid #333; border-radius: 20px; box-shadow: 0 8px 0px #333;
+            padding: 12px 20px; display: flex; flex-direction: column; gap: 12px; z-index: 100;
+        }
+        .nav-row-top { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+        
+        .btn-ui {
+            font-family: 'Pangolin', cursive; font-weight: bold; padding: 8px 16px; border: 3px solid #333;
+            border-radius: 12px; cursor: pointer; box-shadow: 0 4px 0px #333; transition: all 0.1s; text-decoration: none; text-align: center;
+        }
+        .btn-ui:active { box-shadow: 0 1px 0px #333; transform: translateY(3px); }
+        .btn-back { background: #ffbd59; color: #333; }
+        .btn-add { background: #76e150; color: #333; }
+        .btn-logout { background: #ff5757; color: white; }
+
+        .search-box-wrapper { flex-grow: 1; position: relative; max-width: 300px; }
+        .search-input { width: 100%; padding: 8px 15px; font-size: 15px; border: 3px solid #333; border-radius: 12px; font-family: inherit; font-weight: bold; outline: none; }
+
+        /* ОБЩИЕ СТИЛИ ФОРМ */
+        .form-group { margin-bottom: 15px; display: flex; flex-direction: column; gap: 5px; text-align: left; }
+        .form-group label { font-weight: bold; font-size: 15px; }
+        .form-control { border: 3px solid #333; border-radius: 10px; padding: 8px 12px; font-family: inherit; font-size: 15px; font-weight: bold; outline: none; }
+        
+        /* ЛЕНТА КАРТОЧЕК */
+        .movies-timeline { position: relative; z-index: 10; display: flex; flex-direction: column; align-items: center; gap: 50px; padding: 190px 15px 100px 15px; }
+        .movie-row { width: 100%; max-width: 900px; display: flex; flex-direction: column; align-items: center; }
+        
+        .movie-header-wrapper { display: flex; align-items: center; gap: 10px; z-index: 20; margin-bottom: -15px; transform: rotate(-1deg); }
+        .movie-title-plate { background: #333; color: #fff; padding: 10px 25px; border-radius: 16px; border: 3px solid #333; box-shadow: 0 6px 0px rgba(0,0,0,0.15); text-align: center; }
+        .movie-title-plate h2 { font-family: 'Pangolin', cursive; margin: 0; font-size: 22px; }
+        .author-badge { font-size: 11px; color: #aaa; margin-top: 2px; }
+        .match-badge { display: inline-block; background: #ffde59; color: #333; font-size: 12px; padding: 2px 8px; border-radius: 8px; margin-top: 5px; font-weight: bold; }
+
+        .movie-ctrl-btns { display: flex; flex-direction: column; gap: 5px; }
+        .btn-ctrl { background: #fff; border: 2px solid #333; border-radius: 8px; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; font-size: 14px; cursor: pointer; box-shadow: 0 2px 0px #333; }
+        .btn-edit { background: #ffde59; }
+        .btn-delete { background: #ff5757; color: white; }
+
+        .reviews-split-block { display: flex; width: 100%; background: rgba(255, 253, 240, 0.96); border: 5px solid #333; border-radius: 20px; box-shadow: 0 10px 0px rgba(0,0,0,0.1); overflow: hidden; }
+        .opinion-side { width: 50%; padding: 35px 25px 25px 25px; display: flex; flex-direction: column; min-height: 180px; }
+        .left-opinion { border-right: 3px dashed #333; }
+        
+        /* Исправленная длина линий под именами */
+        .opinion-side h3 { 
+            font-family: 'Pangolin', cursive; font-size: 18px; margin: 0 0 15px 0; text-align: center; 
+            border-bottom: 2px dashed rgba(0,0,0,0.1); padding-bottom: 8px;
+            width: 100%; 
+        }
+        
+        .review-text { font-size: 15px; line-height: 1.4; color: #333; font-weight: 700; flex-grow: 1; }
+        
+        /* Измененный бэйдж оценки со звездочкой */
+        .rating-badge { 
+            align-self: center; background: #fff; border: 3px solid #333; 
+            border-radius: 20px; padding: 4px 14px; display: flex; justify-content: center; 
+            align-items: center; font-size: 16px; font-weight: bold; font-family: 'Pangolin', cursive; 
+            box-shadow: 2px 3px 0px #333; gap: 5px; margin-top: 10px;
+        }
+        
+        .empty-review-placeholder { display: flex; flex-direction: column; align-items: center; justify-content: center; flex-grow: 1; gap: 10px; width: 100%; }
+        .btn-add-opinion { background: #ffde59; color: #333; font-size: 14px; }
+
+        /* EMPTY STATE */
+        .empty-state-card {
+            background: #fffdf0; border: 5px dashed #333; border-radius: 24px; padding: 40px;
+            text-align: center; max-width: 500px; width: 100%; box-shadow: 0 8px 0 rgba(0,0,0,0.05);
+            animation: floatAnim 3s ease-in-out infinite; margin-top: 40px;
+        }
+        @keyframes floatAnim { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
+        .empty-state-card .icon { font-size: 48px; margin-bottom: 15px; display: inline-block; }
+        .empty-state-card h3 { font-family: 'Pangolin', cursive; font-size: 24px; color: #333; margin: 0 0 10px 0; }
+        .empty-state-card p { font-size: 16px; color: #666; line-height: 1.5; margin: 0; font-weight: bold; }
+
+        /* МОДАЛЬНЫЕ ОКНА */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 200; display: none; align-items: center; justify-content: center; }
+        .modal-window { background: #fffdf0; border: 5px solid #333; border-radius: 24px; width: 90%; max-width: 500px; padding: 25px; box-shadow: 0 12px 0px #333; position: relative; }
+        .modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; }
+        .btn-close-modal { background: #ccc; color: #333; }
+
+        /* КАСТОМНЫЕ АЛЕРТЫ */
+        .alert-window { max-width: 380px; text-align: center; padding: 30px 20px 20px 20px; animation: alertPop 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        @keyframes alertPop { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+        #custom-alert-text { font-size: 16px; font-weight: bold; color: #333; margin-bottom: 20px; line-height: 1.4; }
+
+        /* АДАПТИВНОСТЬ ПОД МОБИЛЬНЫЕ УСТРОЙСТВА */
+        @media (max-width: 768px) {
+            .paper-rip-divider { display: none; }
+            .reviews-split-block { flex-direction: column; }
+            .opinion-side { width: 100%; min-height: auto; }
+            .left-opinion { border-right: none; border-bottom: 3px dashed #333; }
+            
+            .top-navbar { width: 95%; padding: 12px; top: 10px; gap: 10px; }
+            .nav-row-top { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+            .btn-back { grid-column: 1; padding: 8px; font-size: 14px; }
+            .btn-logout { grid-column: 2; padding: 8px; font-size: 14px; }
+            
+            .search-box-wrapper { grid-column: 1 / span 2; max-width: 100%; width: 100%; }
+            .btn-add { grid-column: 1 / span 2; width: 100%; padding: 10px; }
+
+            .movies-timeline { padding-top: 270px; }
+            .watermark-grid span { font-size: 20px; }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="auth-screen">
+        <div class="auth-card">
+            <h1>Вход</h1>
+            <form id="auth-form">
+                <div class="form-group">
+                    <label>Email:</label>
+                    <input type="email" id="auth-email" class="form-control" required placeholder="name@diary.com">
+                </div>
+                <div class="form-group">
+                    <label>Пароль:</label>
+                    <input type="password" id="auth-password" class="form-control" required placeholder="******">
+                </div>
+                
+                <label class="remember-me-wrapper">
+                    <input type="checkbox" id="auth-remember" checked>
+                    Запомнить меня на этом устройстве
+                </label>
+
+                <button type="submit" class="btn-ui btn-add" style="width: 100%; margin-top: 5px;">Войти в пространство ✨</button>
+            </form>
+        </div>
+        <a href="index.html" class="btn-ui btn-back">⬅ Вернуться на главную</a>
+    </div>
+
+
+    <div id="main-app">
+        
+        <div class="top-navbar">
+            <div class="nav-row-top">
+                <a href="index.html" class="btn-ui btn-back">⬅ В дневник</a>
+                <div class="search-box-wrapper">
+                    <input type="text" id="movie-search" class="search-input" placeholder="Поиск по названием...">
+                </div>
+                <button class="btn-ui btn-add" id="open-add-modal">Добавить фильм 🎬</button>
+                <button class="btn-ui btn-logout" id="btn-logout">Выйти 🚪</button>
+            </div>
+        </div>
+
+        <div class="page-split-container">
+            <div class="side side-blue">
+                <div class="watermark-grid">
+                    <span>Сережа</span><span>Сережа</span><span>Сережа</span><span>Сережа</span>
+                    <span>Сережа</span><span>Сережа</span><span>Сережа</span><span>Сережа</span>
+                    <span>Сережа</span><span>Сережа</span><span>Сережа</span><span>Сережа</span>
+                    <span>Сережа</span><span>Сережа</span><span>Сережа</span><span>Сережа</span>
+                </div>
+            </div>
+            
+            <div class="paper-rip-divider"></div>
+            
+            <div class="side side-pink">
+                <div class="watermark-grid">
+                    <span>Катя</span><span>Катя</span><span>Катя</span><span>Катя</span>
+                    <span>Катя</span><span>Катя</span><span>Катя</span><span>Катя</span>
+                    <span>Катя</span><span>Катя</span><span>Катя</span><span>Катя</span>
+                    <span>Катя</span><span>Катя</span><span>Катя</span><span>Катя</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="movies-timeline" id="movies-list"></div>
+
+    </div>
+
+    <div class="modal-overlay" id="movie-modal">
+        <div class="modal-window">
+            <h2 id="modal-title">Добавить фильм в коллекцию</h2>
+            <form id="movie-form">
+                <input type="hidden" id="modal-movie-id">
+                <input type="hidden" id="modal-mode" value="create"> 
+
+                <div class="form-group" id="group-title">
+                    <label>Название фильма:</label>
+                    <input type="text" id="form-movie-title" class="form-control" placeholder="Например: Интерстеллар">
+                </div>
+                <div class="form-group" id="group-genre">
+                    <label>Жанр:</label>
+                    <input type="text" id="form-movie-genre" class="form-control" placeholder="Фантастика, Драма">
+                </div>
+                <div class="form-group">
+                    <label>Твой отзыв / Комментарий:</label>
+                    <textarea id="form-movie-text" class="form-control" rows="4" required placeholder="Что думаешь о фильме?"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Твоя оценка (от 1 до 10):</label>
+                    <input type="number" id="form-movie-rating" class="form-control" min="1" max="10" required placeholder="10">
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn-ui btn-close-modal" id="close-modal">Отмена</button>
+                    <button type="submit" class="btn-ui btn-add">Сохранить</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="custom-alert-modal" style="z-index: 99999;">
+        <div class="modal-window alert-window">
+            <div id="custom-alert-text">Оповещение</div>
+            <button class="btn-ui btn-add" id="close-alert-btn" style="padding: 6px 25px;">Понятно 👌</button>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="custom-confirm-modal" style="z-index: 99999;">
+        <div class="modal-window alert-window">
+            <div id="custom-confirm-text">Уверены?</div>
+            <div class="modal-actions" style="justify-content: center; gap: 15px;">
+                <button class="btn-ui btn-close-modal" id="confirm-cancel-btn">Отмена</button>
+                <button class="btn-ui btn-logout" id="confirm-yes-btn">Да, удалить</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyCYuiXcuhWONj-hO0P8C2U6zO5JkcHg30Q",
+  authDomain: "chat1-45647.firebaseapp.com",
+  databaseURL: "https://chat1-45647-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "chat1-45647",
+  storageBucket: "chat1-45647.firebasestorage.app",
+  messagingSenderId: "491253151226",
+  appId: "1:491253151226:web:2cf12af405730c8a5f2043"
+        };
+        
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+        const auth = firebase.auth();
+
+        const USER_1_UID = "d7ahocTSX6aqaLix4yf2icKiuf72"; 
+        const USER_2_UID = "tNo8CSntBqhAgvr8EIfWU8YzCY52";
+
+        let currentUser = null;
+        let confirmCallback = null;
+
+        function getUserName(uid) {
+            if (uid === USER_1_UID) return "Сережа";
+            if (uid === USER_2_UID) return "Катя";
+            return "Гость";
+        }
+
+        function showCustomAlert(text) {
+            $('#custom-alert-text').html(text);
+            $('#custom-alert-modal').css('display', 'flex');
+        }
+        $('#close-alert-btn').on('click', function() { $('#custom-alert-modal').hide(); });
+
+        function showCustomConfirm(text, callback) {
+            $('#custom-confirm-text').text(text);
+            confirmCallback = callback;
+            $('#custom-confirm-modal').css('display', 'flex');
+        }
+        $('#confirm-cancel-btn').on('click', function() { $('#custom-confirm-modal').hide(); confirmCallback = null; });
+        $('#confirm-yes-btn').on('click', function() { if (confirmCallback) confirmCallback(); $('#custom-confirm-modal').hide(); confirmCallback = null; });
+
+        // АВТОРИЗАЦИЯ
+        auth.onAuthStateChanged((user) => {
+            if (user && (user.uid === USER_1_UID || user.uid === USER_2_UID)) {
+                currentUser = { uid: user.uid, displayName: getUserName(user.uid) };
+                $('#auth-screen').hide();
+                $('#main-app').show();
+                startDatabaseSync();
+            } else {
+                if(user) auth.signOut(); 
+                $('#main-app').hide();
+                $('#auth-screen').css('display', 'flex');
+            }
+        });
+
+        $('#auth-form').on('submit', function(e) {
+            e.preventDefault();
+            const email = $('#auth-email').val();
+            const password = $('#auth-password').val();
+            const rememberMe = $('#auth-remember').is(':checked');
+
+            const persistenceType = rememberMe 
+                ? firebase.auth.Auth.Persistence.LOCAL 
+                : firebase.auth.Auth.Persistence.SESSION;
+
+            auth.setPersistence(persistenceType)
+                .then(() => auth.signInWithEmailAndPassword(email, password))
+                .catch(error => showCustomAlert("💬 Упс! Не удалось войти.<br>Проверь правильность ввода Email и пароля."));
+        });
+
+        $('#btn-logout').on('click', function() { auth.signOut(); });
+
+        // СИНХРОНИЗАЦИЯ С БД
+        function startDatabaseSync() {
+            db.ref('movies').off();
+            db.ref('movies').on('value', (snapshot) => {
+                const moviesList = $('#movies-list');
+                moviesList.empty();
+                
+                if (!snapshot.exists()) {
+                    moviesList.html(`
+                        <div class="empty-state-card">
+                            <span class="icon">🍿✨</span>
+                            <h3>Наша страничка пуста</h3>
+                            <p>Время смотреееть!</p>
+                        </div>
+                    `);
+                    return;
+                }
+
+                snapshot.forEach((childSnapshot) => {
+                    const movieId = childSnapshot.key;
+                    const movieData = childSnapshot.val();
+                    
+                    // Вычисляем, кто создал карточку, чтобы поставить его на первое место
+                    const creatorUid = movieData.createdBy || USER_1_UID;
+                    const partnerUid = (creatorUid === USER_1_UID) ? USER_2_UID : USER_1_UID;
+
+                    const reviewLeft = movieData.reviews ? movieData.reviews[creatorUid] : null;
+                    const reviewRight = movieData.reviews ? movieData.reviews[partnerUid] : null;
+
+                    const leftName = getUserName(creatorUid);
+                    const rightName = getUserName(partnerUid);
+
+                    const leftEmoji = (creatorUid === USER_1_UID) ? '💎' : '🌸';
+                    const rightEmoji = (partnerUid === USER_1_UID) ? '💎' : '🌸';
+
+                    // Подсчет совпадения
+                    const r1 = movieData.reviews ? movieData.reviews[USER_1_UID] : null;
+                    const r2 = movieData.reviews ? movieData.reviews[USER_2_UID] : null;
+                    let matchHTML = `<div class="match-badge" style="background:#ccc;">Ожидаем второй отзыв ⏳</div>`;
+                    if (r1 && r2) {
+                        const diff = Math.abs(r1.rating - r2.rating);
+                        const matchPercent = 100 - (diff * 10);
+                        matchHTML = `<div class="match-badge">Совпадение: ${matchPercent}% ${matchPercent >= 80 ? '❤️' : '🍿'}</div>`;
+                    }
+
+                    // Кнопки управления
+                    let controlBtnsHTML = '';
+                    if (currentUser.uid === USER_1_UID || currentUser.uid === USER_2_UID) {
+                        const myReview = movieData.reviews ? movieData.reviews[currentUser.uid] : null;
+                        const myText = myReview ? encodeURIComponent(myReview.text) : '';
+                        const myRating = myReview ? myReview.rating : '';
+
+                        controlBtnsHTML = `
+                            <div class="movie-ctrl-btns">
+                                <button class="btn-ctrl btn-edit" title="Редактировать" onclick="openEditModal('${movieId}', '${encodeURIComponent(movieData.title)}', '${encodeURIComponent(movieData.genre)}', '${myRating}', '${myText}')">✏️</button>
+                                <button class="btn-ctrl btn-delete" title="Удалить фильм" onclick="deleteMovie('${movieId}')">🗑️</button>
+                            </div>
+                        `;
+                    }
+
+                    // Собираем ЛЕВЫЙ блок (Создатель)
+                    let opinionLeftHTML = '';
+                    if (reviewLeft) {
+                        opinionLeftHTML = `<h3>${reviewLeft.name} ${leftEmoji}</h3><div class="review-text">${reviewLeft.text}</div><div class="rating-badge">⭐ ${reviewLeft.rating}</div>`;
+                    } else {
+                        opinionLeftHTML = `<div class="empty-review-placeholder"><h3>${leftName} ${leftEmoji}</h3>` + 
+                            (currentUser.uid === creatorUid ? `<button class="btn-ui btn-add-opinion" onclick="openAddReviewModal('${movieId}')">Добавить отзыв</button>` : `<span>Еще не посмотрел(а)</span>`) + `</div>`;
+                    }
+
+                    // Собираем ПРАВЫЙ блок (Партнер)
+                    let opinionRightHTML = '';
+                    if (reviewRight) {
+                        opinionRightHTML = `<h3>${reviewRight.name} ${rightEmoji}</h3><div class="review-text">${reviewRight.text}</div><div class="rating-badge">⭐ ${reviewRight.rating}</div>`;
+                    } else {
+                        opinionRightHTML = `<div class="empty-review-placeholder"><h3>${rightName} ${rightEmoji}</h3>` + 
+                            (currentUser.uid === partnerUid ? `<button class="btn-ui btn-add-opinion" onclick="openAddReviewModal('${movieId}')">Добавить отзыв</button>` : `<span>Еще не посмотрел(а)</span>`) + `</div>`;
+                    }
+
+                    const movieCard = `
+                        <div class="movie-row">
+                            <div class="movie-header-wrapper">
+                                <div class="movie-title-plate">
+                                    <h2>${movieData.title} (${movieData.genre})</h2>
+                                    <div class="author-badge">Добавил(а): ${movieData.creatorName}</div>
+                                    ${matchHTML}
+                                </div>
+                                ${controlBtnsHTML}
+                            </div>
+                            <div class="reviews-split-block">
+                                <div class="opinion-side left-opinion">${opinionLeftHTML}</div>
+                                <div class="opinion-side right-opinion">${opinionRightHTML}</div>
+                            </div>
+                        </div>
+                    `;
+                    moviesList.prepend(movieCard);
+                });
+            });
+        }
+
+        // РАБОТА С МОДАЛКАМИ
+        window.deleteMovie = function(movieId) {
+            showCustomConfirm("Удалить этот фильм?", function() {
+                db.ref(`movies/${movieId}`).remove().then(() => showCustomAlert("✨ Фильм успешно стерт."));
+            });
+        };
+
+        window.openEditModal = function(movieId, encTitle, encGenre, rating, encText) {
+            $('#movie-form')[0].reset();
+            $('#modal-mode').val('edit');
+            $('#modal-movie-id').val(movieId);
+            $('#modal-title').text('Редактировать фильм');
+            $('#group-title, #group-genre').show();
+            $('#form-movie-title').val(decodeURIComponent(encTitle)).attr('required', true);
+            $('#form-movie-genre').val(decodeURIComponent(encGenre)).attr('required', true);
+            $('#form-movie-text').val(decodeURIComponent(encText));
+            $('#form-movie-rating').val(rating);
+            $('#movie-modal').css('display', 'flex');
+        };
+
+        $('#open-add-modal').on('click', function() {
+            $('#movie-form')[0].reset();
+            $('#modal-mode').val('create');
+            $('#modal-title').text('Добавить новый фильм');
+            $('#group-title, #group-genre').show();
+            $('#form-movie-title, #form-movie-genre').attr('required', true);
+            $('#movie-modal').css('display', 'flex');
+        });
+
+        window.openAddReviewModal = function(movieId) {
+            $('#movie-form')[0].reset();
+            $('#modal-mode').val('add_review');
+            $('#modal-movie-id').val(movieId);
+            $('#modal-title').text(`Добавить мой отзыв`);
+            $('#group-title, #group-genre').hide(); 
+            $('#form-movie-title, #form-movie-genre').attr('required', false);
+            $('#movie-modal').css('display', 'flex');
+        };
+
+        $('#close-modal, .modal-overlay').on('click', function(e) { if (e.target === this) $('#movie-modal').hide(); });
+
+        $('#movie-form').on('submit', function(e) {
+            e.preventDefault();
+            const mode = $('#modal-mode').val();
+            const movieId = $('#modal-movie-id').val();
+            const rating = parseInt($('#form-movie-rating').val());
+            const text = $('#form-movie-text').val();
+
+            if (mode === 'create') {
+                const title = $('#form-movie-title').val();
+                const genre = $('#form-movie-genre').val();
+                const newMovieRef = db.ref('movies').push();
+                
+                const movieObject = {
+                    title: title, genre: genre,
+                    createdBy: currentUser.uid, creatorName: currentUser.displayName,
+                    reviews: {}
+                };
+                movieObject.reviews[currentUser.uid] = { name: currentUser.displayName, rating: rating, text: text };
+                newMovieRef.set(movieObject);
+
+            } else if (mode === 'add_review') {
+                db.ref(`movies/${movieId}/reviews/${currentUser.uid}`).set({ name: currentUser.displayName, rating: rating, text: text });
+
+            } else if (mode === 'edit') {
+                const title = $('#form-movie-title').val();
+                const genre = $('#form-movie-genre').val();
+                const updates = {};
+                updates[`movies/${movieId}/title`] = title;
+                updates[`movies/${movieId}/genre`] = genre;
+                updates[`movies/${movieId}/reviews/${currentUser.uid}/text`] = text;
+                updates[`movies/${movieId}/reviews/${currentUser.uid}/rating`] = rating;
+                db.ref().update(updates);
+            }
+            $('#movie-modal').hide();
+        });
+
+        $('#movie-search').on('input', function() {
+            const val = $(this).val().toLowerCase().trim();
+            $('.movie-row').each(function() {
+                const title = $(this).find('.movie-title-plate h2').text().toLowerCase();
+                if (title.includes(val)) $(this).show(); else $(this).hide();
+            });
+        });
+    </script>
+</body>
+</html>
