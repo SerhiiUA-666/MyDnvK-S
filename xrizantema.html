@@ -1,0 +1,760 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <link rel="icon" type="image/png" href="xriz/xriz.png">
+    <title>Раскраска</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            user-select: none;
+        }
+
+        body {
+            min-height: 100vh;
+            background: radial-gradient(circle at 30% 20%, #dfd2be, #c8b894);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Segoe UI', 'Quicksand', system-ui, -apple-system, 'Roboto', sans-serif;
+            padding: 0.8rem;
+        }
+
+        .container {
+            max-width: 1400px;
+            width: 100%;
+            background: rgba(252, 248, 238, 0.85);
+            backdrop-filter: blur(6px);
+            border-radius: 2.5rem;
+            box-shadow: 0 25px 45px rgba(0, 0, 0, 0.12), 0 0 0 1px rgba(255, 252, 240, 0.9) inset;
+            padding: 1.2rem;
+            transition: all 0.3s ease;
+        }
+
+        .hero {
+            text-align: center;
+            margin-bottom: 1.2rem;
+        }
+
+        .hero h1 {
+            font-size: 2rem;
+            font-weight: 500;
+            letter-spacing: -0.3px;
+            background: linear-gradient(135deg, #3f5430, #9b7348);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+            text-shadow: 2px 2px 8px rgba(0,0,0,0.05);
+        }
+
+        .hero p {
+            font-size: 0.85rem;
+            color: #5f4e36;
+            margin-top: 0.2rem;
+            font-style: italic;
+        }
+
+        .art-board {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1.2rem;
+            justify-content: center;
+            align-items: flex-start;
+        }
+
+        .canvas-area {
+            flex: 2.5;
+            min-width: 240px;
+            display: flex;
+            justify-content: center;
+            background: #fdf5e9;
+            border-radius: 2rem;
+            padding: 0.6rem;
+            box-shadow: 0 12px 28px rgba(0, 0, 0, 0.08);
+        }
+
+        canvas {
+            display: block;
+            width: 100%;
+            height: auto;
+            background: #fffcf4;
+            border-radius: 1.5rem;
+            box-shadow: 0 8px 18px rgba(0, 0, 0, 0.05);
+            cursor: pointer;
+            transition: transform 0.2s ease;
+            touch-action: manipulation;
+        }
+
+        canvas:active {
+            transform: scale(0.98);
+        }
+
+        .controls {
+            flex: 1.2;
+            min-width: 220px;
+            background: rgba(251, 242, 228, 0.8);
+            backdrop-filter: blur(4px);
+            border-radius: 1.8rem;
+            padding: 1rem 1rem;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
+            border: 1px solid rgba(255, 245, 225, 0.9);
+        }
+
+        .palette-title {
+            font-weight: 500;
+            color: #5d4a2e;
+            margin-bottom: 0.8rem;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border-left: 4px solid #c9aa6f;
+            padding-left: 10px;
+        }
+
+        /* СЕТКА ЦВЕТОВ — улучшенная адаптация */
+        .color-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 10px;
+            margin-bottom: 1.5rem;
+            max-height: 260px;
+            overflow-y: auto;
+            padding-right: 4px;
+        }
+
+        .color-grid::-webkit-scrollbar {
+            width: 4px;
+        }
+        .color-grid::-webkit-scrollbar-track {
+            background: #e9decf;
+            border-radius: 10px;
+        }
+        .color-grid::-webkit-scrollbar-thumb {
+            background: #c2a16c;
+            border-radius: 10px;
+        }
+
+        .color-swatch {
+            aspect-ratio: 1 / 1;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+            border: 2px solid rgba(255, 245, 230, 0.9);
+            width: 100%;
+            max-width: 56px;
+            justify-self: center;
+        }
+
+        .color-swatch:hover {
+            transform: scale(1.08);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .color-swatch.active {
+            transform: scale(1.05);
+            border: 3px solid white;
+            box-shadow: 0 0 0 2px #b87c4f, 0 4px 12px rgba(0,0,0,0.2);
+        }
+
+        .action-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-top: 5px;
+        }
+
+        .btn {
+            background: #ebe0cf;
+            border: none;
+            padding: 10px 0;
+            border-radius: 60px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: #4c3f2c;
+            cursor: pointer;
+            transition: 0.2s;
+            font-family: inherit;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            backdrop-filter: blur(2px);
+            text-decoration: none;
+        }
+
+        .btn-primary {
+            background: #cfb384;
+            color: #2d281c;
+            font-weight: 600;
+        }
+
+        .btn-primary:hover {
+            background: #c2a16c;
+            transform: translateY(-2px);
+        }
+
+        .btn:hover {
+            background: #dfcfb6;
+            transform: translateY(-1px);
+        }
+
+        .btn:active {
+            transform: translateY(2px);
+        }
+
+        /* Стиль для активной кнопки авто-медитации */
+        .btn-auto-active {
+            background: #9fb87a;
+            color: #1e2a0c;
+            box-shadow: 0 0 8px #b8d98c;
+            animation: gentlePulse 1.2s infinite;
+        }
+
+        @keyframes gentlePulse {
+            0% { box-shadow: 0 0 0 0 rgba(159, 184, 122, 0.4); }
+            70% { box-shadow: 0 0 0 6px rgba(159, 184, 122, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(159, 184, 122, 0); }
+        }
+
+        /* Стиль для кнопки-ссылки "Дневник" */
+        .btn-diary {
+            background: #dbc7aa;
+            color: #4a3a24;
+            margin-top: 4px;
+        }
+        .btn-diary:hover {
+            background: #ceb78f;
+        }
+
+        .status-card {
+            margin-top: 1rem;
+            padding-top: 0.8rem;
+            border-top: 2px dotted #decbae;
+            text-align: center;
+            font-size: 0.8rem;
+            color: #7f6848;
+        }
+
+        .current-emotion {
+            background: #f5ecdf;
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 40px;
+            font-weight: 500;
+            margin-top: 5px;
+            font-size: 0.75rem;
+            color: #aa7b4c;
+        }
+
+        /* ============= МЕДИА-АДАПТАЦИЯ (кнопки и цвета не выезжают) ============= */
+        @media (max-width: 820px) {
+            .container {
+                padding: 1rem;
+            }
+            .color-grid {
+                gap: 8px;
+            }
+            .color-swatch {
+                max-width: 52px;
+            }
+        }
+
+        @media (max-width: 680px) {
+            .hero h1 {
+                font-size: 1.6rem;
+            }
+            .controls {
+                padding: 0.8rem;
+                min-width: 200px;
+            }
+            .color-grid {
+                grid-template-columns: repeat(4, 1fr);
+                gap: 8px;
+            }
+            .color-swatch {
+                max-width: 48px;
+            }
+            .btn {
+                font-size: 0.78rem;
+                padding: 8px 0;
+            }
+        }
+
+        @media (max-width: 550px) {
+            body {
+                padding: 0.5rem;
+            }
+            .container {
+                padding: 0.8rem;
+                border-radius: 1.8rem;
+            }
+            .hero h1 {
+                font-size: 1.4rem;
+            }
+            .controls {
+                min-width: 180px;
+                padding: 0.7rem;
+            }
+            .color-grid {
+                grid-template-columns: repeat(4, 1fr);
+                gap: 6px;
+                max-height: 220px;
+            }
+            .color-swatch {
+                max-width: 42px;
+            }
+            .btn {
+                font-size: 0.7rem;
+                padding: 7px 0;
+            }
+        }
+
+        @media (max-width: 450px) {
+            .color-grid {
+                grid-template-columns: repeat(3, 1fr);
+                gap: 6px;
+            }
+            .color-swatch {
+                max-width: 44px;
+            }
+            .controls {
+                min-width: 160px;
+            }
+            .btn {
+                font-size: 0.65rem;
+                padding: 6px 0;
+            }
+        }
+
+        @media (max-width: 380px) {
+            .color-swatch {
+                max-width: 38px;
+            }
+            .color-grid {
+                gap: 5px;
+            }
+            .btn {
+                font-size: 0.6rem;
+            }
+        }
+
+        footer {
+            text-align: center;
+            font-size: 0.65rem;
+            margin-top: 1rem;
+            color: #b4a180;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="hero">
+        <h1>🌸Хризантема</h1>
+        <p>Что то вроде медитации</p>
+    </div>
+
+    <div class="art-board">
+        <div class="canvas-area">
+            <canvas id="chrysanthemumCanvas" width="800" height="800" style="width:100%; height:auto; max-width:800px; aspect-ratio:1/1">
+                Ваш браузер не поддерживает холст
+            </canvas>
+        </div>
+
+        <div class="controls">
+            <div class="palette-title">
+                🎨 палитра цветов
+            </div>
+            <div class="color-grid" id="colorPalette"></div>
+
+            <div class="action-buttons">
+                <button class="btn" id="resetBtn">🌿 Сбросить · начало</button>
+                <button class="btn btn-primary" id="randomBtn">Случайный</button>
+                <button class="btn" id="autoLiveBtn">🌀 Живая анимация (вкл)</button>
+                <button class="btn" id="saveBtn">📸 Сохранить</button>
+                <!-- Новая кнопка для возврата в дневник index.html -->
+                <a href="index.html" class="btn btn-diary" id="diaryBtn">Вернуться в дневник</a>
+            </div>
+
+            <div class="status-card">
+                Текущее состояние:
+                <div class="current-emotion" id="emotionLabel">Спокойствие (песочный)</div>
+                <div style="margin-top: 6px;">🌸 Все для тебя</div>
+                <div style="font-size: 0.65rem; margin-top: 5px;">Ну я не знал что еще придумать</div>
+            </div>
+        </div>
+    </div>
+    <footer>копирайтер запрещен PS: Кроме Кати</footer>
+</div>
+
+<script>
+    (function(){
+        // ---------- БОТАНИЧЕСКАЯ ХРИЗАНТЕМА: РЕАЛИСТИЧНЫЕ ЛЕПЕСТКИ ----------
+        const canvas = document.getElementById('chrysanthemumCanvas');
+        const ctx = canvas.getContext('2d');
+        let w = 800, h = 800;
+        canvas.width = w;
+        canvas.height = h;
+
+        let regions = [];
+        let currentEmotionId = 0;
+        let autoAnimationInterval = null;   // для хранения интервала живой мандалы
+
+        // ----- 15 медитативных цветов (расширенная палитра) -----
+        const emotions = [
+            { name: "Спокойствие", color: "#F3E5C7", label: "песочный" },
+            { name: "Нежность", color: "#FADADD", label: "розовый" },
+            { name: "Мудрость", color: "#C9E4DE", label: "мята" },
+            { name: "Вдохновение", color: "#F6E0B5", label: "янтарь" },
+            { name: "Гармония", color: "#D8D3B6", label: "оливковый" },
+            { name: "Благодарность", color: "#E5D3B3", label: "кремовый" },
+            { name: "Осознанность", color: "#C7B9A2", label: "кашемир" },
+            { name: "Радость", color: "#F4C9B0", label: "персик" },
+            { name: "Прощение", color: "#C7D3C1", label: "шалфей" },
+            { name: "Тишина", color: "#B9C5C0", label: "жемчуг" },
+            { name: "Любовь", color: "#F5C6CB", label: "коралл" },
+            { name: "Свет", color: "#FFF1B5", label: "лимонный" },
+            { name: "Сосредоточенность", color: "#B4CFC3", label: "зеленый чай" },
+            { name: "Равновесие", color: "#E1CBAF", label: "миндаль" },
+            { name: "Безмятежность", color: "#D9CDE8", label: "лаванда" }
+        ];
+
+        // Реалистичный лепесток хризантемы (удлинённый язычок)
+        function createRealisticPetal(cx, cy, startRadius, endRadius, angleStart, angleEnd, isOuter = true) {
+            const midAngle = (angleStart + angleEnd) / 2;
+            const baseInner = startRadius;
+            const angleOffset = (angleEnd - angleStart) * 0.35;
+            
+            const baseLeftAngle = angleStart + angleOffset * 0.5;
+            const baseRightAngle = angleEnd - angleOffset * 0.5;
+            const p1x = cx + baseInner * Math.cos(baseLeftAngle);
+            const p1y = cy + baseInner * Math.sin(baseLeftAngle);
+            const p2x = cx + baseInner * Math.cos(baseRightAngle);
+            const p2y = cy + baseInner * Math.sin(baseRightAngle);
+            
+            const tipX = cx + (endRadius + (isOuter ? 6 : 3)) * Math.cos(midAngle);
+            const tipY = cy + (endRadius + (isOuter ? 6 : 3)) * Math.sin(midAngle);
+            
+            const ctrlOutLeftX = cx + (endRadius * 0.82) * Math.cos(midAngle - 0.22);
+            const ctrlOutLeftY = cy + (endRadius * 0.82) * Math.sin(midAngle - 0.22);
+            const ctrlOutRightX = cx + (endRadius * 0.82) * Math.cos(midAngle + 0.22);
+            const ctrlOutRightY = cy + (endRadius * 0.82) * Math.sin(midAngle + 0.22);
+            
+            const path = new Path2D();
+            path.moveTo(p1x, p1y);
+            path.quadraticCurveTo(ctrlOutLeftX, ctrlOutLeftY, tipX, tipY);
+            path.quadraticCurveTo(ctrlOutRightX, ctrlOutRightY, p2x, p2y);
+            const midBaseX = cx + (baseInner - 5) * Math.cos(midAngle);
+            const midBaseY = cy + (baseInner - 5) * Math.sin(midAngle);
+            path.lineTo(midBaseX, midBaseY);
+            path.closePath();
+            return path;
+        }
+        
+        function buildBotanicalChrysanthemum() {
+            const paths = [];
+            const cx = w/2, cy = h/2;
+            const maxR = w/2 - 28;
+            
+            // внешний ряд (24 длинных)
+            const outerStart = maxR * 0.54;
+            const outerEnd = maxR;
+            const outerCount = 24;
+            for (let i = 0; i < outerCount; i++) {
+                const angleStart = (i / outerCount) * Math.PI * 2;
+                const angleEnd = ((i+1) / outerCount) * Math.PI * 2;
+                const path = createRealisticPetal(cx, cy, outerStart, outerEnd, angleStart, angleEnd, true);
+                paths.push({ path, emotionId: 0, color: emotions[0].color, index: paths.length, layer: "внешний" });
+            }
+            
+            // средний ряд (20 лепестков)
+            const midStart = maxR * 0.38;
+            const midEnd = maxR * 0.72;
+            const midCount = 20;
+            const midOffset = (Math.PI * 2) / (midCount * 2.2);
+            for (let i = 0; i < midCount; i++) {
+                const angleStart = (i / midCount) * Math.PI * 2 + midOffset;
+                const angleEnd = ((i+1) / midCount) * Math.PI * 2 + midOffset;
+                const path = createRealisticPetal(cx, cy, midStart, midEnd, angleStart, angleEnd, false);
+                paths.push({ path, emotionId: 0, color: emotions[0].color, index: paths.length, layer: "средний" });
+            }
+            
+            // внутренний ряд (16 коротких)
+            const innerStart = maxR * 0.24;
+            const innerEnd = maxR * 0.48;
+            const innerCount = 16;
+            const innerOffset = (Math.PI * 2) / (innerCount * 2.8);
+            for (let i = 0; i < innerCount; i++) {
+                const angleStart = (i / innerCount) * Math.PI * 2 + innerOffset;
+                const angleEnd = ((i+1) / innerCount) * Math.PI * 2 + innerOffset;
+                const path = createRealisticPetal(cx, cy, innerStart, innerEnd, angleStart, angleEnd, false);
+                paths.push({ path, emotionId: 0, color: emotions[0].color, index: paths.length, layer: "внутренний" });
+            }
+            
+            // центральная корзинка + ядро (две зоны)
+            const centerCore = new Path2D();
+            const coreR = maxR * 0.19;
+            centerCore.arc(cx, cy, coreR, 0, Math.PI * 2);
+            paths.push({ path: centerCore, emotionId: 0, color: emotions[0].color, index: paths.length, layer: "сердцевина" });
+            
+            const innerCore = new Path2D();
+            innerCore.arc(cx, cy, coreR * 0.55, 0, Math.PI * 2);
+            paths.push({ path: innerCore, emotionId: 0, color: emotions[0].color, index: paths.length, layer: "ядро" });
+            
+            return paths;
+        }
+        
+        // отрисовка с текстурой и прожилками
+        function drawFullFlower() {
+            if (!ctx) return;
+            ctx.clearRect(0, 0, w, h);
+            ctx.fillStyle = "#FFF8EE";
+            ctx.fillRect(0, 0, w, h);
+            
+            for (let reg of regions) {
+                ctx.fillStyle = reg.color;
+                ctx.fill(reg.path);
+                ctx.strokeStyle = "#b78f5a";
+                ctx.lineWidth = 1.2;
+                ctx.stroke(reg.path);
+            }
+            
+            // декоративные прожилки
+            ctx.save();
+            ctx.globalAlpha = 0.45;
+            ctx.beginPath();
+            ctx.lineWidth = 0.7;
+            ctx.strokeStyle = "#a07345";
+            const cx = w/2, cy = w/2;
+            const maxRad = w/2 - 28;
+            for (let ang = 0; ang < 360; ang += 6) {
+                const rad = ang * Math.PI/180;
+                const startR = maxRad * 0.45;
+                const endR = maxRad * 0.92;
+                const x1 = cx + startR * Math.cos(rad);
+                const y1 = cy + startR * Math.sin(rad);
+                const x2 = cx + endR * Math.cos(rad);
+                const y2 = cy + endR * Math.sin(rad);
+                ctx.beginPath();
+                ctx.moveTo(x1, y1);
+                ctx.lineTo(x2, y2);
+                ctx.stroke();
+            }
+            ctx.fillStyle = "#ebce92";
+            for (let i=0;i<120;i++) {
+                const r = 22 + Math.random() * 65;
+                const a = Math.random() * Math.PI*2;
+                const x = cx + r * Math.cos(a);
+                const y = cy + r * Math.sin(a);
+                ctx.beginPath();
+                ctx.arc(x, y, 1.3, 0, Math.PI*2);
+                ctx.fill();
+            }
+            ctx.restore();
+            
+            // центральная мандала
+            ctx.beginPath();
+            ctx.arc(cx, cy, 38, 0, 2*Math.PI);
+            ctx.fillStyle = "#eedfbe";
+            ctx.fill();
+            ctx.strokeStyle = "#c39454";
+            ctx.lineWidth = 1.6;
+            ctx.stroke();
+            for (let i=0;i<16;i++) {
+                const angle = (i/16)*Math.PI*2;
+                const r1 = 22, r2 = 52;
+                const x1 = cx + r1*Math.cos(angle);
+                const y1 = cy + r1*Math.sin(angle);
+                const x2 = cx + r2*Math.cos(angle);
+                const y2 = cy + r2*Math.sin(angle);
+                ctx.beginPath();
+                ctx.moveTo(x1, y1);
+                ctx.lineTo(x2, y2);
+                ctx.stroke();
+            }
+        }
+        
+        function getRegionAt(x, y) {
+            for (let i = 0; i < regions.length; i++) {
+                if (ctx.isPointInPath(regions[i].path, x, y)) return i;
+            }
+            return -1;
+        }
+        
+        function paintRegion(index, emotionIdx) {
+            if (index === -1) return;
+            const emotion = emotions[emotionIdx];
+            if (!emotion) return;
+            regions[index].emotionId = emotionIdx;
+            regions[index].color = emotion.color;
+            drawFullFlower();
+        }
+        
+        // ----- Функции для «Живой мандалы» (непрерывная смена без паузы) -----
+        function randomColorStep() {
+            if (!regions.length) return;
+            // Выбираем случайное количество лепестков (от 2 до 12) для плавного перетекания
+            const changesCount = Math.floor(Math.random() * 12) + 2;
+            for (let i = 0; i < changesCount; i++) {
+                const randomIndex = Math.floor(Math.random() * regions.length);
+                const randomEmotion = Math.floor(Math.random() * emotions.length);
+                regions[randomIndex].emotionId = randomEmotion;
+                regions[randomIndex].color = emotions[randomEmotion].color;
+            }
+            drawFullFlower();
+        }
+        
+        function startAutoMeditation() {
+            if (autoAnimationInterval) return; // уже запущено
+            autoAnimationInterval = setInterval(() => {
+                randomColorStep();
+            }, 220); // каждые 220 мс — быстрая плавная смена, но без тормозов
+        }
+        
+        function stopAutoMeditation() {
+            if (autoAnimationInterval) {
+                clearInterval(autoAnimationInterval);
+                autoAnimationInterval = null;
+            }
+        }
+        
+        function toggleAutoMeditation(buttonElement) {
+            if (autoAnimationInterval) {
+                stopAutoMeditation();
+                buttonElement.textContent = "🌀 Живая анимация (вкл)";
+                buttonElement.classList.remove("btn-auto-active");
+            } else {
+                startAutoMeditation();
+                buttonElement.textContent = "⏸ Живая анимация(выкл)";
+                buttonElement.classList.add("btn-auto-active");
+            }
+        }
+        
+        // Сброс: очищаем авто-режим, возвращаем все цвета к спокойствию
+        function resetAll() {
+            if (autoAnimationInterval) {
+                // если активна авто-мандала, останавливаем и меняем текст кнопки
+                const autoBtn = document.getElementById('autoLiveBtn');
+                if (autoBtn) {
+                    stopAutoMeditation();
+                    autoBtn.textContent = "🌀 Живая анимация (вкл)";
+                    autoBtn.classList.remove("btn-auto-active");
+                } else {
+                    stopAutoMeditation();
+                }
+            }
+            for (let i = 0; i < regions.length; i++) {
+                regions[i].emotionId = 0;
+                regions[i].color = emotions[0].color;
+            }
+            drawFullFlower();
+        }
+        
+        // Одноразовая спонтанность + остановка авто-режима, чтобы не было конфликта
+        function randomMeditative() {
+            if (autoAnimationInterval) {
+                const autoBtn = document.getElementById('autoLiveBtn');
+                if (autoBtn) {
+                    stopAutoMeditation();
+                    autoBtn.textContent = "🌀 Живая анимация (вкл)";
+                    autoBtn.classList.remove("btn-auto-active");
+                } else {
+                    stopAutoMeditation();
+                }
+            }
+            for (let i = 0; i < regions.length; i++) {
+                if (Math.random() < 0.55) {
+                    const randEmo = Math.floor(Math.random() * emotions.length);
+                    regions[i].emotionId = randEmo;
+                    regions[i].color = emotions[randEmo].color;
+                }
+            }
+            drawFullFlower();
+        }
+        
+        function saveAsImage() {
+            const link = document.createElement('a');
+            link.download = 'living_chrysanthemum.png';
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+        }
+        
+        // Палитра UI
+        function buildPaletteUI() {
+            const container = document.getElementById('colorPalette');
+            container.innerHTML = '';
+            emotions.forEach((em, idx) => {
+                const swatch = document.createElement('div');
+                swatch.className = 'color-swatch';
+                swatch.style.backgroundColor = em.color;
+                swatch.title = `${em.name} · ${em.label}`;
+                swatch.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    currentEmotionId = idx;
+                    document.querySelectorAll('.color-swatch').forEach(el => el.classList.remove('active'));
+                    swatch.classList.add('active');
+                    document.getElementById('emotionLabel').innerHTML = `${em.name} (${em.label})`;
+                });
+                container.appendChild(swatch);
+            });
+            document.querySelectorAll('.color-swatch')[0].classList.add('active');
+            document.getElementById('emotionLabel').innerHTML = `${emotions[0].name} (${emotions[0].label})`;
+            currentEmotionId = 0;
+        }
+        
+        // Обработчик кликов/касаний по canvas
+        function handleCanvasInteraction(e) {
+            e.preventDefault();
+            const rect = canvas.getBoundingClientRect();
+            const scaleX = canvas.width / rect.width;
+            const scaleY = canvas.height / rect.height;
+            let clientX, clientY;
+            if (e.touches) {
+                clientX = e.touches[0].clientX;
+                clientY = e.touches[0].clientY;
+            } else {
+                clientX = e.clientX;
+                clientY = e.clientY;
+            }
+            let mouseX = (clientX - rect.left) * scaleX;
+            let mouseY = (clientY - rect.top) * scaleY;
+            mouseX = Math.min(Math.max(0, mouseX), w);
+            mouseY = Math.min(Math.max(0, mouseY), h);
+            const regionIdx = getRegionAt(mouseX, mouseY);
+            if (regionIdx !== -1) {
+                paintRegion(regionIdx, currentEmotionId);
+                canvas.style.transform = "scale(0.98)";
+                setTimeout(() => { canvas.style.transform = ""; }, 120);
+            } else {
+                canvas.style.opacity = "0.95";
+                setTimeout(() => canvas.style.opacity = "1", 100);
+            }
+        }
+        
+        function init() {
+            regions = buildBotanicalChrysanthemum();
+            buildPaletteUI();
+            drawFullFlower();
+            
+            canvas.addEventListener('click', handleCanvasInteraction);
+            canvas.addEventListener('touchstart', handleCanvasInteraction, { passive: false });
+            
+            document.getElementById('resetBtn').addEventListener('click', resetAll);
+            document.getElementById('randomBtn').addEventListener('click', randomMeditative);
+            document.getElementById('saveBtn').addEventListener('click', saveAsImage);
+            
+            const autoBtn = document.getElementById('autoLiveBtn');
+            autoBtn.addEventListener('click', () => toggleAutoMeditation(autoBtn));
+            
+            window.addEventListener('resize', () => drawFullFlower());
+        }
+        
+        init();
+    })();
+</script>
+</body>
+</html>
