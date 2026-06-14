@@ -1,0 +1,904 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Наш рисунок</title>
+    <link rel="icon" type="image/png" href="films/ficon.png">
+
+    <link href="https://fonts.googleapis.com/css2?family=Pangolin&family=Comic+Neue:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body,
+        html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #ffde59;
+            background-image: radial-gradient(#ffbd59 20%, transparent 20%);
+            background-size: 30px 30px;
+            font-family: 'Comic Neue', cursive;
+            overflow: hidden;
+            position: fixed;
+        }
+
+        h1 {
+            position: absolute;
+            top: 10px;
+            left: 0;
+            width: 100%;
+            font-family: 'Pangolin', cursive;
+            color: #333;
+            text-shadow: 2px 2px 0px #fff;
+            text-align: center;
+            z-index: 100;
+            pointer-events: none;
+            margin: 0;
+            font-size: 1.2rem;
+        }
+
+        .scale-indicator-badge {
+            position: fixed;
+            top: 60px;
+            right: 15px;
+            width: 50px;
+            height: 50px;
+            background: #fffdf0;
+            border: 3px solid #333;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Pangolin', cursive;
+            font-size: 14px;
+            font-weight: bold;
+            color: #333;
+            box-shadow: 0 3px 0px #333;
+            z-index: 700;
+            pointer-events: none;
+        }
+
+        #viewport {
+            width: 100vw;
+            height: 100vh;
+            position: relative;
+            cursor: grab;
+            touch-action: none;
+            overflow: hidden;
+        }
+
+        #viewport:active {
+            cursor: grabbing;
+        }
+
+        #main-canvas {
+            position: absolute;
+            width: 2000px;
+            height: 2000px;
+            background-color: #fffdf0;
+            background-image: linear-gradient(#f0edce 1px, transparent 1px), linear-gradient(90deg, #f0edce 1px, transparent 1px);
+            background-size: 50px 50px;
+            box-shadow: 0 0 50px rgba(0, 0, 0, 0.2);
+            left: 0;
+            top: 0;
+            transform-origin: 0 0;
+            will-change: transform;
+        }
+
+        .canvas-item {
+            position: absolute;
+            transform: translate(-50%, -50%);
+            pointer-events: none;
+            border-radius: 12px;
+            filter: drop-shadow(2px 4px 6px rgba(0, 0, 0, 0.2));
+        }
+
+        .controls-panel {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 8px;
+            z-index: 500;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 6px 12px;
+            border-radius: 40px;
+            border: 3px solid #333;
+            box-shadow: 0 5px 0px #333;
+            backdrop-filter: blur(4px);
+        }
+
+        .btn-action {
+            background: #76e150;
+            border: none;
+            border-radius: 40px;
+            padding: 8px 16px;
+            font-size: 16px;
+            font-weight: bold;
+            color: white;
+            cursor: pointer;
+            font-family: 'Pangolin', cursive;
+            transition: 0.05s linear;
+            box-shadow: 0 3px 0px #2c5a1a;
+            touch-action: manipulation;
+        }
+
+        .btn-action:active {
+            transform: translateY(2px);
+            box-shadow: 0 1px 0px #2c5a1a;
+        }
+
+        .btn-icon {
+            padding: 8px 14px;
+            background: #57b9ff;
+            box-shadow: 0 3px 0px #2a6d9e;
+        }
+
+        .btn-download {
+            background: #ffaa33;
+            box-shadow: 0 3px 0px #b4621a;
+        }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 3000;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            backdrop-filter: blur(8px);
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: #fffdf0;
+            border: 6px solid #333;
+            border-radius: 28px;
+            padding: 12px;
+            width: 96%;
+            max-width: 550px;
+            max-height: 90vh;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 20px 30px rgba(0, 0, 0, 0.3);
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .modal-header h2 {
+            margin: 0;
+            font-family: 'Pangolin', cursive;
+            font-size: 1.3rem;
+        }
+
+        .draw-tools {
+            display: flex;
+            gap: 6px;
+            align-items: center;
+            background: #ffe3a3;
+            padding: 4px 10px;
+            border-radius: 40px;
+        }
+
+        .tools-panel {
+            background: #ffe3a3;
+            border-radius: 30px;
+            padding: 6px 10px;
+            margin-top: 6px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .color-palette {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .color-swatch {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            border: 2px solid white;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            cursor: pointer;
+        }
+
+        .tool-btn {
+            background: white;
+            border: none;
+            border-radius: 30px;
+            padding: 4px 10px;
+            font-family: 'Pangolin', cursive;
+            font-weight: bold;
+            font-size: 12px;
+            box-shadow: 0 2px 0px #aaa;
+            cursor: pointer;
+        }
+
+        .tool-btn.active {
+            background: #57b9ff;
+            color: white;
+            transform: translateY(1px);
+            box-shadow: none;
+        }
+
+        .brush-size-control {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            background: white;
+            padding: 2px 10px;
+            border-radius: 40px;
+        }
+
+        #brush-size-value {
+            font-weight: bold;
+            min-width: 30px;
+            text-align: center;
+            font-size: 12px;
+        }
+
+        input[type="range"] {
+            width: 80px;
+        }
+
+        .draw-wrapper {
+            width: 100%;
+            height: 45vh;
+            max-height: 380px;
+            overflow: hidden;
+            border-radius: 20px;
+            background: #ffffff;
+            border: 3px solid #aaa;
+            position: relative;
+            touch-action: none;
+            margin-top: 6px;
+        }
+
+        #drawing-container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background: #fef6e0;
+        }
+
+        #drawing-board {
+            position: absolute;
+            top: 0;
+            left: 0;
+            transform-origin: 0 0;
+            will-change: transform;
+            background: white;
+            box-shadow: 0 0 0 2px #ccc;
+            cursor: crosshair;
+        }
+
+        .modal-footer {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 12px;
+            gap: 10px;
+        }
+
+        .modal-footer .btn-action {
+            flex: 1;
+            text-align: center;
+            font-size: 16px;
+            padding: 8px;
+        }
+
+        #placement-ui {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            pointer-events: none;
+            z-index: 600;
+        }
+
+        #target-ghost {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 140px;
+            height: 140px;
+            transform: translate(-50%, -50%);
+            opacity: 0.85;
+            filter: drop-shadow(0 8px 15px rgba(0, 0, 0, 0.3));
+            pointer-events: none;
+            border-radius: 16px;
+        }
+
+        .crosshair {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 60px;
+            height: 60px;
+            transform: translate(-50%, -50%);
+            border: 3px dashed #ff5757;
+            border-radius: 50%;
+            pointer-events: none;
+            box-shadow: 0 0 0 2px white;
+        }
+
+        .placement-controls {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            pointer-events: auto;
+            width: 90%;
+            max-width: 350px;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(12px);
+            padding: 10px 15px;
+            border-radius: 50px;
+            border: 2px solid white;
+        }
+
+        .placement-zoom-row {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+        }
+
+        #confirm-placement-btn {
+            background: #ff5757;
+            font-size: 20px;
+            padding: 10px 20px;
+            width: 100%;
+            box-shadow: 0 4px 0px #962020;
+        }
+
+        @media (max-height: 600px) {
+            .draw-wrapper { height: 35vh; max-height: 280px; }
+            .tools-panel { padding: 4px 8px; gap: 4px; }
+            .color-swatch { width: 28px; height: 28px; }
+            .tool-btn { font-size: 10px; padding: 3px 8px; }
+            .modal-header h2 { font-size: 1.1rem; }
+        }
+    </style>
+</head>
+
+<body>
+
+<h1>🎨 Наша Картина 🖌️</h1>
+<div id="scale-indicator" class="scale-indicator-badge">100%</div>
+
+<div id="viewport">
+    <div id="main-canvas"></div>
+</div>
+
+<div class="controls-panel" id="main-controls">
+    <button class="btn-action btn-icon main-zoom-out">➖</button>
+    <button class="btn-action" id="open-draw-btn">✏️ Нарисовать</button>
+    <button class="btn-action btn-icon main-zoom-in">➕</button>
+    <button class="btn-action btn-download" id="download-canvas-btn">📸 Скачать</button>
+</div>
+
+<div id="placement-ui">
+    <div class="crosshair"></div>
+    <img id="target-ghost" src="" alt="призрак">
+    <div class="placement-controls">
+        <div class="placement-zoom-row">
+            <button class="btn-action btn-icon main-zoom-out" style="background: #57b9ff;">➖</button>
+            <button class="btn-action btn-icon main-zoom-in" style="background: #57b9ff;">➕</button>
+        </div>
+        <button class="btn-action" id="confirm-placement-btn">✅ ПОСТАВИТЬ СЮДА</button>
+        <button class="btn-action" id="cancel-placement-btn" style="background: #ff5757; margin-top: 8px;">❌ ОТМЕНИТЬ</button>
+    </div>
+</div>
+
+<div class="modal-overlay" id="draw-modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>Твори! ✨</h2>
+            <div class="draw-tools">
+                <button class="btn-action btn-icon" style="padding: 4px 10px;" id="draw-zoom-out">➖</button>
+                <span id="draw-scale-indicator">100%</span>
+                <button class="btn-action btn-icon" style="padding: 4px 10px;" id="draw-zoom-in">➕</button>
+                <button class="mode-switch" id="toggle-pan-mode">✋ Панорам.</button>
+            </div>
+        </div>
+
+        <div class="tools-panel">
+            <div class="color-palette" id="color-palette"></div>
+            <div style="display: flex; gap: 6px;">
+                <button class="tool-btn" id="tool-brush">🖌️ Кисть</button>
+                <button class="tool-btn" id="tool-eraser">🧽 Ластик</button>
+                <button class="tool-btn" id="tool-rainbow">🌈 Радуга</button>
+            </div>
+            <div class="brush-size-control">
+                <span>✏️</span>
+                <input type="range" id="brush-size" min="3" max="50" value="14" step="1">
+                <span id="brush-size-value">14</span>
+            </div>
+            <button class="tool-btn" id="clear-drawing" style="background:#ffaa33;">🗑️ Очистить</button>
+        </div>
+
+        <div class="draw-wrapper">
+            <div id="drawing-container">
+                <canvas id="drawing-board" width="1200" height="1200"></canvas>
+            </div>
+        </div>
+
+        <div class="modal-footer">
+            <button class="btn-action" style="background: #ff5757;" id="close-modal-btn">Отмена</button>
+            <button class="btn-action" id="save-btn">Готово!</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // ==========================================
+    // 1. ГЛАВНЫЙ ХОЛСТ: ДРАГ + ПИНЧ ЗУМ
+    // ==========================================
+    const viewport = document.getElementById('viewport');
+    const mainCanvasDiv = document.getElementById('main-canvas');
+    const scaleIndicator = document.getElementById('scale-indicator');
+
+    let canvasX = (window.innerWidth - 2000) / 2;
+    let canvasY = (window.innerHeight - 2000) / 2;
+    let mainScale = 1;
+
+    let isDragging = false;
+    let dragStartX, dragStartY;
+    let initialPinchDistance = 0;
+    let initialMainScale = 1;
+    let initialCanvasX = 0, initialCanvasY = 0;
+
+    function updateMainCanvas() {
+        mainCanvasDiv.style.transform = `translate(${canvasX}px, ${canvasY}px) scale(${mainScale})`;
+        scaleIndicator.innerText = Math.round(mainScale * 100) + '%';
+    }
+    updateMainCanvas();
+
+    function zoomAtPoint(deltaScale, clientX, clientY) {
+        const oldScale = mainScale;
+        let newScale = mainScale + deltaScale;
+        newScale = Math.min(Math.max(0.3, newScale), 3);
+        if (newScale === mainScale) return;
+        const cx = clientX ?? window.innerWidth / 2;
+        const cy = clientY ?? window.innerHeight / 2;
+        canvasX = cx - (cx - canvasX) * (newScale / oldScale);
+        canvasY = cy - (cy - canvasY) * (newScale / oldScale);
+        mainScale = newScale;
+        updateMainCanvas();
+    }
+
+    document.querySelectorAll('.main-zoom-in').forEach(btn => btn.onclick = (e) => { e.stopPropagation(); zoomAtPoint(0.2); });
+    document.querySelectorAll('.main-zoom-out').forEach(btn => btn.onclick = (e) => { e.stopPropagation(); zoomAtPoint(-0.2); });
+
+    viewport.addEventListener('pointerdown', (e) => {
+        if (e.button === 0) {
+            isDragging = true;
+            dragStartX = e.clientX - canvasX;
+            dragStartY = e.clientY - canvasY;
+            viewport.setPointerCapture(e.pointerId);
+        }
+    });
+    viewport.addEventListener('pointermove', (e) => {
+        if (!isDragging) return;
+        canvasX = e.clientX - dragStartX;
+        canvasY = e.clientY - dragStartY;
+        updateMainCanvas();
+    });
+    viewport.addEventListener('pointerup', () => isDragging = false);
+
+    viewport.addEventListener('touchstart', (e) => {
+        if (e.touches.length === 2) {
+            e.preventDefault();
+            const t1 = e.touches[0], t2 = e.touches[1];
+            const dx = t1.clientX - t2.clientX, dy = t1.clientY - t2.clientY;
+            initialPinchDistance = Math.hypot(dx, dy);
+            initialMainScale = mainScale;
+            initialCanvasX = canvasX;
+            initialCanvasY = canvasY;
+        }
+    });
+    viewport.addEventListener('touchmove', (e) => {
+        if (e.touches.length === 2 && initialPinchDistance > 0) {
+            e.preventDefault();
+            const t1 = e.touches[0], t2 = e.touches[1];
+            const dx = t1.clientX - t2.clientX, dy = t1.clientY - t2.clientY;
+            const newDist = Math.hypot(dx, dy);
+            if (newDist === 0) return;
+            const scaleFactor = newDist / initialPinchDistance;
+            let newScale = initialMainScale * scaleFactor;
+            newScale = Math.min(Math.max(0.3, newScale), 3);
+            const centerX = (t1.clientX + t2.clientX) / 2;
+            const centerY = (t1.clientY + t2.clientY) / 2;
+            canvasX = centerX - (centerX - initialCanvasX) * (newScale / initialMainScale);
+            canvasY = centerY - (centerY - initialCanvasY) * (newScale / initialMainScale);
+            mainScale = newScale;
+            updateMainCanvas();
+        }
+    });
+    viewport.addEventListener('touchend', () => { initialPinchDistance = 0; });
+
+    // ==========================================
+    // 2. МОДАЛЬНОЕ ОКНО: РИСОВАНИЕ, ПАЛИТРА, ИНСТРУМЕНТЫ
+    // ==========================================
+    const drawModal = document.getElementById('draw-modal');
+    const drawingCanvas = document.getElementById('drawing-board');
+    const drawContainer = document.getElementById('drawing-container');
+    const drawScaleSpan = document.getElementById('draw-scale-indicator');
+    const ctx = drawingCanvas.getContext('2d');
+
+    let currentColor = '#2c3e66';
+    let currentTool = 'brush';
+    let brushSize = 14;
+    let rainbowHue = 0;
+
+    let drawScale = 1;
+    let drawPanX = 0, drawPanY = 0;
+    let isPanningMode = false;
+    let isPanningActive = false;
+    let lastPanX = 0, lastPanY = 0;
+    let modalPinchDistance = 0;
+    let modalInitialScale = 1, modalInitialPanX = 0, modalInitialPanY = 0;
+    let isDrawing = false;
+
+    function updateDrawTransform() {
+        drawingCanvas.style.transform = `translate(${drawPanX}px, ${drawPanY}px) scale(${drawScale})`;
+        drawScaleSpan.innerText = Math.round(drawScale * 100) + '%';
+    }
+    function resetDrawView() { drawScale = 1; drawPanX = 0; drawPanY = 0; updateDrawTransform(); }
+    function zoomDraw(delta, clientX, clientY) {
+        let newScale = drawScale + delta;
+        newScale = Math.min(Math.max(0.5, newScale), 4);
+        if (newScale === drawScale) return;
+        const rect = drawContainer.getBoundingClientRect();
+        const centerX = clientX !== undefined ? clientX - rect.left : rect.width / 2;
+        const centerY = clientY !== undefined ? clientY - rect.top : rect.height / 2;
+        drawPanX = centerX - (centerX - drawPanX) * (newScale / drawScale);
+        drawPanY = centerY - (centerY - drawPanY) * (newScale / drawScale);
+        drawScale = newScale;
+        updateDrawTransform();
+    }
+    document.getElementById('draw-zoom-in').onclick = () => zoomDraw(0.2);
+    document.getElementById('draw-zoom-out').onclick = () => zoomDraw(-0.2);
+
+    const toggleBtn = document.getElementById('toggle-pan-mode');
+    toggleBtn.onclick = () => {
+        isPanningMode = !isPanningMode;
+        toggleBtn.textContent = isPanningMode ? "✏️ Рисов." : "✋ Панорам.";
+        toggleBtn.style.background = isPanningMode ? "#3a86ff" : "#f5a623";
+    };
+
+    function getCanvasCoords(e) {
+        const rect = drawContainer.getBoundingClientRect();
+        let clientX, clientY;
+        if (e.touches) { clientX = e.touches[0].clientX; clientY = e.touches[0].clientY; }
+        else { clientX = e.clientX; clientY = e.clientY; }
+        const containerX = clientX - rect.left;
+        const containerY = clientY - rect.top;
+        const canvasX = (containerX - drawPanX) / drawScale;
+        const canvasY = (containerY - drawPanY) / drawScale;
+        return { x: Math.max(0, Math.min(drawingCanvas.width, canvasX)), y: Math.max(0, Math.min(drawingCanvas.height, canvasY)) };
+    }
+
+    function applyBrushSettings() {
+        ctx.globalCompositeOperation = 'source-over';
+        if (currentTool === 'eraser') {
+            ctx.strokeStyle = '#ffffff';
+            ctx.globalCompositeOperation = 'destination-out';
+        } else if (currentTool === 'rainbow') {
+            // цвет динамический
+        } else {
+            ctx.strokeStyle = currentColor;
+        }
+        ctx.lineWidth = brushSize;
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
+    }
+
+    function startDraw(e) {
+        if (isPanningMode) return;
+        e.preventDefault();
+        isDrawing = true;
+        applyBrushSettings();
+        const pos = getCanvasCoords(e);
+        ctx.beginPath();
+        ctx.moveTo(pos.x, pos.y);
+        draw(e);
+    }
+    function draw(e) {
+        if (!isDrawing || isPanningMode) return;
+        e.preventDefault();
+        if (currentTool === 'rainbow') {
+            ctx.strokeStyle = `hsl(${rainbowHue}, 100%, 55%)`;
+            rainbowHue = (rainbowHue + 5) % 360;
+        }
+        const pos = getCanvasCoords(e);
+        ctx.lineTo(pos.x, pos.y);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(pos.x, pos.y);
+    }
+    function stopDraw() { isDrawing = false; ctx.beginPath(); }
+
+    function startPan(e) {
+        if (!isPanningMode) return;
+        e.preventDefault();
+        isPanningActive = true;
+        const point = e.touches ? e.touches[0] : e;
+        lastPanX = point.clientX; lastPanY = point.clientY;
+    }
+    function doPan(e) {
+        if (!isPanningActive || !isPanningMode) return;
+        e.preventDefault();
+        const point = e.touches ? e.touches[0] : e;
+        const dx = point.clientX - lastPanX, dy = point.clientY - lastPanY;
+        if (dx !== 0 || dy !== 0) {
+            drawPanX += dx; drawPanY += dy;
+            updateDrawTransform();
+        }
+        lastPanX = point.clientX; lastPanY = point.clientY;
+    }
+    function endPan() { isPanningActive = false; }
+
+    function handleModalPinchStart(e) {
+        if (e.touches.length !== 2) return;
+        e.preventDefault();
+        const t1 = e.touches[0], t2 = e.touches[1];
+        const dx = t1.clientX - t2.clientX, dy = t1.clientY - t2.clientY;
+        modalPinchDistance = Math.hypot(dx, dy);
+        modalInitialScale = drawScale;
+        modalInitialPanX = drawPanX;
+        modalInitialPanY = drawPanY;
+    }
+    function handleModalPinchMove(e) {
+        if (e.touches.length !== 2 || modalPinchDistance === 0) return;
+        e.preventDefault();
+        const t1 = e.touches[0], t2 = e.touches[1];
+        const dx = t1.clientX - t2.clientX, dy = t1.clientY - t2.clientY;
+        const newDist = Math.hypot(dx, dy);
+        if (newDist === 0) return;
+        const scaleFactor = newDist / modalPinchDistance;
+        let newScale = modalInitialScale * scaleFactor;
+        newScale = Math.min(Math.max(0.5, newScale), 4);
+        if (newScale === drawScale) return;
+        const rect = drawContainer.getBoundingClientRect();
+        const centerX = (t1.clientX + t2.clientX) / 2 - rect.left;
+        const centerY = (t1.clientY + t2.clientY) / 2 - rect.top;
+        drawPanX = centerX - (centerX - modalInitialPanX) * (newScale / modalInitialScale);
+        drawPanY = centerY - (centerY - modalInitialPanY) * (newScale / modalInitialScale);
+        drawScale = newScale;
+        updateDrawTransform();
+    }
+    function resetModalPinch() { modalPinchDistance = 0; }
+
+    const drawContainerElem = drawContainer;
+    drawContainerElem.addEventListener('mousedown', (e) => { if (isPanningMode) startPan(e); else startDraw(e); });
+    window.addEventListener('mousemove', (e) => { if (isPanningMode && isPanningActive) doPan(e); else if (!isPanningMode && isDrawing) draw(e); });
+    window.addEventListener('mouseup', () => { if (isPanningMode) endPan(); else stopDraw(); });
+
+    drawContainerElem.addEventListener('touchstart', (e) => {
+        if (e.touches.length === 2) { handleModalPinchStart(e); return; }
+        if (isPanningMode) startPan(e); else startDraw(e);
+    });
+    drawContainerElem.addEventListener('touchmove', (e) => {
+        if (e.touches.length === 2 && modalPinchDistance > 0) { handleModalPinchMove(e); return; }
+        if (isPanningMode && isPanningActive) doPan(e);
+        else if (!isPanningMode && isDrawing) draw(e);
+    });
+    drawContainerElem.addEventListener('touchend', () => { if (modalPinchDistance) resetModalPinch(); if (isPanningMode) endPan(); else stopDraw(); });
+
+    // Палитра цветов
+    const colorPaletteDiv = document.getElementById('color-palette');
+    const colors = ['#2c3e66', '#e63946', '#f4a261', '#2a9d8f', '#9c27b0', '#ff69b4', '#000000', '#ffffff'];
+    colors.forEach(col => {
+        const swatch = document.createElement('div');
+        swatch.className = 'color-swatch';
+        swatch.style.backgroundColor = col;
+        swatch.style.border = col === '#ffffff' ? '1px solid #ccc' : '2px solid white';
+        swatch.addEventListener('click', () => {
+            currentTool = 'brush';
+            document.getElementById('tool-brush').classList.add('active');
+            document.getElementById('tool-eraser').classList.remove('active');
+            document.getElementById('tool-rainbow').classList.remove('active');
+            currentColor = col;
+        });
+        colorPaletteDiv.appendChild(swatch);
+    });
+    const picker = document.createElement('input');
+    picker.type = 'color';
+    picker.value = '#2c3e66';
+    picker.style.width = '32px';
+    picker.style.height = '32px';
+    picker.style.borderRadius = '50%';
+    picker.style.border = '2px solid white';
+    picker.style.cursor = 'pointer';
+    picker.addEventListener('input', (e) => {
+        currentTool = 'brush';
+        document.getElementById('tool-brush').classList.add('active');
+        document.getElementById('tool-eraser').classList.remove('active');
+        document.getElementById('tool-rainbow').classList.remove('active');
+        currentColor = e.target.value;
+    });
+    colorPaletteDiv.appendChild(picker);
+
+    const brushBtn = document.getElementById('tool-brush');
+    const eraserBtn = document.getElementById('tool-eraser');
+    const rainbowBtn = document.getElementById('tool-rainbow');
+    brushBtn.addEventListener('click', () => { currentTool = 'brush'; brushBtn.classList.add('active'); eraserBtn.classList.remove('active'); rainbowBtn.classList.remove('active'); });
+    eraserBtn.addEventListener('click', () => { currentTool = 'eraser'; eraserBtn.classList.add('active'); brushBtn.classList.remove('active'); rainbowBtn.classList.remove('active'); });
+    rainbowBtn.addEventListener('click', () => { currentTool = 'rainbow'; rainbowBtn.classList.add('active'); brushBtn.classList.remove('active'); eraserBtn.classList.remove('active'); });
+    brushBtn.classList.add('active');
+
+    const brushSizeSlider = document.getElementById('brush-size');
+    const brushSizeValue = document.getElementById('brush-size-value');
+    brushSizeSlider.addEventListener('input', (e) => { brushSize = parseInt(e.target.value); brushSizeValue.innerText = brushSize; });
+
+    document.getElementById('clear-drawing').addEventListener('click', () => { ctx.clearRect(0, 0, drawingCanvas.width, drawingCanvas.height); });
+
+    document.getElementById('open-draw-btn').onclick = () => {
+        ctx.clearRect(0, 0, drawingCanvas.width, drawingCanvas.height);
+        ctx.beginPath();
+        resetDrawView();
+        isPanningMode = false;
+        toggleBtn.textContent = "✋ Панорам.";
+        toggleBtn.style.background = "#f5a623";
+        drawModal.classList.add('active');
+    };
+    document.getElementById('close-modal-btn').onclick = () => drawModal.classList.remove('active');
+
+    // ==========================================
+    // 3. РАЗМЕЩЕНИЕ РИСУНКА НА ГЛАВНЫЙ ХОЛСТ — ИСПРАВЛЕННОЕ (через реальный центр призрака)
+    // ==========================================
+    const placementUI = document.getElementById('placement-ui');
+    const targetGhost = document.getElementById('target-ghost');
+    const mainControls = document.getElementById('main-controls');
+    let currentDrawingData = null;
+
+    document.getElementById('save-btn').onclick = () => {
+        currentDrawingData = drawingCanvas.toDataURL('image/png');
+        targetGhost.src = currentDrawingData;
+        drawModal.classList.remove('active');
+        mainControls.style.display = 'none';
+        placementUI.style.display = 'block';
+    };
+
+    // Точное преобразование экранных координат в координаты на большом холсте (0..2000)
+    function screenToCanvasCoords(clientX, clientY) {
+        const xOnCanvas = (clientX - canvasX) / mainScale;
+        const yOnCanvas = (clientY - canvasY) / mainScale;
+        return {
+            x: Math.min(Math.max(xOnCanvas, 0), 2000),
+            y: Math.min(Math.max(yOnCanvas, 0), 2000)
+        };
+    }
+
+    document.getElementById('confirm-placement-btn').onclick = () => {
+        // Берём реальные координаты центра призрака (он позиционирован top:50%; left:50%)
+        const ghostRect = targetGhost.getBoundingClientRect();
+        const centerX = ghostRect.left + ghostRect.width / 2;
+        const centerY = ghostRect.top + ghostRect.height / 2;
+
+        // Переводим в координаты холста
+        const canvasCoords = screenToCanvasCoords(centerX, centerY);
+        let xOnCanvas = canvasCoords.x;
+        let yOnCanvas = canvasCoords.y;
+
+        // Дополнительная страховка (хотя функция уже ограничила)
+        xOnCanvas = Math.min(Math.max(xOnCanvas, 0), 2000);
+        yOnCanvas = Math.min(Math.max(yOnCanvas, 0), 2000);
+
+        const img = document.createElement('img');
+        img.src = currentDrawingData;
+        img.classList.add('canvas-item');
+
+        // Размер на холсте: сохраняем визуальный размер 140px (как у призрака) в экранных пикселях,
+        // затем пересчитываем в пиксели холста с учётом масштаба
+        let realSizeOnCanvas = 140 / mainScale;
+        realSizeOnCanvas = Math.min(Math.max(realSizeOnCanvas, 40), 400);
+
+        img.style.width = realSizeOnCanvas + 'px';
+        img.style.height = realSizeOnCanvas + 'px';
+        // Позиционируем через проценты (0..100%), чтобы изображение не сбивалось при дальнейшем зуме/панорамировании
+        img.style.left = (xOnCanvas / 2000) * 100 + '%';
+        img.style.top = (yOnCanvas / 2000) * 100 + '%';
+
+        mainCanvasDiv.appendChild(img);
+
+        placementUI.style.display = 'none';
+        mainControls.style.display = 'flex';
+        currentDrawingData = null;
+    };
+
+    // Логика работы кнопки Отмена во время прицеливания
+    document.getElementById('cancel-placement-btn').onclick = () => {
+        placementUI.style.display = 'none';    // Прячем прицел и кнопки привязки
+        mainControls.style.display = 'flex';     // Показываем стандартное нижнее меню холста
+        currentDrawingData = null;               // Очищаем данные несохраненного рисунка
+    };
+
+    // ==========================================
+    // 4. СКАЧИВАНИЕ ВСЕГО ХОЛСТА (МАКС. КАЧЕСТВО 2000x2000)
+    // ==========================================
+    async function downloadFullCanvas() {
+        const tempCanvas = document.createElement('canvas');
+        tempCanvas.width = 2000;
+        tempCanvas.height = 2000;
+        const tempCtx = tempCanvas.getContext('2d');
+        tempCtx.fillStyle = '#fffdf0';
+        tempCtx.fillRect(0, 0, 2000, 2000);
+        tempCtx.strokeStyle = '#f0edce';
+        tempCtx.lineWidth = 1;
+        for (let y = 0; y <= 2000; y += 50) { tempCtx.beginPath(); tempCtx.moveTo(0, y); tempCtx.lineTo(2000, y); tempCtx.stroke(); }
+        for (let x = 0; x <= 2000; x += 50) { tempCtx.beginPath(); tempCtx.moveTo(x, 0); tempCtx.lineTo(x, 2000); tempCtx.stroke(); }
+
+        const items = document.querySelectorAll('#main-canvas .canvas-item');
+        const promises = Array.from(items).map(img => {
+            return new Promise((resolve) => {
+                if (img.complete && img.naturalWidth !== 0) {
+                    drawImageOnCanvas(img, tempCtx);
+                    resolve();
+                } else {
+                    img.addEventListener('load', () => { drawImageOnCanvas(img, tempCtx); resolve(); });
+                    img.addEventListener('error', () => resolve());
+                    if (img.complete) { drawImageOnCanvas(img, tempCtx); resolve(); }
+                }
+            });
+        });
+        await Promise.all(promises);
+        const link = document.createElement('a');
+        link.download = 'nash_holst.png';
+        link.href = tempCanvas.toDataURL('image/png');
+        link.click();
+    }
+    function drawImageOnCanvas(img, context) {
+        const leftPercent = parseFloat(img.style.left);
+        const topPercent = parseFloat(img.style.top);
+        const widthPx = parseFloat(img.style.width);
+        const heightPx = parseFloat(img.style.height);
+        if (isNaN(leftPercent) || isNaN(topPercent) || isNaN(widthPx) || isNaN(heightPx)) return;
+        const x = (leftPercent / 100) * 2000;
+        const y = (topPercent / 100) * 2000;
+        const drawX = x - widthPx / 2;
+        const drawY = y - heightPx / 2;
+        context.drawImage(img, drawX, drawY, widthPx, heightPx);
+    }
+    document.getElementById('download-canvas-btn').addEventListener('click', () => { downloadFullCanvas().catch(console.warn); });
+</script>
+<script type="module" src="canvas-logic.js"></script>
+</body>
+
+</html>
