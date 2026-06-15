@@ -1,0 +1,960 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Дейли кринж 5</title>
+    <link rel="icon" type="image/png" href="clown/smex.png">
+    <link href="https://fonts.googleapis.com/css2?family=Pangolin&family=Comic+Neue:wght@400;700&display=swap"
+        rel="stylesheet">
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: #ffde59;
+            /* Яркий желтый */
+            background-image: radial-gradient(#ffbd59 20%, transparent 20%);
+            background-size: 30px 30px;
+            /* Веселый горошек на фоне */
+            margin: 0;
+            padding: 20px 10px;
+            display: flex;
+            justify-content: flex-start;
+            align-items: center;
+            min-height: 100vh;
+            flex-direction: column;
+            font-family: 'Comic Neue', cursive;
+            overflow-x: hidden;
+        }
+
+        h1,
+        h2,
+        h3 {
+            font-family: 'Pangolin', cursive;
+            /* Рукописный шрифт */
+            color: #333;
+            margin: 0 0 10px 0;
+            text-shadow: 2px 2px 0px #fff;
+            text-align: center;
+        }
+
+        header {
+            margin-bottom: 15px;
+            max-width: 500px;
+            text-align: center;
+        }
+
+        header h1 {
+            font-size: 36px;
+            transform: rotate(-1deg);
+        }
+
+        header p {
+            font-size: 16px;
+            font-weight: bold;
+            color: #444;
+            margin: 5px 0 0 0;
+        }
+
+        .calendar-wrapper {
+            position: relative;
+            width: 100%;
+            max-width: 320px;
+            margin-bottom: 15px;
+            z-index: 10;
+        }
+
+        .calendar-trigger {
+            width: 100%;
+            font-family: 'Comic Neue', cursive;
+            font-weight: bold;
+            font-size: 18px;
+            color: #333;
+            background-color: #fffdf0;
+            border: 3px solid #333;
+            border-radius: 14px;
+            padding: 10px 15px;
+            outline: none;
+            box-shadow: 0 5px 0px #333;
+            cursor: pointer;
+            text-align: center;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            user-select: none;
+            transition: transform 0.1s ease, box-shadow 0.1s ease;
+        }
+
+        .calendar-trigger:active {
+            transform: translateY(3px);
+            box-shadow: 0 2px 0px #333;
+        }
+
+        .calendar-dropdown {
+            display: none;
+            position: absolute;
+            top: 55px;
+            left: 0;
+            width: 100%;
+            background: #fffdf0;
+            border: 3px solid #333;
+            border-radius: 16px;
+            padding: 15px;
+            box-shadow: 0 8px 0px rgba(0, 0, 0, 0.15);
+        }
+
+        .calendar-dropdown.show {
+            display: block;
+            animation: popUp 0.2s ease-out;
+        }
+
+        @keyframes popUp {
+            from {
+                transform: scale(0.95);
+                opacity: 0;
+            }
+
+            to {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .calendar-month-title {
+            font-family: 'Pangolin', cursive;
+            font-size: 18px;
+            color: #333;
+            margin: 0;
+        }
+
+        .calendar-nav-btn {
+            background: #57b9ff;
+            border: 2px solid #333;
+            color: white;
+            border-radius: 8px;
+            width: 32px;
+            height: 32px;
+            cursor: pointer;
+            font-weight: bold;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 3px 0px #333;
+        }
+
+        .calendar-nav-btn:active {
+            transform: translateY(2px);
+            box-shadow: 0 1px 0px #333;
+        }
+
+        .calendar-weekdays {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            text-align: center;
+            font-weight: bold;
+            font-size: 12px;
+            color: #888;
+            margin-bottom: 5px;
+        }
+
+        .calendar-days-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 5px;
+        }
+
+        .calendar-day {
+            aspect-ratio: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 14px;
+            font-weight: bold;
+            color: #333;
+            cursor: pointer;
+            border-radius: 8px;
+            border: 2px solid transparent;
+            user-select: none;
+        }
+
+        .calendar-day:hover:not(.empty):not(.disabled) {
+            background-color: #ffde59;
+            border-color: #333;
+        }
+
+        .calendar-day.selected {
+            background-color: #76e150 !important;
+            color: white !important;
+            border-color: #333 !important;
+            box-shadow: inset 0 -2px 0px rgba(0, 0, 0, 0.2);
+        }
+
+        .calendar-day.disabled {
+            color: #ccc;
+            cursor: not-allowed;
+        }
+
+        .calendar-day.empty {
+            cursor: default;
+        }
+
+        /* --- БЕГУЩАЯ СТРОКА (МАРКЕР ТЕКСТА) --- */
+        .news-ticker-container {
+            width: 100%;
+            max-width: 500px;
+            background-color: #ff5757;
+            /* Фирменный красный цвет новостной ленты */
+            border: 3px solid #333;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 5px 0px #333;
+            margin-bottom: 25px;
+            display: flex;
+            align-items: center;
+            transform: rotate(-0.5deg);
+        }
+
+        .ticker-wrapper {
+            width: 100%;
+            overflow: hidden;
+            padding: 8px 0;
+            display: flex;
+        }
+
+        .ticker-text {
+            display: inline-block;
+            white-space: nowrap;
+            padding-left: 100%;
+            /* Начальная позиция за экраном справа */
+            font-family: 'Comic Neue', cursive;
+            font-weight: bold;
+            font-size: 15px;
+            color: white;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            animation: ticker-animation 20s linear infinite;
+        }
+
+        /* Анимация бесконечного движения */
+        @keyframes ticker-animation {
+            0% {
+                transform: translate3d(0, 0, 0);
+            }
+
+            100% {
+                transform: translate3d(-100%, 0, 0);
+            }
+        }
+
+
+        /* --- ГОРИЗОНТАЛЬНЫЙ СЛАЙДЕР ДЛЯ КАРТОЧЕК --- */
+        .slider-wrapper {
+            width: 100%;
+            max-width: 500px;
+            position: relative;
+            margin-bottom: 15px;
+            min-height: 250px;
+            display: flex;
+            align-items: center;
+        }
+
+        .jokes-container {
+            width: 100%;
+            display: flex;
+            gap: 30px;
+            overflow-x: auto;
+            scroll-behavior: smooth;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+            padding: 20px 10px 30px 10px;
+        }
+
+        .jokes-container::-webkit-scrollbar {
+            display: none;
+        }
+
+        /* Заглушка */
+        .no-jokes-message {
+            width: 100%;
+            background-color: #fffdf0;
+            border: 4px solid #333;
+            border-radius: 16px;
+            padding: 30px 20px;
+            box-shadow: 0 10px 0px rgba(0, 0, 0, 0.15);
+            text-align: center;
+            transform: rotate(-1deg);
+        }
+
+        /* Карточка шутки */
+        .joke-card {
+            flex: 0 0 calc(100% - 20px);
+            background-color: #fffdf0;
+            border: 4px solid #333;
+            border-radius: 16px;
+            padding: 25px 20px;
+            box-shadow: 0 10px 0px rgba(0, 0, 0, 0.15);
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            transform: rotate(1deg);
+            transition: transform 0.2s ease;
+        }
+
+        .joke-card:nth-child(even) {
+            transform: rotate(-1deg);
+        }
+
+        .joke-question {
+            font-size: 18px;
+            line-height: 1.5;
+            color: #333;
+            margin: 0 0 15px 0;
+            font-weight: 700;
+        }
+
+        /* Блок ответа */
+        .joke-answer-wrapper {
+            display: grid;
+            grid-template-rows: 0fr;
+            transition: grid-template-rows 0.3s ease, margin-top 0.3s ease;
+            overflow: hidden;
+        }
+
+        .joke-answer {
+            min-height: 0;
+            font-size: 18px;
+            line-height: 1.5;
+            color: #ff5757;
+            font-weight: 700;
+            background: rgba(255, 87, 87, 0.08);
+            border-left: 4px solid #ff5757;
+            padding: 0px 10px;
+            border-radius: 4px;
+            transition: padding 0.3s ease;
+        }
+
+        .joke-card.open .joke-answer-wrapper {
+            grid-template-rows: 1fr;
+            margin-top: 10px;
+        }
+
+        .joke-card.open .joke-answer {
+            padding: 10px;
+        }
+
+        /* Кнопка раскрытия шутки */
+        .btn-punchline {
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+            align-self: center;
+            background: #76e150;
+            border: 3px solid #333;
+            border-radius: 12px;
+            padding: 8px 16px;
+            font-size: 15px;
+            font-weight: bold;
+            color: white;
+            cursor: pointer;
+            box-shadow: 0 4px 0px #333;
+            transition: all 0.1s ease;
+            font-family: 'Pangolin', cursive;
+            text-shadow: 1px 1px 0px rgba(0, 0, 0, 0.2);
+            user-select: none;
+            margin-top: auto;
+            padding-top: 10px;
+        }
+
+        .btn-punchline:active {
+            box-shadow: 0 1px 0px #333;
+            transform: translateY(3px);
+        }
+
+        .joke-card.open .btn-punchline {
+            background: #57b9ff;
+        }
+
+        /* Номер шутки */
+        .joke-number {
+            position: absolute;
+            top: -12px;
+            left: 15px;
+            font-weight: bold;
+            background: #333;
+            color: #fff;
+            padding: 2px 10px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-family: 'Comic Neue', cursive;
+            transform: rotate(-3deg);
+        }
+
+        .joke-card:nth-child(even) .joke-number {
+            transform: rotate(3deg);
+        }
+
+        /* Кнопки управления слайдером */
+        .controls {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 25px;
+            transform: rotate(1deg);
+        }
+
+        .btn-arrow {
+            background: #57b9ff;
+            border: 4px solid #333;
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            font-size: 24px;
+            font-weight: bold;
+            color: white;
+            cursor: pointer;
+            box-shadow: 0 6px 0px #333;
+            transition: all 0.1s ease;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            user-select: none;
+        }
+
+        .btn-arrow:not(:disabled):active {
+            box-shadow: 0 2px 0px #333;
+            transform: translateY(4px) rotate(3deg);
+        }
+
+        /* Кнопка Назад */
+        .btn-back {
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+            background: #76e150;
+            border: 4px solid #333;
+            border-radius: 16px;
+            padding: 12px 24px;
+            font-size: 18px;
+            font-weight: bold;
+            color: white;
+            text-decoration: none;
+            box-shadow: 0 6px 0px #333;
+            transition: all 0.1s ease;
+            transform: rotate(-1deg);
+            font-family: 'Pangolin', cursive;
+            text-shadow: 2px 2px 0px rgba(0, 0, 0, 0.2);
+            user-select: none;
+        }
+
+        .btn-back:active {
+            box-shadow: 0 2px 0px #333;
+            transform: translateY(4px) rotate(0deg);
+        }
+
+        footer {
+            margin-top: auto;
+            padding: 15px 0 5px;
+            font-size: 14px;
+            font-weight: bold;
+            color: #333;
+            text-shadow: 1px 1px 0px #fff;
+        }
+
+        /* --- КНОПКА МУЗЫКИ --- */
+        .audio-control-wrapper {
+            width: 100%;
+            max-width: 500px;
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        .btn-audio {
+            font-family: 'Pangolin', cursive;
+            font-weight: bold;
+            font-size: 16px;
+            color: #333;
+            background-color: #ffbd59;
+            /* Приятный оранжевый */
+            border: 3px solid #333;
+            border-radius: 14px;
+            padding: 10px 20px;
+            outline: none;
+            box-shadow: 0 5px 0px #333;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            user-select: none;
+            transition: transform 0.1s ease, box-shadow 0.1s ease, background-color 0.2s;
+            transform: rotate(0.5deg);
+        }
+
+        /* Состояние при проигрывании (зеленеет) */
+        .btn-audio.playing {
+            background-color: #76e150;
+        }
+
+        .btn-audio:active {
+            transform: translateY(3px) rotate(0.5deg);
+            box-shadow: 0 2px 0px #333;
+        }
+
+        @media (max-width: 650px) {
+            .btn-audio {
+                font-size: 14px;
+                padding: 8px 16px;
+                border-width: 3px;
+            }
+        }
+
+        @media (max-width: 650px) {
+            header h1 {
+                font-size: 28px;
+            }
+
+            header p {
+                font-size: 14px;
+            }
+
+            .joke-question,
+            .joke-answer {
+                font-size: 16px;
+            }
+
+            .joke-card,
+            .no-jokes-message,
+            .news-ticker-container {
+                border-width: 3px;
+                border-radius: 12px;
+            }
+
+            .joke-card {
+                flex: 0 0 calc(100% - 10px);
+            }
+
+            .btn-punchline {
+                font-size: 14px;
+            }
+
+            .btn-arrow {
+                width: 50px;
+                height: 50px;
+                font-size: 20px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <header>
+        <h1>Дейли Кринж 5 🗓️</h1>
+    </header>
+
+    <div class="calendar-wrapper">
+        <button class="calendar-trigger" id="calendarTrigger">
+            📅 <span id="triggerText">Выбери дату</span>
+        </button>
+
+        <div class="calendar-dropdown" id="calendarDropdown">
+            <div class="calendar-header">
+                <button class="calendar-nav-btn" id="prevMonth">◀</button>
+                <h3 class="calendar-month-title" id="monthTitle">Июнь 2026</h3>
+                <button class="calendar-nav-btn" id="nextMonth">▶</button>
+            </div>
+            <div class="calendar-weekdays">
+                <div>Пн</div>
+                <div>Вт</div>
+                <div>Ср</div>
+                <div>Чт</div>
+                <div>Пт</div>
+                <div>Сб</div>
+                <div>Вс</div>
+            </div>
+            <div class="calendar-days-grid" id="daysGrid">
+            </div>
+        </div>
+    </div>
+
+    <div class="news-ticker-container">
+        <div class="ticker-wrapper">
+            <div class="ticker-text">
+                🚨 Катя, тут шутки ну его нахуй, смешно ой не могу, ржу короче. Да уж блин, чуть не умер от них и почему
+                ты такое любишь?. Обновление шуток происходит раз в сутки, так что жди Катюша. Любительница мистера
+                пропера и его швабры. Название сайта я спиздил из какой то известной газеты у
+                пиндосов.....................................................Ловить тут нечего
+                больше...................................АХАХАХАХАХАХАХ ТЫ ЧЕГО ЖДЕШЬ? С МОРЯ
+                ПОГОДЫ?.................................................ЛАДНО.....................................ТЫ
+                СУПЕР
+            </div>
+        </div>
+    </div>
+
+    <div class="audio-control-wrapper">
+        <button class="btn-audio" id="audioBtn">
+            <span id="audioIcon">🎵</span> <span id="audioText">Включить музончик</span>
+        </button>
+    </div>
+
+    <!-- САМ АУДИОПЛЕЕР (Замени ссылку на свой трек) -->
+    <audio id="bgMusic" loop>
+        <source src="clown/music_smex.mp3" type="audio/mpeg">
+        Твой браузер не поддерживает аудио.
+    </audio>
+
+    <div class="slider-wrapper">
+        <div class="jokes-container" id="jokesContainer">
+        </div>
+    </div>
+
+    <div class="controls" id="controlsBlock">
+        <button class="btn-arrow" id="prev-joke-btn">◀</button>
+        <button class="btn-arrow" id="next-joke-btn">▶</button>
+    </div>
+
+    <a href="index.html" class="btn-back">Вернуться в Дневник 🌟</a>
+
+    <footer>
+        Каждый день, новый крииинж!!!!
+    </footer>
+
+    <script>
+        // БАЗА ДАННЫХ ШУТОК ПО ДНЯМ
+        const jokesByDays = {
+            "2026-06-15": [
+                { q: "Почему археологи не любят будущее?", a: "Потому что их интересует только прошлое!" },
+                { q: "Почему скелеты не дерутся друг с другом?", a: "У них кишка тонка!" },
+                { q: "Почему стоматологи редко ругаются?", a: "Потому что привыкли держать язык за зубами!" },
+                { q: "Какая любимая страна у геометров?", a: "Куба!" },
+                { q: "Почему пожарный не любит острые шутки?", a: "Потому что от них подгорает!" }
+            ],
+            "2026-06-16": [
+                { q: "Как называют корову, которая не дает молока?", a: "Жадина-говядина!" },
+                { q: "Почему шахматист не любит магазины?", a: "Потому что везде требуют сделать ход первым!" },
+                { q: "Почему шпионы не носят кепки?", a: "Потому что они выдают их с головой!" },
+                { q: "Почему сапёр никогда не опаздывает?", a: "Потому что у него нет права на ошибку!" },
+                { q: "Почему бармен не любит драму?", a: "Потому что и так хватает крепких историй!" }
+            ],
+            "2026-06-17": [
+                { q: "Почему утки плохие актеры?", a: "Потому что они постоянно крякают невпопад." },
+                { q: "Почему библиотекарь всегда спокойный?", a: "Потому что знает, чем всё закончится!" },
+                { q: "Что общего между шахматистом и разведенным?", a: "И тот, и другой потеряли королеву." },
+                { q: "Почему Спанч Боб не ходит в спортзал?", a: "Потому что он и так в форме!" },
+                { q: "Почему часовщик не спорит с судьбой?", a: "Потому что её время придёт!" }
+            ],
+            "2026-06-18": [
+                { q: "Почему повар стал боксёром?", a: "Потому что устал отбивать только мясо!" },
+                { q: "Почему маляр не берёт кредиты?", a: "Потому что не любит лишние проценты на слой!" },
+                { q: "Почему сантехник всегда оптимист?", a: "Потому что знает: любую ситуацию можно прочистить!" },
+                { q: "Почему географы никогда не теряются?", a: "Они знают свое место." },
+                { q: "Почему фотограф не женился?", a: "Потому что искал идеальную выдержку!" }
+            ],
+            "2026-06-19": [
+                { q: "Почему математики любят лес?", a: "Там много корней!" },
+                { q: "Почему Google не ходит на свидания?", a: "Потому что всегда находит что-то получше!" },
+                { q: "Почему Photoshop не говорит правду?", a: "Потому что любит приукрашивать!" },
+                { q: "Почему окулист всегда спокоен?", a: "Потому что смотрит на вещи шире!" },
+                { q: "Почему калькулятор не врёт?", a: "Потому что его быстро вычисляют!" }
+            ],
+            "2026-06-20": [
+                { q: "Какую музыку слушают привидения?", a: "Душ-е-раздирающую!" },
+                { q: "Что кричит повар в порыве ярости?", a: "Я тебя в порошок сотру!" },
+                { q: "Почему зомби не едят омоновцев?", a: "На языке вяжутся" },
+                { q: "Почему календарь перестал перелистывать страницы?", a: "Потому что у него закончились дни." },
+                { q: "Почему Колобок остановился?", a: "Потому что понял: дальше уже не смешно, а поздно." }
+            ],
+            "2026-06-21": [
+                { q: "Почему стул сломался?", a: "Потому что больше не выдержал ничего." },
+                { q: "Ниже шутка👇", a: "Рыба утонула в море" },
+                { q: "Что общего между электриком и сапером?", a: "Оба ошибаются один раз. Но электрик при этом еще и танцует." },
+                { q: "Ниже шутка👇", a: "Кто не скачет тот москаль" },
+                { q: "Кто ночью прилетает к стоматологам?", a: "Зубная фея" }
+            ],
+            "2026-06-22": [
+                { q: "Из чего состоит мясо?", a: "Из мяса" },
+                { q: "Что случилось со спящей красавицей?", a: "Умерла во сне" },
+                { q: "Ниже шутка👇", a: "Колобок не докатился до смысла жизни." },
+                { q: "Что стало с красной шапочкой?", a: "Ее сьели" },
+                { q: "Ниже шутка👇", a: "Русалка пошла в бар и заказала аквариум" }
+            ],
+            "2026-06-23": [
+                { q: "Из чего сделан стол?", a: "Из дерева." },
+                { q: "Что случилось с дверью?", a: "Её открыли." },
+                { q: "Куда делась вода?", a: "Испарилась." },
+                { q: "Что стало с огнём?", a: "Погас." },
+                { q: "Почему человек упал?", a: "Потому что земля внизу." }
+            ],
+            "2026-06-24": [
+                { q: "Почему птица летит?", a: "Потому что умеет." },
+                { q: "Что делает рыба?", a: "Плавает." },
+                { q: "Почему снег белый?", a: "Потому что не чёрный." },
+                { q: "Что делает солнце?", a: "Светит." },
+                { q: "Почему ночь тёмная?", a: "Потому что нет света." }
+            ],
+            "2026-06-25": [
+                { q: "Почему помидор покраснел?", a: "Потому что он увидел огурец в салате!" },
+                { q: "Как зовут собаку-детектива?", a: "Шерлок Холмс-дог." },
+                { q: "Что говорит стена другой стене?", a: "Встретимся на углу!" },
+                { q: "Какое любимое животное у пиратов?", a: "Аааааааар-мадил!" },
+                { q: "Почему будильники такие злые?", a: "Их постоянно бьют по голове с утра." }
+            ],
+            "2026-06-26": [
+                { q: "Что такое камень?", a: "Камень." },
+                { q: "Почему трава зелёная?", a: "Потому что такая." },
+                { q: "Что случилось с водой?", a: "Она мокрая." },
+                { q: "Почему машина едет?", a: "Потому что её ведут." },
+                { q: "Что делает дверь?", a: "Стоит в проёме." }
+            ],
+            "2026-06-27": [
+                { q: "Что делает вода?", a: "Течёт." },
+                { q: "Почему камень тяжёлый?", a: "Потому что он не лёгкий." },
+                { q: "Что случилось с яблоком?", a: "Оно упало." },
+                { q: "Почему человек моргает?", a: "Потому что глаза есть." },
+                { q: "Что делает воздух?", a: "Он есть." }
+            ],
+            "2026-06-28": [
+                { q: "Почему лампа светит?", a: "Потому что включили." },
+                { q: "Что делает книга?", a: "Лежит." },
+                { q: "Почему телефон звонит?", a: "Потому что звонок." },
+                { q: "Что делает стол?", a: "Стоит." },
+                { q: "Почему небо высоко?", a: "Потому что не низко." }
+            ],
+            "2026-06-29": [
+                { q: "Что делает лошадь?", a: "Стоит и иногда идёт." },
+                { q: "Почему овца белая?", a: "Потому что не чёрная." },
+                { q: "Ниже шутка👇", a: "Птица летит, когда летит." },
+                { q: "Что делает заяц в поле?", a: "Прыгает иногда." },
+                { q: "Почему пчела летает?", a: "Потому что воздух." }
+            ],
+            "2026-06-30": [
+                { q: "Почему собака сидит?", a: "Потому что не лежит." },
+                { q: "Ниже шутка👇", a: "Медведь живёт потому что живой." },
+                { q: "Почему чай горячий?", a: "Потому что его нагрели." },
+                { q: "Что делает кнопка?", a: "Нажимается." },
+                { q: "Почему книга открыта?", a: "Потому что её открыли." }
+            ]
+        };
+
+        // Состояние календаря
+        const today = new Date();
+        let selectedDate = new Date(today);
+        let currentMonthView = new Date(today);
+
+        const monthNames = [
+            "Январь", "Февраль", "Март", "Апрель", "Май", "Июнь",
+            "Июль", "Август", "Сентябрь", "Октябрь", "Ноябрь", "Декабрь"
+        ];
+
+        function initCustomCalendar() {
+            const trigger = document.getElementById('calendarTrigger');
+            const dropdown = document.getElementById('calendarDropdown');
+            const prevMonthBtn = document.getElementById('prevMonth');
+            const nextMonthBtn = document.getElementById('nextMonth');
+
+            trigger.addEventListener('click', (e) => {
+                e.stopPropagation();
+                dropdown.classList.toggle('show');
+            });
+
+            document.addEventListener('click', (e) => {
+                if (!dropdown.contains(e.target) && e.target !== trigger) {
+                    dropdown.classList.remove('show');
+                }
+            });
+
+            prevMonthBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                currentMonthView.setMonth(currentMonthView.getMonth() - 1);
+                renderCalendarGrid();
+            });
+
+            nextMonthBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                currentMonthView.setMonth(currentMonthView.getMonth() + 1);
+                renderCalendarGrid();
+            });
+
+            updateTriggerText();
+            renderCalendarGrid();
+            renderJokesForDate(formatDateToString(selectedDate));
+        }
+
+        function updateTriggerText() {
+            const textSpan = document.getElementById('triggerText');
+            const day = String(selectedDate.getDate()).padStart(2, '0');
+            const month = String(selectedDate.getMonth() + 1).padStart(2, '0');
+            const year = selectedDate.getFullYear();
+            textSpan.textContent = `День: ${day}.${month}.${year} 🗓️`;
+        }
+
+        function renderCalendarGrid() {
+            const grid = document.getElementById('daysGrid');
+            const title = document.getElementById('monthTitle');
+
+            title.textContent = `${monthNames[currentMonthView.getMonth()]} ${currentMonthView.getFullYear()}`;
+            grid.innerHTML = '';
+
+            const year = currentMonthView.getFullYear();
+            const month = currentMonthView.getMonth();
+
+            let firstDayIndex = new Date(year, month, 1).getDay();
+            firstDayIndex = firstDayIndex === 0 ? 6 : firstDayIndex - 1;
+
+            const totalDays = new Date(year, month + 1, 0).getDate();
+
+            for (let i = 0; i < firstDayIndex; i++) {
+                const emptyCell = document.createElement('div');
+                emptyCell.classList.add('calendar-day', 'empty');
+                grid.appendChild(emptyCell);
+            }
+
+            for (let day = 1; day <= totalDays; day++) {
+                const dayCell = document.createElement('div');
+                dayCell.classList.add('calendar-day');
+                dayCell.textContent = day;
+
+                const thisCellDate = new Date(year, month, day);
+
+                if (thisCellDate > today) {
+                    dayCell.classList.add('disabled');
+                } else {
+                    if (isSameDay(thisCellDate, selectedDate)) {
+                        dayCell.classList.add('selected');
+                    }
+
+                    dayCell.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        selectedDate = new Date(thisCellDate);
+
+                        updateTriggerText();
+                        renderCalendarGrid();
+                        document.getElementById('calendarDropdown').classList.remove('show');
+
+                        renderJokesForDate(formatDateToString(selectedDate));
+                    });
+                }
+
+                grid.appendChild(dayCell);
+            }
+        }
+
+        function isSameDay(d1, d2) {
+            return d1.getFullYear() === d2.getFullYear() &&
+                d1.getMonth() === d2.getMonth() &&
+                d1.getDate() === d2.getDate();
+        }
+
+        function formatDateToString(dateObj) {
+            const yyyy = dateObj.getFullYear();
+            const mm = String(dateObj.getMonth() + 1).padStart(2, '0');
+            const dd = String(dateObj.getDate()).padStart(2, '0');
+            return `${yyyy}-${mm}-${dd}`;
+        }
+
+        function renderJokesForDate(dateString) {
+            const container = document.getElementById('jokesContainer');
+            const controlsBlock = document.getElementById('controlsBlock');
+            const dayJokes = jokesByDays[dateString];
+
+            if (!dayJokes || dayJokes.length === 0) {
+                container.innerHTML = `
+                    <div class="no-jokes-message">
+                        <h3>Ой-ой! 🙈</h3>
+                        <p style="font-weight: bold; color: #666; margin: 10px 0 0 0;">
+                            На этот день (${dateString.split('-').reverse().join('.')}) батя еще не придумал каламбуров. Выберите другой день!
+                        </p>
+                    </div>
+                `;
+                controlsBlock.style.display = 'none';
+                return;
+            }
+
+            controlsBlock.style.display = 'flex';
+            container.innerHTML = dayJokes.map((joke, index) => `
+                <div class="joke-card">
+                    <div class="joke-number">Шутка №${index + 1}</div>
+                    <p class="joke-question">${joke.q}</p>
+                    <div class="joke-answer-wrapper">
+                        <div class="joke-answer">${joke.a}</div>
+                    </div>
+                    <button class="btn-punchline" onclick="toggleJoke(this)">Показать ответ ❓</button>
+                </div>
+            `).join('');
+
+            container.scrollLeft = 0;
+            initSliderLogic();
+        }
+
+        function toggleJoke(buttonElement) {
+            const card = buttonElement.closest('.joke-card');
+            card.classList.toggle('open');
+            buttonElement.innerHTML = card.classList.contains('open') ? 'Скрыть ответ 🤡' : 'Показать ответ ❓';
+        }
+
+        let prevHandler, nextHandler;
+        function initSliderLogic() {
+            const container = document.getElementById('jokesContainer');
+            const prevBtn = document.getElementById('prev-joke-btn');
+            const nextBtn = document.getElementById('next-joke-btn');
+
+            if (prevHandler) prevBtn.removeEventListener('click', prevHandler);
+            if (nextHandler) nextBtn.removeEventListener('click', nextHandler);
+
+            nextHandler = () => {
+                const card = container.querySelector('.joke-card');
+                if (card) container.scrollLeft += (card.clientWidth + 30);
+            };
+
+            prevHandler = () => {
+                const card = container.querySelector('.joke-card');
+                if (card) container.scrollLeft -= (card.clientWidth + 30);
+            };
+
+            nextBtn.addEventListener('click', nextHandler);
+            prevBtn.addEventListener('click', prevHandler);
+        }
+
+        window.onload = initCustomCalendar;
+
+
+        // ЛОГИКА МУЗЫКАЛЬНОЙ КНОПКИ
+        document.getElementById('audioBtn').addEventListener('click', function () {
+            const audio = document.getElementById('bgMusic');
+            const btn = this;
+            const icon = document.getElementById('audioIcon');
+            const text = document.getElementById('audioText');
+
+            if (audio.paused) {
+                // Если музыка стояла на паузе — запускаем
+                audio.play().then(() => {
+                    btn.classList.add('playing');
+                    icon.textContent = '⏸️';
+                    text.textContent = 'Поставить на паузу';
+                }).catch(error => {
+                    console.log("Браузер заблокировал автовоспроизведение до первого клика:", error);
+                    alert("Браузер требует клика! Попробуй еще раз.");
+                });
+            } else {
+                // Если играла — ставим на паузу
+                audio.pause();
+                btn.classList.remove('playing');
+                icon.textContent = '🎵';
+                text.textContent = 'Включить музончик';
+            }
+        });
+    </script>
+</body>
+
+</html>
