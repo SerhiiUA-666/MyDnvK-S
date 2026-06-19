@@ -1,0 +1,1222 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>Наши желания</title>
+    <link rel="icon" type="image/png" href="fonar/fonicon.png">
+
+
+    <style>
+        /* ---------- Глобальные ---------- */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        html,
+        body {
+            width: 100%;
+            min-height: 100vh;
+            background: #020208;
+            font-family: 'Georgia', 'Times New Roman', serif;
+            color: #f0ece4;
+            overflow-x: hidden;
+            overflow-y: auto;
+            scroll-behavior: smooth;
+        }
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0a0a14;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #e74c3c55;
+            border-radius: 12px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #e74c3c99;
+        }
+
+        /* ---------- ОСНОВНОЙ КОНТЕЙНЕР ---------- */
+        #main-app {
+            display: none;
+        }
+
+        #sky-container {
+            position: relative;
+            width: 100%;
+            height: 500vh;
+            background: linear-gradient(to top,
+                    #14162b 0%,
+                    #0e0f1f 18%,
+                    #080912 42%,
+                    #04040a 70%,
+                    #010103 100%);
+            overflow: hidden;
+        }
+
+        /* ---------- Звёзды (на мобильных остаётся только 2 слоя) ---------- */
+        .stars-layer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            will-change: opacity;
+            backface-visibility: hidden;
+        }
+        .stars-layer.s1 {
+            background-image:
+                radial-gradient(1.5px 1.5px at 5% 10%, #fff8f0, rgba(255, 255, 255, 0)),
+                radial-gradient(2px 2px at 12% 45%, #fff0e0, rgba(255, 255, 255, 0)),
+                radial-gradient(1px 1px at 20% 75%, #ffe5cc, rgba(255, 255, 255, 0)),
+                radial-gradient(2.5px 2.5px at 28% 22%, #fff5ea, rgba(255, 255, 255, 0)),
+                radial-gradient(1.5px 1.5px at 35% 88%, #ffeddd, rgba(255, 255, 255, 0)),
+                radial-gradient(2px 2px at 42% 12%, #fff8f0, rgba(255, 255, 255, 0)),
+                radial-gradient(1px 1px at 50% 55%, #ffe9d0, rgba(255, 255, 255, 0)),
+                radial-gradient(2px 2px at 58% 33%, #fff0e0, rgba(255, 255, 255, 0)),
+                radial-gradient(1.5px 1.5px at 65% 78%, #ffe5cc, rgba(255, 255, 255, 0)),
+                radial-gradient(2px 2px at 72% 5%, #fff5ea, rgba(255, 255, 255, 0)),
+                radial-gradient(1px 1px at 78% 62%, #ffeddd, rgba(255, 255, 255, 0)),
+                radial-gradient(2.5px 2.5px at 85% 40%, #fff8f0, rgba(255, 255, 255, 0)),
+                radial-gradient(1.5px 1.5px at 92% 90%, #ffe9d0, rgba(255, 255, 255, 0)),
+                radial-gradient(2px 2px at 98% 18%, #fff0e0, rgba(255, 255, 255, 0)),
+                radial-gradient(1.5px 1.5px at 15% 50%, #fff5ea, rgba(255, 255, 255, 0)),
+                radial-gradient(2px 2px at 30% 70%, #ffe5cc, rgba(255, 255, 255, 0)),
+                radial-gradient(1px 1px at 45% 30%, #ffeddd, rgba(255, 255, 255, 0)),
+                radial-gradient(2.5px 2.5px at 60% 85%, #fff8f0, rgba(255, 255, 255, 0)),
+                radial-gradient(1.5px 1.5px at 75% 15%, #ffe9d0, rgba(255, 255, 255, 0)),
+                radial-gradient(2px 2px at 90% 65%, #fff0e0, rgba(255, 255, 255, 0));
+            background-size: 100% 100%;
+            background-repeat: no-repeat;
+            opacity: 0.9;
+            animation: twinkle1 4s ease-in-out infinite alternate;
+        }
+        .stars-layer.s2 {
+            background-image:
+                radial-gradient(2.5px 2.5px at 8% 25%, #ffffff, rgba(255, 255, 255, 0)),
+                radial-gradient(3px 3px at 18% 60%, #fff5ea, rgba(255, 255, 255, 0)),
+                radial-gradient(2px 2px at 27% 12%, #ffffff, rgba(255, 255, 255, 0)),
+                radial-gradient(3.5px 3.5px at 38% 80%, #fff0e0, rgba(255, 255, 255, 0)),
+                radial-gradient(2.5px 2.5px at 48% 35%, #ffffff, rgba(255, 255, 255, 0)),
+                radial-gradient(3px 3px at 57% 92%, #fff5ea, rgba(255, 255, 255, 0)),
+                radial-gradient(2px 2px at 68% 18%, #ffffff, rgba(255, 255, 255, 0)),
+                radial-gradient(3.5px 3.5px at 77% 55%, #fff0e0, rgba(255, 255, 255, 0)),
+                radial-gradient(2.5px 2.5px at 87% 42%, #ffffff, rgba(255, 255, 255, 0)),
+                radial-gradient(3px 3px at 95% 75%, #fff5ea, rgba(255, 255, 255, 0));
+            background-size: 100% 100%;
+            background-repeat: no-repeat;
+            opacity: 0.95;
+            animation: twinkle2 6s ease-in-out infinite alternate;
+        }
+        .stars-layer.s3,
+        .stars-layer.s4,
+        .stars-layer.s5 {
+            display: none;
+        }
+
+        @keyframes twinkle1 {
+            0% { opacity: 0.7; }
+            100% { opacity: 1; }
+        }
+        @keyframes twinkle2 {
+            0% { opacity: 0.6; }
+            100% { opacity: 1; }
+        }
+
+        /* ---------- Луна ---------- */
+        .moon {
+            position: absolute;
+            top: 6%;
+            right: 10%;
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            background: radial-gradient(circle at 35% 30%, #fffaf0, #f5e6d0);
+            box-shadow: 0 0 40px rgba(255, 230, 200, 0.25), 0 0 120px rgba(255, 210, 160, 0.10), inset -12px -8px 20px rgba(180, 140, 100, 0.30);
+            pointer-events: none;
+            z-index: 1;
+            opacity: 0.8;
+            animation: moonGlow 6s ease-in-out infinite alternate;
+            will-change: box-shadow;
+            backface-visibility: hidden;
+        }
+        .moon::after {
+            content: '';
+            position: absolute;
+            top: 18%;
+            left: 22%;
+            width: 18%;
+            height: 14%;
+            border-radius: 50%;
+            background: rgba(200, 170, 140, 0.15);
+            box-shadow: 20px 25px 0 4px rgba(200, 170, 140, 0.08), -10px 40px 0 6px rgba(200, 170, 140, 0.06);
+        }
+        @keyframes moonGlow {
+            0% { box-shadow: 0 0 40px rgba(255, 230, 200, 0.20), 0 0 100px rgba(255, 210, 160, 0.08); }
+            100% { box-shadow: 0 0 60px rgba(255, 230, 200, 0.35), 0 0 160px rgba(255, 210, 160, 0.15); }
+        }
+
+        /* ---------- Падающие звёзды ---------- */
+        .shooting-star {
+            position: absolute;
+            width: 120px;
+            height: 2px;
+            background: linear-gradient(to right, rgba(255, 255, 255, 0), rgba(255, 245, 230, 0.9));
+            border-radius: 2px;
+            filter: drop-shadow(0 0 8px rgba(255, 220, 180, 0.7));
+            pointer-events: none;
+            z-index: 2;
+            opacity: 0;
+            animation: shoot linear infinite;
+            will-change: transform, opacity;
+            backface-visibility: hidden;
+        }
+        .shooting-star::after {
+            content: '';
+            position: absolute;
+            right: -6px;
+            top: -6px;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: rgba(255, 245, 230, 0.9);
+            filter: blur(3px);
+        }
+        @keyframes shoot {
+            0% { opacity: 0; transform: translateX(0) translateY(0) rotate(-35deg); }
+            5% { opacity: 1; }
+            25% { opacity: 1; }
+            40% { opacity: 0; transform: translateX(-300px) translateY(200px) rotate(-35deg); }
+            100% { opacity: 0; transform: translateX(-300px) translateY(200px) rotate(-35deg); }
+        }
+
+        /* ---------- Город ---------- */
+        .city-background {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 130vh;
+            background-image: url('fonar/desctop.png');
+            background-size: cover;
+            background-position: center bottom;
+            background-repeat: no-repeat;
+            z-index: 3;
+            -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 25%, black 100%);
+            mask-image: linear-gradient(to bottom, transparent 0%, black 25%, black 100%);
+            filter: brightness(0.75) contrast(1.15) saturate(0.9);
+            will-change: transform;
+            backface-visibility: hidden;
+        }
+        .city-glow {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 40vh;
+            background: radial-gradient(ellipse at 50% 100%, rgba(231, 120, 60, 0.18) 0%, rgba(200, 80, 40, 0.08) 40%, transparent 70%);
+            z-index: 4;
+            pointer-events: none;
+        }
+        .horizon-glow {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 20vh;
+            background: linear-gradient(to top, rgba(231, 76, 60, 0.12), transparent);
+            z-index: 5;
+            pointer-events: none;
+        }
+
+        /* ---------- ДЕКОРАТИВНЫЕ ФОНАРИ (CSS) ---------- */
+        .deco-lantern {
+            position: absolute;
+            width: 30px;
+            height: 44px;
+            pointer-events: none;
+            z-index: 2;
+            will-change: transform, opacity;
+            backface-visibility: hidden;
+            animation: decoFloat linear infinite;
+            background: radial-gradient(ellipse at 50% 30%, #ff5a3a, #cc1f1a);
+            border-radius: 50% 50% 30% 30% / 60% 60% 30% 30%;
+            box-shadow: 0 0 20px rgba(255, 60, 40, 0.6), 0 0 60px rgba(255, 40, 20, 0.3), inset 0 -8px 12px rgba(0, 0, 0, 0.3);
+            border-top: 3px solid rgba(200, 150, 100, 0.6);
+            border-top-left-radius: 4px;
+            border-top-right-radius: 4px;
+            transform-origin: bottom center;
+        }
+        .deco-lantern::before {
+            content: '';
+            position: absolute;
+            top: 10%;
+            left: 10%;
+            width: 80%;
+            height: 80%;
+            background: radial-gradient(circle, rgba(255, 200, 100, 0.5), transparent 70%);
+            border-radius: 50%;
+            filter: blur(8px);
+            opacity: 0.7;
+            animation: decoGlow 2s ease-in-out infinite alternate;
+        }
+        .deco-lantern::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 40px;
+            height: 40px;
+            background: radial-gradient(circle, rgba(255, 80, 50, 0.4), transparent 70%);
+            border-radius: 50%;
+            filter: blur(12px);
+            opacity: 0.8;
+        }
+        @keyframes decoGlow {
+            0% { opacity: 0.4; transform: scale(0.9); }
+            100% { opacity: 1; transform: scale(1.2); }
+        }
+        @keyframes decoFloat {
+            0% {
+                transform: translateY(0) translateX(0) rotate(0deg) scale(1);
+                opacity: 0.2;
+            }
+            10% { opacity: 0.8; }
+            90% { opacity: 0.8; }
+            100% {
+                transform: translateY(-130vh) translateX(var(--drift)) rotate(var(--rot)) scale(0.6);
+                opacity: 0.05;
+            }
+        }
+
+        /* ---------- ИНТЕРАКТИВНЫЕ ФОНАРИКИ (PNG) ---------- */
+        .lantern {
+            position: absolute;
+            bottom: -10vh;
+            width: 50px;
+            height: 72px;
+            background-image: url('fonar/lantern.png');
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+            background-color: rgba(231, 76, 60, 0.05);
+            border-radius: 10px 10px 20px 20px;
+            filter: drop-shadow(0 0 18px rgba(231, 76, 60, 0.7)) drop-shadow(0 0 40px rgba(231, 76, 60, 0.25));
+            cursor: pointer;
+            z-index: 10;
+            transition: transform 0.25s ease, filter 0.3s ease;
+            will-change: bottom, transform, opacity;
+            backface-visibility: hidden;
+            transform: translateZ(0);
+        }
+        .lantern::before {
+            content: '';
+            position: absolute;
+            top: -12px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 14px;
+            height: 14px;
+            background: radial-gradient(circle, rgba(255, 200, 100, 0.5), transparent);
+            border-radius: 50%;
+            filter: blur(6px);
+            opacity: 0.6;
+            animation: lanternPulse 2.5s ease-in-out infinite alternate;
+        }
+        .lantern::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 120%;
+            height: 120%;
+            background: radial-gradient(circle, rgba(231, 76, 60, 0.12), transparent 70%);
+            border-radius: 50%;
+            z-index: -1;
+            filter: blur(20px);
+            animation: lanternGlow 3s ease-in-out infinite alternate;
+        }
+        @keyframes lanternPulse {
+            0% { opacity: 0.3; transform: translateX(-50%) scale(0.8); }
+            100% { opacity: 1; transform: translateX(-50%) scale(1.3); }
+        }
+        @keyframes lanternGlow {
+            0% { transform: translate(-50%, -50%) scale(0.8); opacity: 0.6; }
+            100% { transform: translate(-50%, -50%) scale(1.4); opacity: 1; }
+        }
+        .lantern:hover,
+        .lantern:active {
+            transform: scale(1.22) !important;
+            filter: drop-shadow(0 0 35px rgba(255, 180, 70, 1)) drop-shadow(0 0 70px rgba(255, 140, 50, 0.5));
+            z-index: 99;
+        }
+
+        /* Анимация подъёма через bottom */
+        @keyframes floatUpAndStop {
+            0% { bottom: -10vh; opacity: 0.4; }
+            15% { opacity: 1; }
+            100% { bottom: var(--target-y); opacity: 1; }
+        }
+
+        /* Покачивание */
+        @keyframes gentleSway {
+            0% { transform: translateX(-8px) rotate(-2deg); }
+            100% { transform: translateX(8px) rotate(2deg); }
+        }
+        @keyframes driftSway {
+            0% { transform: translateX(-6px) rotate(-1.5deg) scale(1); }
+            50% { transform: translateX(10px) rotate(2deg) scale(1.02); }
+            100% { transform: translateX(-4px) rotate(-1deg) scale(0.98); }
+        }
+
+        /* ---------- Светлячки ---------- */
+        .ember {
+            position: absolute;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(255, 200, 100, 0.9), rgba(255, 120, 50, 0.2));
+            box-shadow: 0 0 10px rgba(255, 200, 100, 0.5);
+            pointer-events: none;
+            z-index: 6;
+            will-change: transform, opacity;
+            backface-visibility: hidden;
+            animation: floatEmber linear infinite alternate;
+        }
+        @keyframes floatEmber {
+            0% {
+                transform: translateY(0) translateX(0) scale(1);
+                opacity: 0.3;
+            }
+            100% {
+                transform: translateY(-30vh) translateX(var(--drift)) scale(1.5);
+                opacity: 0.8;
+            }
+        }
+
+        /* ---------- UI: кнопки ---------- */
+        .ui-layer {
+            position: fixed;
+            bottom: 28px;
+            right: 28px;
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            align-items: flex-end;
+        }
+        .floating-btn {
+            background: linear-gradient(145deg, #e04a3a, #b53124);
+            color: #fff;
+            border: none;
+            padding: 18px 32px;
+            font-size: 17px;
+            font-family: 'Georgia', serif;
+            letter-spacing: 0.5px;
+            border-radius: 60px;
+            cursor: pointer;
+            box-shadow: 0 8px 28px rgba(231, 76, 60, 0.45), 0 2px 8px rgba(0, 0, 0, 0.4);
+            transition: transform 0.25s ease, box-shadow 0.3s ease;
+            backdrop-filter: blur(4px);
+            background: rgba(220, 60, 45, 0.92);
+            border: 1px solid rgba(255, 200, 150, 0.15);
+            will-change: transform;
+            backface-visibility: hidden;
+        }
+        .floating-btn:hover {
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 0 12px 40px rgba(231, 76, 60, 0.6), 0 2px 12px rgba(0, 0, 0, 0.5);
+        }
+        .floating-btn:active {
+            transform: scale(0.96);
+        }
+        .diary-btn {
+            background: rgba(50, 70, 100, 0.92);
+            border: 1px solid rgba(100, 150, 255, 0.15);
+            box-shadow: 0 8px 28px rgba(50, 70, 100, 0.45), 0 2px 8px rgba(0, 0, 0, 0.4);
+        }
+        .diary-btn:hover {
+            background: rgba(70, 100, 150, 0.92);
+            box-shadow: 0 12px 40px rgba(50, 100, 200, 0.4);
+        }
+
+        /* ---------- Модалки ---------- */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(2, 2, 8, 0.75);
+            backdrop-filter: blur(14px) saturate(0.8);
+            -webkit-backdrop-filter: blur(14px) saturate(0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            padding: 20px;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.4s ease;
+        }
+        .modal:not(.hidden) {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        .modal.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+        .modal-content {
+            background: rgba(18, 20, 36, 0.88);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.07);
+            border-radius: 28px;
+            padding: 34px 32px 32px;
+            width: 100%;
+            max-width: 420px;
+            text-align: center;
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.7), inset 0 1px 0 rgba(255, 255, 255, 0.04);
+            transform: scale(0.96);
+            transition: transform 0.35s ease, opacity 0.35s ease;
+        }
+        .modal:not(.hidden) .modal-content {
+            transform: scale(1);
+        }
+        .modal-content h3 {
+            margin: 0 0 6px 0;
+            font-size: 22px;
+            font-weight: 400;
+            color: #ffd9cc;
+            letter-spacing: 0.5px;
+        }
+        .modal-content .subtitle {
+            font-size: 14px;
+            color: rgba(255, 200, 180, 0.5);
+            margin-bottom: 20px;
+            font-style: italic;
+        }
+        textarea {
+            width: 100%;
+            height: 130px;
+            background: rgba(8, 9, 20, 0.7);
+            border: 1px solid rgba(255, 255, 255, 0.07);
+            border-radius: 14px;
+            color: #f0ece4;
+            padding: 16px 18px;
+            font-family: 'Georgia', serif;
+            font-size: 16px;
+            resize: none;
+            outline: none;
+            transition: border-color 0.3s, box-shadow 0.3s;
+            line-height: 1.6;
+        }
+        textarea:focus {
+            border-color: rgba(231, 76, 60, 0.5);
+            box-shadow: 0 0 0 3px rgba(231, 76, 60, 0.10);
+        }
+        textarea::placeholder {
+            color: rgba(255, 220, 200, 0.25);
+            font-style: italic;
+        }
+        .modal-buttons {
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+            margin-top: 18px;
+        }
+        .btn-primary,
+        .btn-secondary {
+            padding: 12px 26px;
+            border-radius: 60px;
+            font-family: 'Georgia', serif;
+            font-size: 15px;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            border: none;
+        }
+        .btn-primary {
+            background: linear-gradient(145deg, #e04a3a, #b53124);
+            color: #fff;
+            box-shadow: 0 4px 16px rgba(231, 76, 60, 0.35);
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 28px rgba(231, 76, 60, 0.5);
+        }
+        .btn-primary:active {
+            transform: scale(0.96);
+        }
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.05);
+            color: rgba(255, 255, 255, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.10);
+            color: #fff;
+        }
+
+        .view-content .lantern-icon {
+            font-size: 48px;
+            margin-bottom: 6px;
+            animation: pulseGlow 2.2s ease-in-out infinite alternate;
+            display: block;
+        }
+        #view-wish-text {
+            font-size: 20px;
+            font-style: italic;
+            color: #ffe3c0;
+            line-height: 1.7;
+            margin: 16px 0 24px;
+            word-wrap: break-word;
+            padding: 0 4px;
+        }
+        @keyframes pulseGlow {
+            0% { filter: drop-shadow(0 0 6px rgba(231, 76, 60, 0.3)); }
+            100% { filter: drop-shadow(0 0 30px rgba(231, 76, 60, 0.9)); }
+        }
+
+        /* ---------- АВТОРИЗАЦИЯ ---------- */
+        #auth-modal .modal-content {
+            max-width: 380px;
+            padding: 40px 32px 36px;
+        }
+        #auth-modal .auth-icon {
+            font-size: 52px;
+            margin-bottom: 6px;
+            display: block;
+            animation: pulseGlow 2.5s ease-in-out infinite alternate;
+        }
+        #auth-modal h2 {
+            font-weight: 400;
+            font-size: 24px;
+            color: #ffd9cc;
+            margin-bottom: 4px;
+        }
+        #auth-modal .auth-sub {
+            color: rgba(255, 200, 180, 0.5);
+            font-size: 14px;
+            margin-bottom: 24px;
+            font-style: italic;
+        }
+        .auth-field {
+            width: 100%;
+            background: rgba(8, 9, 20, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 14px;
+            padding: 14px 18px;
+            color: #f0ece4;
+            font-family: 'Georgia', serif;
+            font-size: 15px;
+            outline: none;
+            transition: border-color 0.3s, box-shadow 0.3s;
+            margin-bottom: 14px;
+        }
+        .auth-field:focus {
+            border-color: rgba(231, 76, 60, 0.5);
+            box-shadow: 0 0 0 3px rgba(231, 76, 60, 0.10);
+        }
+        .auth-field::placeholder {
+            color: rgba(255, 220, 200, 0.25);
+        }
+        .auth-error {
+            color: #ffb3a0;
+            font-size: 15px;
+            margin: -6px 0 12px 0;
+            min-height: 22px;
+            text-align: left;
+            padding-left: 6px;
+            font-weight: 300;
+        }
+        .auth-remember {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 6px 0 16px 0;
+            font-size: 15px;
+            color: rgba(255, 255, 255, 0.7);
+            cursor: pointer;
+            user-select: none;
+        }
+        .auth-remember input[type="checkbox"] {
+            display: none;
+        }
+        .auth-remember .checkmark {
+            width: 22px;
+            height: 22px;
+            border-radius: 6px;
+            border: 2px solid rgba(255, 255, 255, 0.25);
+            background: rgba(8, 9, 20, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.25s ease;
+            flex-shrink: 0;
+        }
+        .auth-remember input:checked+.checkmark {
+            background: #e04a3a;
+            border-color: #e04a3a;
+        }
+        .auth-remember input:checked+.checkmark::after {
+            content: '✓';
+            color: #fff;
+            font-size: 16px;
+            font-weight: bold;
+        }
+        .auth-remember:hover .checkmark {
+            border-color: rgba(255, 255, 255, 0.5);
+        }
+
+        .auth-actions {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            margin-top: 4px;
+        }
+        .auth-actions .btn-primary {
+            flex: 1;
+            padding: 14px;
+            font-size: 16px;
+        }
+
+        /* ---------- АДАПТИВ И ОПТИМИЗАЦИЯ ДЛЯ МОБИЛЬНЫХ ---------- */
+        @media (max-width: 768px) {
+            .deco-lantern {
+                width: 16px !important;
+                height: 24px !important;
+                box-shadow: 0 0 8px rgba(255,60,40,0.3) !important;
+            }
+            .deco-lantern::before,
+            .deco-lantern::after {
+                display: none !important;
+            }
+            .lantern {
+                width: 44px !important;
+                height: 64px !important;
+                filter: drop-shadow(0 0 12px rgba(231,76,60,0.8)) drop-shadow(0 0 30px rgba(231,76,60,0.3)) !important;
+            }
+            .lantern::after {
+                filter: blur(6px) !important;
+            }
+            .lantern::before {
+                filter: blur(2px) !important;
+            }
+            .moon {
+                width: 40px;
+                height: 40px;
+                top: 4%;
+                right: 6%;
+                box-shadow: 0 0 20px rgba(255, 230, 200, 0.15) !important;
+            }
+            .shooting-star {
+                width: 60px !important;
+            }
+            .shooting-star::after {
+                width: 6px;
+                height: 6px;
+                right: -4px;
+                top: -4px;
+                filter: blur(1px) !important;
+            }
+            .city-background {
+                height: 80vh;
+            }
+            .floating-btn {
+                padding: 14px 22px;
+                font-size: 15px;
+            }
+            .ui-layer {
+                bottom: 18px;
+                right: 18px;
+                gap: 10px;
+            }
+            .modal-content {
+                padding: 24px 20px 28px;
+            }
+            .modal-content h3 {
+                font-size: 19px;
+            }
+            textarea {
+                height: 110px;
+                font-size: 15px;
+            }
+            #auth-modal .modal-content {
+                padding: 28px 20px 28px;
+            }
+        }
+        @media (max-width: 400px) {
+            .floating-btn {
+                padding: 12px 18px;
+                font-size: 13px;
+            }
+            .modal-content {
+                padding: 20px 16px 24px;
+            }
+            .lantern {
+                width: 38px !important;
+                height: 56px !important;
+            }
+            .deco-lantern {
+                width: 12px !important;
+                height: 18px !important;
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            *,
+            *::before,
+            *::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+            .lantern,
+            .deco-lantern,
+            .shooting-star,
+            .ember {
+                animation: none !important;
+                transition: none !important;
+            }
+            .stars-layer {
+                animation: none !important;
+            }
+            .moon {
+                animation: none !important;
+            }
+        }
+
+        /* ---------- Блокировка при переполнении ---------- */
+        .room-full {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background: #05050b;
+            color: rgba(255, 255, 255, 0.5);
+            font-family: 'Georgia', serif;
+            font-size: 18px;
+            text-align: center;
+            padding: 30px;
+            line-height: 1.7;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .room-full .icon { font-size: 48px; opacity: 0.4; }
+        .room-full .sub { font-size: 14px; color: rgba(255, 255, 255, 0.25); }
+
+        #main-app { display: none; }
+        #auth-modal { opacity: 1; pointer-events: auto; z-index: 2000; }
+        #auth-modal.hidden { opacity: 0; pointer-events: none; }
+    </style>
+</head>
+<body>
+
+    <!-- ===== МОДАЛКА АВТОРИЗАЦИИ ===== -->
+    <div id="auth-modal" class="modal">
+        <div class="modal-content">
+            <span class="auth-icon">🏮</span>
+            <h2>Добро пожаловать</h2>
+            <div class="auth-sub">Войди, чтобы загадать желание</div>
+
+            <input type="email" id="auth-email" class="auth-field" placeholder="Электронная почта" autocomplete="email" />
+            <input type="password" id="auth-password" class="auth-field" placeholder="Пароль" autocomplete="current-password" />
+
+            <div class="auth-error" id="auth-error"></div>
+
+            <label class="auth-remember">
+                <input type="checkbox" id="auth-remember" checked />
+                <span class="checkmark"></span>
+                Запомнить меня
+            </label>
+
+            <div class="auth-actions">
+                <button id="auth-submit-btn" class="btn-primary">Войти в меня</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== ОСНОВНОЕ ПРИЛОЖЕНИЕ ===== -->
+    <div id="main-app">
+        <div id="sky-container">
+            <div class="stars-layer s1"></div>
+            <div class="stars-layer s2"></div>
+            <div class="stars-layer s3"></div>
+            <div class="stars-layer s4"></div>
+            <div class="stars-layer s5"></div>
+            <div class="moon"></div>
+            <div class="city-background"></div>
+            <div class="city-glow"></div>
+            <div class="horizon-glow"></div>
+        </div>
+
+        <div class="ui-layer">
+            <button id="open-wish-modal" class="floating-btn">✨ Загадать желание</button>
+            <button id="go-to-diary" class="floating-btn diary-btn">📖 Вернуться в дневник</button>
+        </div>
+
+        <div id="wish-modal" class="modal hidden">
+            <div class="modal-content">
+                <h3>🌙 Загадай сокровенное</h3>
+                <div class="subtitle">Твое желание улетит в небо на огоньке</div>
+                <textarea id="wish-text" placeholder="Напиши то, что живёт в сердце" maxlength="280"></textarea>
+                <div class="modal-buttons">
+                    <button id="close-wish-modal" class="btn-secondary">Отмена</button>
+                    <button id="launch-btn" class="btn-primary">🎐 Запустить</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="view-wish-modal" class="modal hidden">
+            <div class="modal-content view-content">
+                <span class="lantern-icon">🏮</span>
+                <p id="view-wish-text"></p>
+                <button id="close-view-modal" class="btn-primary">Закрыть</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== FIREBASE SDK ===== -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js">
+    </script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js">
+    </script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js">
+    </script>
+
+    <script>
+        // --------------------------------------------------------------
+        // 1. КОНФИГ FIREBASE (ЗАМЕНИТЕ НА СВОИ КЛЮЧИ)
+        // --------------------------------------------------------------
+        const firebaseConfig = {
+            apiKey: "AIzaSyBOR9aAWI0CLUFaK6jnVQDN3Zze8cG7kW8",
+            authDomain: "fonar-4c095.firebaseapp.com",
+            databaseURL: "https://fonar-4c095-default-rtdb.europe-west1.firebasedatabase.app",
+            projectId: "fonar-4c095",
+            storageBucket: "fonar-4c095.firebasestorage.app",
+            messagingSenderId: "934392362698",
+            appId: "1:934392362698:web:9660427460c83c2f982633"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.database();
+
+        // --------------------------------------------------------------
+        // 2. УПРАВЛЕНИЕ АВТОРИЗАЦИЕЙ
+        // --------------------------------------------------------------
+        const authModal = document.getElementById('auth-modal');
+        const authEmail = document.getElementById('auth-email');
+        const authPassword = document.getElementById('auth-password');
+        const authError = document.getElementById('auth-error');
+        const authSubmitBtn = document.getElementById('auth-submit-btn');
+        const authRemember = document.getElementById('auth-remember');
+
+        authSubmitBtn.onclick = () => {
+            const email = authEmail.value.trim();
+            const password = authPassword.value.trim();
+            if (!email || !password) {
+                authError.textContent = 'Заполните все поля';
+                return;
+            }
+            if (password.length < 6) {
+                authError.textContent = 'Пароль должен быть не менее 6 символов';
+                return;
+            }
+            authError.textContent = '';
+
+            const persistence = authRemember.checked ?
+                firebase.auth.Auth.Persistence.LOCAL :
+                firebase.auth.Auth.Persistence.SESSION;
+
+            auth.setPersistence(persistence)
+                .then(() => {
+                    return auth.signInWithEmailAndPassword(email, password);
+                })
+                .catch((error) => {
+                    let message = 'Не удалось войти. Проверьте данные.';
+                    switch (error.code) {
+                        case 'auth/user-not-found':
+                            message = 'Пользователь с таким email не найден.';
+                            break;
+                        case 'auth/wrong-password':
+                            message = 'Неверный пароль. Попробуйте снова.';
+                            break;
+                        case 'auth/invalid-email':
+                            message = 'Некорректный формат email.';
+                            break;
+                        case 'auth/too-many-requests':
+                            message = 'Слишком много попыток. Подождите немного.';
+                            break;
+                        case 'auth/invalid-login-credentials':
+                            message = 'Неверный email или пароль.';
+                            break;
+                        default:
+                            if (error.message && error.message.includes('INVALID_LOGIN_CREDENTIALS')) {
+                                message = 'Неверный email или пароль.';
+                            } else {
+                                message = 'Ошибка входа. Попробуйте позже.';
+                            }
+                            break;
+                    }
+                    authError.textContent = message;
+                });
+        };
+
+        authPassword.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') authSubmitBtn.click();
+        });
+        authEmail.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') authPassword.focus();
+        });
+
+        // --------------------------------------------------------------
+        // 3. СОСТОЯНИЕ АВТОРИЗАЦИИ
+        // --------------------------------------------------------------
+        auth.onAuthStateChanged((user) => {
+            if (user) {
+                authModal.classList.add('hidden');
+                document.getElementById('main-app').style.display = 'block';
+                if (!window._appInitialized) {
+                    window._appInitialized = true;
+                    initApp();
+                }
+            } else {
+                authModal.classList.remove('hidden');
+                document.getElementById('main-app').style.display = 'none';
+                window._appInitialized = false;
+                authError.textContent = '';
+            }
+        });
+
+        // --------------------------------------------------------------
+        // 4. ГЛАВНАЯ ФУНКЦИЯ
+        // --------------------------------------------------------------
+        function initApp() {
+            console.log('🌟 Приложение запущено для:', auth.currentUser?.email);
+
+            setTimeout(() => {
+                window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+            }, 120);
+
+            const sky = document.getElementById('sky-container');
+            const wishesRef = db.ref('wishes');
+
+            const wishModal = document.getElementById('wish-modal');
+            const viewModal = document.getElementById('view-wish-modal');
+            const openBtn = document.getElementById('open-wish-modal');
+            const closeWish = document.getElementById('close-wish-modal');
+            const launchBtn = document.getElementById('launch-btn');
+            const wishInput = document.getElementById('wish-text');
+            const viewText = document.getElementById('view-wish-text');
+            const closeView = document.getElementById('close-view-modal');
+
+            const goToDiaryBtn = document.getElementById('go-to-diary');
+            goToDiaryBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                window.location.href = 'index.html';
+            });
+
+            function isMobile() {
+                return window.innerWidth < 768 || 'ontouchstart' in window;
+            }
+
+            const DECO_COUNT = isMobile() ? 3 : 10;
+            const EMBER_COUNT = isMobile() ? 6 : 30;
+            const STAR_COUNT = isMobile() ? 2 : 7;
+
+            let observer;
+            if ('IntersectionObserver' in window) {
+                observer = new IntersectionObserver((entries) => {
+                    entries.forEach(entry => {
+                        const el = entry.target;
+                        if (entry.isIntersecting) {
+                            el.style.animationPlayState = 'running';
+                        } else {
+                            el.style.animationPlayState = 'paused';
+                        }
+                    });
+                }, { threshold: 0.1 });
+            }
+
+            openBtn.onclick = () => wishModal.classList.remove('hidden');
+            closeWish.onclick = () => wishModal.classList.add('hidden');
+            wishModal.onclick = (e) => {
+                if (e.target === wishModal) wishModal.classList.add('hidden');
+            };
+
+            closeView.onclick = () => viewModal.classList.add('hidden');
+            viewModal.onclick = (e) => {
+                if (e.target === viewModal) viewModal.classList.add('hidden');
+            };
+
+            launchBtn.onclick = () => {
+                const text = wishInput.value.trim();
+                if (!text) {
+                    wishInput.style.borderColor = 'rgba(231,76,60,0.6)';
+                    wishInput.style.boxShadow = '0 0 0 3px rgba(231,76,60,0.15)';
+                    setTimeout(() => {
+                        wishInput.style.borderColor = '';
+                        wishInput.style.boxShadow = '';
+                    }, 800);
+                    return;
+                }
+                wishesRef.push({
+                    text: text,
+                    x: Math.random() * 80 + 10,
+                    y: Math.random() * 480,
+                    uid: auth.currentUser ? auth.currentUser.uid : 'anonymous',
+                    timestamp: firebase.database.ServerValue.TIMESTAMP
+                });
+                wishInput.value = '';
+                wishModal.classList.add('hidden');
+            };
+
+            wishInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
+                    e.preventDefault();
+                    launchBtn.click();
+                }
+            });
+
+            function createLantern(text, xPos, targetY, animate = true) {
+                const el = document.createElement('div');
+                el.className = 'lantern';
+                el.style.left = xPos + 'vw';
+
+                if (!animate) {
+                    el.style.bottom = targetY + 'vh';
+                    el.style.opacity = '1';
+                    const swayDur = Math.random() * 2 + 3.5;
+                    const swayName = Math.random() > 0.5 ? 'gentleSway' : 'driftSway';
+                    el.style.animation = `${swayName} ${swayDur}s ease-in-out infinite alternate`;
+                } else {
+                    el.style.setProperty('--target-y', targetY + 'vh');
+                    const flyDur = (Math.random() * 4 + 10) * 3;
+                    const swayDur = Math.random() * 2 + 3.5;
+                    const swayName = Math.random() > 0.5 ? 'gentleSway' : 'driftSway';
+                    el.style.animation = `
+                        floatUpAndStop ${flyDur}s cubic-bezier(0.22, 1.0, 0.36, 1.0) forwards,
+                        ${swayName} ${swayDur}s ease-in-out infinite alternate
+                    `;
+                    el.style.animationDelay = (Math.random() * 0.6) + 's';
+                }
+
+                sky.appendChild(el);
+
+                el.onclick = (e) => {
+                    e.stopPropagation();
+                    viewText.textContent = text;
+                    viewModal.classList.remove('hidden');
+                };
+
+                if (navigator.vibrate) {
+                    el.addEventListener('touchstart', () => {
+                        navigator.vibrate && navigator.vibrate(8);
+                    }, { passive: true });
+                }
+            }
+
+            let maxTimestamp = 0;
+
+            wishesRef.orderByChild('timestamp').once('value', (snapshot) => {
+                snapshot.forEach((childSnapshot) => {
+                    const data = childSnapshot.val();
+                    createLantern(data.text, data.x, data.y, false);
+                    if (data.timestamp && data.timestamp > maxTimestamp) {
+                        maxTimestamp = data.timestamp;
+                    }
+                });
+
+                const newQuery = wishesRef.orderByChild('timestamp').startAt(maxTimestamp + 1);
+                newQuery.on('child_added', (snapshot) => {
+                    const data = snapshot.val();
+                    createLantern(data.text, data.x, data.y, true);
+                });
+            });
+
+            function createDecoLantern() {
+                const el = document.createElement('div');
+                el.className = 'deco-lantern';
+                const left = Math.random() * 90 + 5;
+                el.style.left = left + '%';
+                const bottom = Math.random() * 20 - 5;
+                el.style.bottom = bottom + '%';
+                const duration = Math.random() * 20 + 22;
+                const drift = (Math.random() - 0.5) * 120;
+                const rot = (Math.random() - 0.5) * 40;
+                el.style.setProperty('--drift', drift + 'px');
+                el.style.setProperty('--rot', rot + 'deg');
+                el.style.animationDuration = duration + 's';
+                el.style.animationDelay = (Math.random() * 25) + 's';
+                const size = Math.random() * 20 + 24;
+                el.style.width = size + 'px';
+                el.style.height = (size * 1.5) + 'px';
+                const brightness = Math.random() * 0.4 + 0.6;
+                el.style.filter = `brightness(${brightness}) drop-shadow(0 0 12px rgba(255,60,40,0.5))`;
+                sky.appendChild(el);
+                if (observer) observer.observe(el);
+            }
+            for (let i = 0; i < DECO_COUNT; i++) createDecoLantern();
+            setInterval(() => {
+                const existing = document.querySelectorAll('.deco-lantern').length;
+                if (existing < DECO_COUNT) {
+                    createDecoLantern();
+                }
+            }, 8000);
+
+            function createShootingStar() {
+                const star = document.createElement('div');
+                star.className = 'shooting-star';
+                const top = Math.random() * 30 + 5;
+                const left = Math.random() * 60 + 20;
+                star.style.top = top + '%';
+                star.style.left = left + '%';
+                star.style.animationDuration = (Math.random() * 2 + 2.5) + 's';
+                star.style.animationDelay = (Math.random() * 20) + 's';
+                star.style.width = (Math.random() * 80 + 80) + 'px';
+                sky.appendChild(star);
+                if (observer) observer.observe(star);
+            }
+            for (let i = 0; i < STAR_COUNT; i++) createShootingStar();
+
+            function createEmber() {
+                const e = document.createElement('div');
+                e.className = 'ember';
+                const size = Math.random() * 5 + 3;
+                e.style.width = size + 'px';
+                e.style.height = size + 'px';
+                e.style.left = (Math.random() * 90 + 5) + '%';
+                e.style.bottom = (Math.random() * 30 + 5) + '%';
+                e.style.setProperty('--drift', (Math.random() * 60 - 30) + 'px');
+                e.style.animationDuration = (Math.random() * 6 + 6) + 's';
+                e.style.animationDelay = (Math.random() * 15) + 's';
+                e.style.opacity = Math.random() * 0.5 + 0.2;
+                sky.appendChild(e);
+                if (observer) observer.observe(e);
+            }
+            for (let i = 0; i < EMBER_COUNT; i++) createEmber();
+            setInterval(() => {
+                if (document.querySelectorAll('.ember').length < EMBER_COUNT + 10) {
+                    createEmber();
+                }
+            }, 4000);
+
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') {
+                    wishModal.classList.add('hidden');
+                    viewModal.classList.add('hidden');
+                }
+            });
+
+            console.log('🌙 Небо Желаний готово.');
+        }
+    </script>
+
+</body>
+</html>
