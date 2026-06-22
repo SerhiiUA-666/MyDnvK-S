@@ -10,7 +10,6 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
     <style>
-        /* ===== БАЗОВЫЕ СТИЛИ (без изменений) ===== */
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body {
             background: radial-gradient(circle at 10% 20%, #0b1a2e, #020810);
@@ -42,7 +41,6 @@
             pointer-events: none;
             z-index: 0;
         }
-
         .game-wrapper {
             width: 100%;
             max-width: 1100px;
@@ -54,8 +52,6 @@
             position: relative;
             z-index: 1;
         }
-
-        /* ===== БОКОВАЯ ПАНЕЛЬ ===== */
         .side-panel {
             flex: 1 1 280px;
             min-width: 200px;
@@ -85,7 +81,6 @@
             gap: 8px;
         }
         .side-panel h2 span { font-size: 28px; }
-
         .profile-block {
             background: rgba(79, 195, 247, 0.08);
             border: 2px solid #4fc3f7;
@@ -117,7 +112,6 @@
             background: rgba(255, 82, 82, 0.4);
             box-shadow: 0 0 25px #ff5252;
         }
-
         .quest-list {
             list-style: none;
             display: flex;
@@ -163,7 +157,6 @@
             font-weight: bold;
             box-shadow: 0 0 15px #4fc3f7;
         }
-
         .stat-block {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -192,7 +185,6 @@
             color: #4fc3f7;
             text-shadow: 0 0 12px #4fc3f7;
         }
-
         .extra-btn {
             background: rgba(79, 195, 247, 0.1);
             border: 2px solid #4fc3f7;
@@ -215,7 +207,6 @@
             cursor: not-allowed;
             transform: none;
         }
-
         .toggle-group {
             display: flex;
             align-items: center;
@@ -234,7 +225,6 @@
             accent-color: #4fc3f7;
             cursor: pointer;
         }
-
         .reels-selector {
             display: flex;
             align-items: center;
@@ -260,8 +250,6 @@
             outline: none;
             cursor: pointer;
         }
-
-        /* ===== ОСНОВНОЙ АВТОМАТ ===== */
         .casino-machine {
             flex: 2 1 500px;
             min-width: 320px;
@@ -287,7 +275,6 @@
         }
         .machine-title::before { content: '❄️ '; }
         .machine-title::after { content: ' ❄️'; }
-
         .display-panel {
             display: flex;
             gap: 12px;
@@ -314,7 +301,6 @@
             color: #4fc3f7;
             text-shadow: 0 0 20px #4fc3f7;
         }
-
         .slots-viewport {
             background: #050e1a;
             border: 3px solid #4fc3f7;
@@ -361,6 +347,7 @@
             height: 100%;
             transition: transform 0.5s cubic-bezier(0.15, 0.85, 0.35, 1.05);
             will-change: transform;
+            transform: translate3d(0, 0, 0);
         }
         .slot-reel.slow {
             transition-duration: 2.8s;
@@ -377,7 +364,6 @@
             text-shadow: 0 0 30px #4fc3f7;
             user-select: none;
         }
-
         .action-area {
             min-height: 60px;
             display: flex;
@@ -458,7 +444,6 @@
             background: #7cd4f8;
             box-shadow: 0 0 25px #4fc3f7;
         }
-
         .risk-panel {
             background: rgba(8, 20, 40, 0.95);
             border: 2px solid #4fc3f7;
@@ -508,7 +493,6 @@
             box-shadow: 0 1px 0 #0d47a1;
         }
         .hidden { display: none !important; }
-
         .message-display {
             background: rgba(0, 10, 30, 0.7);
             border: 2px solid #4fc3f7;
@@ -549,7 +533,6 @@
             50% { transform: scale(1.03); box-shadow: 0 0 60px rgba(124, 77, 255, 0.4); }
             100% { transform: scale(1); }
         }
-
         .spin-button {
             width: 100%;
             padding: 16px;
@@ -576,15 +559,12 @@
             box-shadow: 0 4px 0 #0d47a1;
             pointer-events: none;
         }
-
         .extra-controls {
             display: flex;
             gap: 10px;
             flex-wrap: wrap;
             margin-top: 5px;
         }
-
-        /* ===== МОДАЛЬНЫЕ ОКНА ===== */
         .modal-overlay {
             position: fixed;
             top: 0;
@@ -671,7 +651,6 @@
         .modal-btn.secondary:hover {
             background: rgba(79, 195, 247, 0.15);
         }
-
         .auth-input {
             width: 100%;
             padding: 12px 16px;
@@ -708,7 +687,6 @@
             font-size: 16px;
             min-height: 24px;
         }
-
         .loan-input {
             width: 100%;
             padding: 10px 14px;
@@ -733,8 +711,6 @@
             margin-bottom: 4px;
             display: block;
         }
-
-        /* ===== БУРГЕР И ВЕРХНЯЯ ПАНЕЛЬ ===== */
         .top-bar {
             display: none;
             justify-content: space-between;
@@ -786,7 +762,6 @@
         .music-btn.muted {
             opacity: 0.4;
         }
-
         .menu-overlay {
             position: fixed;
             top: 0;
@@ -800,7 +775,6 @@
         .menu-overlay.active {
             display: block;
         }
-
         @media (max-width: 768px) {
             .game-wrapper {
                 flex-direction: column;
@@ -910,7 +884,6 @@
                 font-size: 20px;
             }
         }
-
         @media (min-width: 769px) {
             .top-bar {
                 display: none !important;
@@ -922,7 +895,6 @@
                 display: none !important;
             }
         }
-
         .confetti-container {
             position: fixed;
             top: 0;
@@ -944,8 +916,6 @@
             0% { transform: translateY(-10px) rotate(0deg); opacity: 1; }
             100% { transform: translateY(110vh) rotate(720deg); opacity: 0; }
         }
-
-        /* Доп. стиль для счётчика фриспинов */
         .free-spins-indicator {
             font-family: 'Pangolin', cursive;
             font-size: 20px;
@@ -964,7 +934,6 @@
 
 <div class="game-wrapper">
 
-    <!-- ===== ВЕРХНЯЯ ПАНЕЛЬ (бургер + музыка) ===== -->
     <div class="top-bar">
         <button class="burger-btn" onclick="toggleMenu()">☰</button>
         <div class="top-controls">
@@ -972,10 +941,8 @@
         </div>
     </div>
 
-    <!-- ===== ЗАТЕМНЕНИЕ ===== -->
     <div class="menu-overlay" id="menuOverlay" onclick="toggleMenu()"></div>
 
-    <!-- ===== БОКОВАЯ ПАНЕЛЬ ===== -->
     <div class="side-panel" id="sidePanel">
         <button class="close-menu" onclick="toggleMenu()">✕</button>
 
@@ -1003,14 +970,12 @@
             <button class="extra-btn" id="musicBtnDesktop" onclick="toggleMusic()" style="font-size:18px;">🎵</button>
         </div>
 
-        <!-- Ежедневный бонус -->
         <div style="margin-top: 6px; text-align: center;">
             <button class="extra-btn" id="daily-bonus-btn" onclick="claimDailyBonus()" style="width:100%; font-size:16px; padding:8px;">
                 🎁 Ежедневный бонус
             </button>
         </div>
 
-        <!-- Отображение фриспинов -->
         <div style="text-align: center; margin: 4px 0;">
             <span id="free-spins-display" class="free-spins-indicator" style="display:none;">❄️ 0</span>
         </div>
@@ -1039,7 +1004,6 @@
         </div>
     </div>
 
-    <!-- ===== ГЛАВНЫЙ АВТОМАТ ===== -->
     <div class="casino-machine">
         <div class="machine-title">Ледяной Куш</div>
 
@@ -1100,7 +1064,6 @@
     </div>
 </div>
 
-<!-- ===== МОДАЛЬНЫЕ ОКНА ===== -->
 <div id="info-modal" class="modal-overlay">
     <div class="modal-box">
         <h3 id="info-modal-title">Заголовок</h3>
@@ -1161,9 +1124,6 @@
 <div id="confetti-container" class="confetti-container"></div>
 
 <script>
-    // ================================================================
-    //  FIREBASE КОНФИГУРАЦИЯ
-    // ================================================================
     const firebaseConfig = {
         apiKey: "AIzaSyDzDfj9lkJG0NrRrsHN6AdBcHZRCdxmCCQ",
         authDomain: "kazik-fdb39.firebaseapp.com",
@@ -1178,11 +1138,7 @@
     const auth = firebase.auth();
     const database = firebase.database();
 
-    // ================================================================
-    //  ИГРОВАЯ ЛОГИКА
-    // ================================================================
-
-    // ★ Добавлены новые символы: ❄️ (Wild) и ☃️ (Scatter)
+    // === ОПТИМИЗИРОВАННЫЕ КОНСТАНТЫ ===
     const SYMBOLS = ['🍒', '🍋', '💎', '💩', '🐱', '⭐', '🎰', '❄️', '☃️'];
     const SYMBOL_WEIGHTS = {
         '🍒': 30,
@@ -1192,12 +1148,11 @@
         '🐱': 12,
         '⭐': 8,
         '🎰': 2,
-        '❄️': 5,   // Wild
-        '☃️': 4    // Scatter
+        '❄️': 5,
+        '☃️': 4
     };
     const TOTAL_WEIGHT = Object.values(SYMBOL_WEIGHTS).reduce((a, b) => a + b, 0);
 
-    // Выплаты для основных символов (без Wild и Scatter)
     const PAYOUTS = {
         '🍒': { pair: 0.5, triple: 1.5, four: 8, five: 25 },
         '🍋': { pair: 0.7, triple: 2, four: 12, five: 30 },
@@ -1206,13 +1161,11 @@
         '🐱': { pair: 0.7, triple: 20, four: 60, five: 150 },
         '⭐': { pair: 0.7, triple: 16, four: 45, five: 120 },
         '🎰': { pair: 1.0, triple: 30, four: 100, five: 300 }
-        // ❄️ и ☃️ не участвуют в выплатах напрямую
     };
 
     const LOW_SYMBOLS = ['🍒', '🍋', '💩'];
-    const REEL_SYMBOL_COUNT = 30;
+    const REEL_SYMBOL_COUNT = 15;  // уменьшено с 30
 
-    // Переменные состояния
     let balance = 10000;
     let bet = 10;
     let isSpinning = false;
@@ -1224,15 +1177,13 @@
     let riskEnabled = true;
     let fastAnimation = true;
 
-    // Для риск-игры
     let riskWinAmount = 0;
     let riskChance = 0.5;
 
-    // ★ Новые переменные для фриспинов
     let freeSpinsActive = false;
     let freeSpinsLeft = 0;
-    const FREE_SPINS_COUNT = 5;      // количество фриспинов за 3+ Scatter
-    const FREE_SPINS_MULTIPLIER = 2; // множитель выигрыша во время фриспинов
+    const FREE_SPINS_COUNT = 5;
+    const FREE_SPINS_MULTIPLIER = 2;
 
     let stats = {
         spins: 0,
@@ -1262,7 +1213,6 @@
     let questCompleted = { q1: false, q2: false, q3: false, q4: false, q5: false };
     let lastQuestsDate = null;
 
-    // ---- DOM ----
     const reelContainers = [
         document.getElementById('reel-container-1'),
         document.getElementById('reel-container-2'),
@@ -1294,9 +1244,7 @@
     const dailyBonusBtn = document.getElementById('daily-bonus-btn');
     const freeSpinsDisplay = document.getElementById('free-spins-display');
 
-    // ================================================================
-    //  МУЗЫКА
-    // ================================================================
+    // === МУЗЫКА ===
     let musicEnabled = true;
     const musicBtnMobile = document.getElementById('musicBtnMobile');
     const musicBtnDesktop = document.getElementById('musicBtnDesktop');
@@ -1333,7 +1281,7 @@
         updateMusicUI();
     }
 
-    // Бургер
+    // === БУРГЕР ===
     const sidePanel = document.getElementById('sidePanel');
     const menuOverlay = document.getElementById('menuOverlay');
     function toggleMenu() {
@@ -1345,9 +1293,7 @@
     let isLoggedIn = false;
     let saveTimeout = null;
 
-    // ================================================================
-    //  МОДАЛЬНЫЕ ОКНА
-    // ================================================================
+    // === МОДАЛКИ ===
     const infoModal = document.getElementById('info-modal');
     const infoTitle = document.getElementById('info-modal-title');
     const infoText = document.getElementById('info-modal-text');
@@ -1387,9 +1333,7 @@
         if (e.target === infoModal) closeInfoModal(false);
     });
 
-    // ================================================================
-    //  АВТОРИЗАЦИЯ
-    // ================================================================
+    // === АВТОРИЗАЦИЯ ===
     const authModal = document.getElementById('auth-modal');
     const authEmail = document.getElementById('auth-email');
     const authPassword = document.getElementById('auth-password');
@@ -1435,9 +1379,7 @@
     authEmail.addEventListener('keydown', (e) => { if (e.key === 'Enter') handleAuth(); });
     authPassword.addEventListener('keydown', (e) => { if (e.key === 'Enter') handleAuth(); });
 
-    // ================================================================
-    //  FIREBASE – ЗАГРУЗКА / СОХРАНЕНИЕ
-    // ================================================================
+    // === FIREBASE – ЗАГРУЗКА / СОХРАНЕНИЕ ===
     function loadUserData(uid) {
         return database.ref('users/' + uid + '/gameData').once('value').then(snap => snap.val());
     }
@@ -1455,8 +1397,6 @@
                 questProgress, questCompleted, lastQuestsDate,
                 musicEnabled,
                 lastBonusDate,
-                // ★ сохраняем состояние фриспинов (если активны – можно сохранить, но обычно не сохраняем между сессиями)
-                // freeSpinsActive, freeSpinsLeft – можно сохранить, но тогда нужно аккуратно. Пока не сохраняем.
                 timestamp: firebase.database.ServerValue.TIMESTAMP
             };
             database.ref('users/' + uid + '/gameData').set(data).catch(err => {
@@ -1465,7 +1405,7 @@
                 msgDisplay.className = 'message-display lose';
             });
             saveTimeout = null;
-        }, 500);
+        }, 1000); // увеличено с 500
     }
 
     function checkDailyReset() {
@@ -1524,7 +1464,7 @@
         updateStatsUI();
         updateJackpotUI();
         updateDailyBonusButton();
-        updateFreeSpinsUI();   // обновляем отображение фриспинов
+        updateFreeSpinsUI();
         spinBtn.disabled = false;
         msgDisplay.textContent = '✅ Данные загружены!';
         msgDisplay.className = 'message-display win';
@@ -1537,9 +1477,7 @@
         updateMusicUI();
     }
 
-    // ================================================================
-    //  АУТЕНТИФИКАЦИЯ – СОСТОЯНИЕ
-    // ================================================================
+    // === АУТЕНТИФИКАЦИЯ – СОСТОЯНИЕ ===
     auth.onAuthStateChanged(async (user) => {
         if (user) {
             currentUser = user;
@@ -1645,9 +1583,7 @@
         auth.signOut().catch(err => console.error('Ошибка выхода:', err));
     });
 
-    // ================================================================
-    //  ЕЖЕДНЕВНЫЙ БОНУС
-    // ================================================================
+    // === ЕЖЕДНЕВНЫЙ БОНУС ===
     function updateDailyBonusButton() {
         if (!isLoggedIn) {
             dailyBonusBtn.disabled = true;
@@ -1683,13 +1619,11 @@
         saveUserData();
         msgDisplay.textContent = '🎉 Вы получили ежедневный бонус 20 000 🪙!';
         msgDisplay.className = 'message-display win';
-        fireConfetti(40);
+        fireConfetti(25); // уменьшено
         playWinSound();
     }
 
-    // ================================================================
-    //  ОБНОВЛЕНИЕ UI ДЛЯ ФРИСПИНОВ
-    // ================================================================
+    // === ОБНОВЛЕНИЕ UI ДЛЯ ФРИСПИНОВ ===
     function updateFreeSpinsUI() {
         if (freeSpinsActive && freeSpinsLeft > 0) {
             freeSpinsDisplay.style.display = 'inline-block';
@@ -1699,9 +1633,7 @@
         }
     }
 
-    // ================================================================
-    //  ИГРОВАЯ ЛОГИКА
-    // ================================================================
+    // === ИГРОВАЯ ЛОГИКА ===
     function changeReelsCount(count, save = true) {
         if (count < 3 || count > 5) count = 4;
         reelsCount = count;
@@ -1712,7 +1644,7 @@
         activeReels = reelElements.slice(0, count);
         activeReels.forEach(reel => {
             reel.innerHTML = `<div class="slot-item">${getWeightedSymbol()}</div>`;
-            reel.style.transform = 'translateY(0px)';
+            reel.style.transform = 'translate3d(0, 0, 0)'; // оптимизация
             if (fastAnimation) reel.classList.remove('slow');
             else reel.classList.add('slow');
         });
@@ -1731,12 +1663,11 @@
         return '🍒';
     }
 
-    // ----- ЗВУКИ -----
+    // === ЗВУКИ ===
     let audioCtx = null;
     function initAudio() {
         try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); } catch(e) {}
     }
-    document.addEventListener('click', () => { if (!audioCtx) initAudio(); }, { once: true });
 
     function playTone(freq, duration, type = 'sine', volume = 0.2) {
         if (!audioCtx) return;
@@ -1754,13 +1685,14 @@
         } catch(e) {}
     }
     function playSpinSound() { playTone(400,0.1,'sawtooth',0.1); setTimeout(()=>playTone(500,0.1,'sawtooth',0.1),100); setTimeout(()=>playTone(600,0.1,'sawtooth',0.1),200); }
-    function playWinSound() { playTone(800,0.2,'square',0.15); setTimeout(()=>playTone(1000,0.2,'square',0.15),200); setTimeout(()=>playTone(1200,0.3,'square',0.15),400); }
-    function playJackpotSound() { playTone(600,0.2,'square',0.2); setTimeout(()=>playTone(800,0.2,'square',0.2),150); setTimeout(()=>playTone(1000,0.2,'square',0.2),300); setTimeout(()=>playTone(1200,0.4,'square',0.2),450); }
-    function playLoseSound() { playTone(300,0.3,'sawtooth',0.1); setTimeout(()=>playTone(250,0.4,'sawtooth',0.1),200); }
+    function playWinSound() { if (autoSpinActive) return; playTone(800,0.2,'square',0.15); setTimeout(()=>playTone(1000,0.2,'square',0.15),200); setTimeout(()=>playTone(1200,0.3,'square',0.15),400); }
+    function playJackpotSound() { if (autoSpinActive) return; playTone(600,0.2,'square',0.2); setTimeout(()=>playTone(800,0.2,'square',0.2),150); setTimeout(()=>playTone(1000,0.2,'square',0.2),300); setTimeout(()=>playTone(1200,0.4,'square',0.2),450); }
+    function playLoseSound() { if (autoSpinActive) return; playTone(300,0.3,'sawtooth',0.1); setTimeout(()=>playTone(250,0.4,'sawtooth',0.1),200); }
     function playFreeSpinSound() { playTone(500,0.1,'sine',0.1); setTimeout(()=>playTone(700,0.1,'sine',0.1),100); }
 
-    // ----- КОНФЕТТИ -----
-    function fireConfetti(count = 60) {
+    // === КОНФЕТТИ (ОПТИМИЗИРОВАННЫЕ) ===
+    function fireConfetti(count = 30) {
+        if (autoSpinActive) return;
         const container = document.getElementById('confetti-container');
         const colors = ['#4fc3f7','#7c4dff','#00e5ff','#b388ff','#69f0ae','#448aff'];
         for (let i=0; i<count; i++) {
@@ -1782,7 +1714,7 @@
         }
     }
 
-    // ----- УПРАВЛЕНИЕ СТАВКОЙ -----
+    // === УПРАВЛЕНИЕ СТАВКОЙ ===
     function setBet(amount) {
         if (isSpinning || !riskPanel.classList.contains('hidden') || !isLoggedIn || freeSpinsActive) return;
         if (amount === 'max') bet = balance;
@@ -1808,10 +1740,9 @@
         customBetInput.value = '';
     }
 
-    // ----- ОСНОВНОЙ СПИН -----
+    // === ОСНОВНОЙ СПИН ===
     async function startSpin() {
         if (isSpinning || !isLoggedIn) return;
-        // Если не фриспины, проверяем баланс
         if (!freeSpinsActive && (balance < bet || bet <= 0)) {
             msgDisplay.textContent = '❌ Недостаточно монет!';
             msgDisplay.className = 'message-display lose';
@@ -1822,20 +1753,18 @@
         riskPanel.classList.add('hidden');
         betPanel.classList.remove('hidden');
 
-        // Если фриспины не активны, списываем ставку
         if (!freeSpinsActive) {
             balance -= bet;
             stats.spins++;
             stats.totalBet += bet;
             jackpot += Math.floor(bet * 0.05);
         } else {
-            // Во время фриспинов ставка не списывается, но статистика спинов увеличивается
             stats.spins++;
-            // Джекпот не растёт во время фриспинов (опционально)
         }
-        updateJackpotUI(); updateUI(); updateStatsUI(); saveUserData();
+        updateJackpotUI();
+        updateUI();
+        saveUserData();
 
-        // Если фриспины активны, показываем сообщение
         if (freeSpinsActive) {
             msgDisplay.textContent = `🌀 Бесплатный спин ${FREE_SPINS_COUNT - freeSpinsLeft + 1} из ${FREE_SPINS_COUNT}...`;
             msgDisplay.className = 'message-display win';
@@ -1853,43 +1782,35 @@
         const promises = activeReels.map((reel, index) => animateReel(reel, finalResults[index], index*150));
         await Promise.all(promises);
 
-        // Проверяем выигрыш и Scatter
         checkWin(finalResults);
 
-        // Уменьшаем счётчик фриспинов, если активны
         if (freeSpinsActive) {
-    freeSpinsLeft--;
-    if (freeSpinsLeft <= 0) {
-        // Фриспины закончились
-        freeSpinsActive = false;
-        msgDisplay.textContent = '✨ Бесплатные вращения закончились!';
-        msgDisplay.className = 'message-display win';
-        updateFreeSpinsUI();
-        if (riskEnabled) riskPanel.classList.remove('hidden');
-        
-        // ★ Сбрасываем флаг и разблокируем кнопку
-        isSpinning = false;
-        if (!autoSpinActive) spinBtn.disabled = false;
-        updateUI();
-        saveUserData();
-
-        // Если автоигра активна – продолжаем
-        if (autoSpinActive) {
-            setTimeout(() => {
-                if (autoSpinActive && !isSpinning) startSpin();
-            }, 500);
+            freeSpinsLeft--;
+            if (freeSpinsLeft <= 0) {
+                freeSpinsActive = false;
+                msgDisplay.textContent = '✨ Бесплатные вращения закончились!';
+                msgDisplay.className = 'message-display win';
+                updateFreeSpinsUI();
+                if (riskEnabled) riskPanel.classList.remove('hidden');
+                isSpinning = false;
+                if (!autoSpinActive) spinBtn.disabled = false;
+                updateUI();
+                saveUserData();
+                if (autoSpinActive) {
+                    setTimeout(() => {
+                        if (autoSpinActive && !isSpinning) startSpin();
+                    }, 500);
+                }
+                return;
+            } else {
+                updateFreeSpinsUI();
+                isSpinning = false;
+                setTimeout(() => {
+                    if (!isSpinning) startSpin();
+                }, 800);
+                return;
+            }
         }
-        return;
-    } else {
-        // Фриспины ещё есть – запускаем следующий автоматически
-        updateFreeSpinsUI();
-        isSpinning = false;   // ← добавили эту строку
-        setTimeout(() => {
-            if (!isSpinning) startSpin();
-        }, 800);
-        return;
-    }
-}
 
         saveUserData();
 
@@ -1919,11 +1840,11 @@
                 const travel = (REEL_SYMBOL_COUNT-1) * itemHeight;
                 const duration = fastAnimation ? 0.5 : 2.8;
                 reel.style.transition = `transform ${duration}s cubic-bezier(0.15,0.85,0.35,1.05)`;
-                reel.style.transform = `translateY(-${travel}px)`;
+                reel.style.transform = `translate3d(0, -${travel}px, 0)`;
 
                 setTimeout(() => {
                     reel.style.transition = 'none';
-                    reel.style.transform = 'translateY(0px)';
+                    reel.style.transform = 'translate3d(0, 0, 0)';
                     reel.innerHTML = `<div class="slot-item">${finalSymbol}</div>`;
                     resolve();
                 }, duration*1000 + 100);
@@ -1931,9 +1852,8 @@
         });
     }
 
-    // ----- НОВАЯ ПРОВЕРКА ВЫИГРЫША С WILD И SCATTER -----
+    // === ПРОВЕРКА ВЫИГРЫША ===
     function checkWin(results) {
-        // 1. Считаем Scatter
         let scatterCount = 0;
         let wildCount = 0;
         const basicSymbols = [];
@@ -1943,40 +1863,33 @@
             else basicSymbols.push(sym);
         });
 
-        // 2. Активация фриспинов
         if (scatterCount >= 3 && !freeSpinsActive) {
             freeSpinsActive = true;
             freeSpinsLeft = FREE_SPINS_COUNT;
             updateFreeSpinsUI();
             msgDisplay.textContent = `🎉 Активированы ${FREE_SPINS_COUNT} бесплатных вращений! (x${FREE_SPINS_MULTIPLIER})`;
             msgDisplay.className = 'message-display jackpot';
-            fireConfetti(40);
+            fireConfetti(25);
             playJackpotSound();
-            // Сохраняем состояние
             saveUserData();
-            // Если есть ещё и выигрыш, он будет рассчитан ниже, но мы не показываем риск-панель
         } else if (scatterCount >= 3 && freeSpinsActive) {
-            // Дополнительные фриспины (реактивация)
             freeSpinsLeft += FREE_SPINS_COUNT;
             updateFreeSpinsUI();
             msgDisplay.textContent = `🎉 Ещё ${FREE_SPINS_COUNT} фриспинов! (x${FREE_SPINS_MULTIPLIER})`;
             msgDisplay.className = 'message-display jackpot';
-            fireConfetti(30);
+            fireConfetti(20);
             playJackpotSound();
             saveUserData();
         }
 
-        // 3. Расчёт выигрыша с учётом Wild
         let win = 0;
         let combo = '';
         let isJackpot = false;
         let usedWild = false;
 
         if (basicSymbols.length === 0 && wildCount > 0) {
-            // Только Wild – выигрыша нет (или можно сделать минимальный)
             win = 0;
         } else {
-            // Для каждого уникального символа (кроме Wild и Scatter) считаем count с учётом Wild
             const uniqueSymbols = [...new Set(basicSymbols)];
             let bestSym = null;
             let bestCount = 0;
@@ -1984,9 +1897,7 @@
 
             for (const sym of uniqueSymbols) {
                 const count = basicSymbols.filter(s => s === sym).length + wildCount;
-                // Для джекпота особый случай: если символ 🎰 и count >= 3
                 if (sym === '🎰' && count >= 3) {
-                    // Джекпот
                     const jackpotWin = jackpot;
                     jackpot = 0;
                     updateJackpotUI();
@@ -1996,10 +1907,8 @@
                     win = jackpotWin;
                     if (freeSpinsActive) win *= FREE_SPINS_MULTIPLIER;
                     playJackpotSound();
-                    fireConfetti(120);
+                    fireConfetti(60);
                     msgDisplay.className = 'message-display jackpot';
-                    // Завершаем расчёт, так как джекпот перекрывает всё
-                    // Но всё равно нужно учесть, что риск-панель не показывается
                     currentWin = Math.floor(win);
                     balance += currentWin;
                     stats.wins++;
@@ -2009,13 +1918,11 @@
                     msgDisplay.textContent = `🎉 ${combo} +${currentWin} 🪙!`;
                     if (freeSpinsActive) msgDisplay.textContent += ` (x${FREE_SPINS_MULTIPLIER})`;
                     updateUI();
-                    updateStatsUI();
                     endSpin();
                     saveUserData();
                     return;
                 }
 
-                // Обычный выигрыш
                 let mult = 0;
                 if (count >= 5 && reelsCount >= 5) mult = PAYOUTS[sym]?.five || 0;
                 else if (count >= 4 && reelsCount >= 4) mult = PAYOUTS[sym]?.four || 0;
@@ -2025,7 +1932,6 @@
                 } else if (count >= 2) {
                     mult = PAYOUTS[sym]?.pair || 0;
                 }
-                // Для младших символов при 4-5 барабанах пара не даёт выигрыш
                 if (count === 2 && LOW_SYMBOLS.includes(sym) && reelsCount >= 4) {
                     mult = 0;
                 }
@@ -2046,17 +1952,14 @@
                     win *= FREE_SPINS_MULTIPLIER;
                     combo += ` x${FREE_SPINS_MULTIPLIER}`;
                 }
-                // Проверяем, не активирован ли джекпот (уже обработано)
-                // Если win > 0, то это обычный выигрыш
                 if (win > 0) {
                     playWinSound();
-                    fireConfetti(Math.min(20+bestMult*2, 80));
+                    fireConfetti(Math.min(15 + bestMult * 1.5, 50)); // уменьшено
                     msgDisplay.className = 'message-display win';
                 }
             }
         }
 
-        // Если выигрыш есть
         if (win > 0) {
             currentWin = Math.floor(win);
             stats.wins++;
@@ -2066,7 +1969,6 @@
             msgDisplay.textContent = `🎉 ${combo} +${currentWin} 🪙!`;
             if (freeSpinsActive) msgDisplay.textContent += ` (бесплатно)`;
 
-            // Во время фриспинов автоматически зачисляем выигрыш (без риск-игры)
             if (freeSpinsActive) {
                 balance += currentWin;
                 riskPanel.classList.add('hidden');
@@ -2075,7 +1977,6 @@
                 endSpin();
                 saveUserData();
             } else {
-                // Если не фриспины – проверяем риск
                 if (autoSpinActive || !riskEnabled || isJackpot) {
                     balance += currentWin;
                     if (autoSpinActive) msgDisplay.textContent += ' (авто)';
@@ -2086,12 +1987,10 @@
                     endSpin();
                     saveUserData();
                 } else {
-                    // Показываем риск-панель
                     showRiskGame();
                 }
             }
         } else {
-            // Проигрыш
             currentWin = 0;
             consecutiveWins = 0;
             if (!freeSpinsActive) {
@@ -2105,10 +2004,9 @@
             endSpin();
         }
         updateQuestProgress();
-        updateStatsUI();
     }
 
-    // ----- РИСК-ИГРА (без изменений) -----
+    // === РИСК-ИГРА ===
     function showRiskGame() {
         if (currentWin > 0 && riskEnabled && !autoSpinActive && !freeSpinsActive) {
             riskWinAmount = currentWin;
@@ -2148,7 +2046,7 @@
             msgDisplay.textContent = `🚀 УДВОЕНО! Текущий выигрыш: ${riskWinAmount} 🪙`;
             msgDisplay.className = 'message-display win';
             playWinSound();
-            fireConfetti(20);
+            fireConfetti(15);
         } else {
             msgDisplay.textContent = `💥 Сгорело! Жадность наказуема.`;
             msgDisplay.className = 'message-display lose';
@@ -2165,9 +2063,11 @@
     function endSpin() {
         isSpinning = false;
         if (!autoSpinActive && !freeSpinsActive) spinBtn.disabled = false;
-        else if (freeSpinsActive) spinBtn.disabled = true;
         else spinBtn.disabled = true;
         updateUI();
+        // Обновляем статистику и квесты только здесь (оптимизация)
+        updateStatsUI();
+        renderQuests();
         if (balance <= 0 && !freeSpinsActive) {
             msgDisplay.textContent = '💸 Ты разорился! Перезагрузи страницу.';
             spinBtn.disabled = true;
@@ -2179,7 +2079,7 @@
         }
     }
 
-    // ----- КВЕСТЫ -----
+    // === КВЕСТЫ ===
     function updateQuestProgress() {
         if (!questCompleted.q1 && stats.spins >= 10) questProgress.q1 = 10;
         else if (!questCompleted.q1) questProgress.q1 = stats.spins;
@@ -2190,7 +2090,7 @@
         if (!questCompleted.q4 && jackpotWon >= 1) questProgress.q4 = 1;
         else if (!questCompleted.q4) questProgress.q4 = jackpotWon;
         checkQuests();
-        renderQuests();
+        // renderQuests вызывается в endSpin, здесь не вызываем
     }
 
     function checkQuests() {
@@ -2206,7 +2106,7 @@
                     anyCompleted = true;
                     msgDisplay.textContent = `🎯 Квест "${def.text}" выполнен! +${def.reward} 🪙`;
                     msgDisplay.className = 'message-display win';
-                    fireConfetti(50);
+                    fireConfetti(30);
                     playWinSound();
                 }
             } else {
@@ -2217,12 +2117,15 @@
                     anyCompleted = true;
                     msgDisplay.textContent = `🎯 Квест "${def.text}" выполнен! +${def.reward} 🪙`;
                     msgDisplay.className = 'message-display win';
-                    fireConfetti(25);
+                    fireConfetti(30);
                     playWinSound();
                 }
             }
         }
-        if (anyCompleted) { renderQuests(); updateUI(); saveUserData(); }
+        if (anyCompleted) {
+            updateUI();
+            saveUserData();
+        }
     }
 
     function renderQuests() {
@@ -2258,7 +2161,7 @@
         }
     }
 
-    // ----- СТАТИСТИКА -----
+    // === СТАТИСТИКА ===
     function updateStatsUI() {
         document.getElementById('stat-spins').textContent = stats.spins;
         document.getElementById('stat-wins').textContent = stats.wins;
@@ -2284,7 +2187,7 @@
         } else closeInfoModal();
     }
 
-    // ----- АВТОИГРА -----
+    // === АВТОИГРА ===
     function toggleAutoSpin() {
         if (!isLoggedIn) return;
         if (autoSpinActive) {
@@ -2307,7 +2210,7 @@
         }
     }
 
-    // ----- ТАБЛИЦА ВЫПЛАТ -----
+    // === ТАБЛИЦА ВЫПЛАТ ===
     async function showPayTable() {
         let msg = `📋 Таблица выплат (x ставки) для ${reelsCount} барабанов:\n\n`;
         for (const [sym, pay] of Object.entries(PAYOUTS)) {
@@ -2335,7 +2238,7 @@
         closeInfoModal();
     }
 
-    // ----- UI -----
+    // === UI ===
     function updateUI() {
         balanceDisplay.textContent = `${balance} 🪙`;
         betDisplay.textContent = bet;
@@ -2347,9 +2250,7 @@
 
     customBetInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); setCustomBet(); } });
 
-    // ================================================================
-    //  ЗАПРОС ДОЛГА
-    // ================================================================
+    // === ЗАПРОС ДОЛГА ===
     const loanModal = document.getElementById('loan-modal');
     const loanAmount = document.getElementById('loan-amount');
     const loanComment = document.getElementById('loan-comment');
@@ -2407,9 +2308,7 @@
     loanAmount.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); loanComment.focus(); } });
     loanComment.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); submitLoanRequest(); } });
 
-    // ================================================================
-    //  ВОЗВРАТ ДОЛГА
-    // ================================================================
+    // === ВОЗВРАТ ДОЛГА ===
     const repaymentModal = document.getElementById('repayment-modal');
     const repaymentAmount = document.getElementById('repayment-amount');
     const repaymentComment = document.getElementById('repayment-comment');
@@ -2471,10 +2370,10 @@
     repaymentAmount.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); repaymentComment.focus(); } });
     repaymentComment.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); submitRepayment(); } });
 
-    // ================================================================
-    //  ИНИЦИАЛИЗАЦИЯ
-    // ================================================================
+    // === ИНИЦИАЛИЗАЦИЯ ===
     window.onload = () => {
+        initAudio(); // предзагрузка аудиоконтекста
+
         toggleRiskCheckbox.addEventListener('change', function() {
             riskEnabled = this.checked;
             saveUserData();
