@@ -1,0 +1,1124 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>Колесо фортуны – 16 секторов</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Segoe UI', Roboto, sans-serif;
+            background: radial-gradient(ellipse at center, #2d1f00 0%, #1a0e00 60%, #0d0700 100%);
+            overflow: hidden;
+            padding: 12px;
+            position: relative;
+        }
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            background-image:
+                radial-gradient(2px 2px at 20% 30%, #ffd700, transparent),
+                radial-gradient(2px 2px at 40% 70%, #ffd700, transparent),
+                radial-gradient(3px 3px at 60% 20%, #ffd700, transparent),
+                radial-gradient(2px 2px at 80% 80%, #ffd700, transparent),
+                radial-gradient(3px 3px at 10% 90%, #ffd700, transparent),
+                radial-gradient(2px 2px at 90% 10%, #ffd700, transparent),
+                radial-gradient(2px 2px at 50% 50%, #ffd700, transparent),
+                radial-gradient(3px 3px at 70% 60%, #ffd700, transparent),
+                radial-gradient(2px 2px at 30% 10%, #ffd700, transparent),
+                radial-gradient(2px 2px at 85% 45%, #ffd700, transparent);
+            background-size: 200px 200px;
+            background-repeat: repeat;
+            opacity: 0.4;
+            animation: twinkle 4s ease-in-out infinite alternate;
+        }
+        @keyframes twinkle {
+            0% { opacity: 0.3; }
+            100% { opacity: 0.8; }
+        }
+        body::after {
+            content: '';
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            background: radial-gradient(circle at 50% 50%, rgba(255, 215, 0, 0.05) 0%, transparent 70%);
+        }
+
+        .game-wrapper {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: clamp(16px, 4vw, 40px);
+            width: 100%;
+            max-width: 500px;
+            padding-bottom: 12px;
+        }
+
+        /* Индикатор остатка круток */
+        .spins-info {
+            font-size: clamp(16px, 3.5vw, 22px);
+            color: #ffd700;
+            text-shadow: 0 0 20px rgba(255, 215, 0, 0.3);
+            background: rgba(0,0,0,0.3);
+            padding: 6px 20px;
+            border-radius: 40px;
+            border: 1px solid #ffd70044;
+            backdrop-filter: blur(4px);
+            width: 100%;
+            text-align: center;
+            max-width: 280px;
+        }
+        .spins-info span {
+            font-weight: 700;
+            color: #fff;
+        }
+
+        /* Контейнер для кнопок с переносом */
+        .nav-buttons {
+            width: 100%;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 12px;
+            margin-top: 4px;
+        }
+        .nav-btn {
+            padding: 12px 24px;
+            font-size: clamp(16px, 3.5vw, 20px);
+            font-weight: 600;
+            color: #1a1a2e;
+            background: linear-gradient(135deg, #fcee9f, #ffd700);
+            border: none;
+            border-radius: 60px;
+            cursor: pointer;
+            box-shadow: 0 4px 0 #b8860b, 0 6px 20px rgba(0, 0, 0, 0.4);
+            transition: all 0.1s ease;
+            text-transform: uppercase;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+            touch-action: manipulation;
+            user-select: none;
+            flex: 1 1 auto;
+            min-width: 120px;
+            max-width: 200px;
+        }
+        .nav-btn:active {
+            transform: translateY(4px);
+            box-shadow: 0 2px 0 #b8860b, 0 6px 20px rgba(0, 0, 0, 0.4);
+        }
+
+        .wheel-container {
+            position: relative;
+            width: 100%;
+            aspect-ratio: 1 / 1;
+            max-width: 440px;
+            margin: 0 auto;
+            border-radius: 50%;
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.8), 0 0 0 6px rgba(255, 215, 0, 0.6), 0 0 0 12px rgba(255, 215, 0, 0.2);
+            background: #2a1a0a;
+            touch-action: none;
+            cursor: pointer;
+        }
+        #wheelCanvas {
+            width: 100% !important;
+            height: 100% !important;
+            border-radius: 50%;
+            display: block;
+        }
+
+        .pointer {
+            position: absolute;
+            top: -8px;
+            left: 50%;
+            transform: translateX(-50%) rotate(0deg);
+            transform-origin: top center;
+            width: 0;
+            height: 0;
+            border-left: 18px solid transparent;
+            border-right: 18px solid transparent;
+            border-top: 32px solid #ffd700;
+            filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.5));
+            z-index: 5;
+            transition: none;
+        }
+        .pointer::after {
+            content: '';
+            position: absolute;
+            top: -34px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 12px;
+            height: 12px;
+            background: radial-gradient(circle, #fff7c0, #ffb800);
+            border-radius: 50%;
+            box-shadow: 0 0 16px #ffd700;
+            animation: glowPulse 1.8s infinite alternate;
+        }
+        @keyframes pointerHit {
+            0% { transform: translateX(-50%) rotate(0deg); }
+            15% { transform: translateX(-50%) rotate(5deg); }
+            30% { transform: translateX(-50%) rotate(-5deg); }
+            50% { transform: translateX(-50%) rotate(3deg); }
+            70% { transform: translateX(-50%) rotate(-3deg); }
+            100% { transform: translateX(-50%) rotate(0deg); }
+        }
+        .pointer.hit {
+            animation: pointerHit 0.25s ease-out;
+        }
+        @keyframes glowPulse {
+            0% { box-shadow: 0 0 8px #ffd700; }
+            100% { box-shadow: 0 0 24px #ffd700, 0 0 40px #ffb800; }
+        }
+
+        .spin-btn {
+            padding: 14px 32px;
+            font-size: clamp(18px, 4vw, 26px);
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            color: #1a1a2e;
+            background: linear-gradient(135deg, #fcee9f, #ffd700);
+            border: none;
+            border-radius: 60px;
+            cursor: pointer;
+            box-shadow: 0 6px 0 #b8860b, 0 10px 30px rgba(0, 0, 0, 0.5);
+            transition: all 0.1s ease;
+            text-transform: uppercase;
+            width: 100%;
+            max-width: 280px;
+            touch-action: manipulation;
+            user-select: none;
+        }
+        .spin-btn:active {
+            transform: translateY(4px);
+            box-shadow: 0 2px 0 #b8860b, 0 6px 20px rgba(0, 0, 0, 0.5);
+        }
+        .spin-btn:disabled {
+            opacity: 0.5;
+            transform: translateY(4px);
+            box-shadow: 0 2px 0 #b8860b;
+            pointer-events: none;
+        }
+
+        .tooltip {
+            position: fixed;
+            background: rgba(20, 10, 0, 0.95);
+            backdrop-filter: blur(8px);
+            border: 1px solid #ffd70088;
+            border-radius: 12px;
+            padding: 12px 18px;
+            color: #f0f4fa;
+            pointer-events: none;
+            font-size: 14px;
+            max-width: 240px;
+            box-shadow: 0 12px 40px rgba(0,0,0,0.8);
+            z-index: 100;
+            opacity: 0;
+            transition: opacity 0.2s ease;
+            line-height: 1.4;
+        }
+        .tooltip.visible { opacity: 1; }
+        .tooltip .tt-title { font-weight: 700; color: #ffd700; font-size: 16px; margin-bottom: 4px; }
+        .tooltip .tt-desc { font-size: 13px; opacity: 0.85; }
+
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(6px);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            padding: 16px;
+            animation: fadeIn 0.3s;
+        }
+        .modal-overlay.active { display: flex; }
+        .modal {
+            background: linear-gradient(145deg, #2a1a0a, #3d2a10);
+            border-radius: 32px;
+            padding: 28px 20px 24px;
+            max-width: 700px;
+            width: 100%;
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.9), 0 0 0 2px #ffd70055;
+            color: #f0f4fa;
+            text-align: center;
+            animation: slideUp 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            position: relative;
+        }
+        .modal-close {
+            position: absolute;
+            top: 10px;
+            right: 16px;
+            font-size: 32px;
+            cursor: pointer;
+            color: #aac0d0;
+            transition: 0.2s;
+            background: none;
+            border: none;
+            line-height: 1;
+            padding: 4px 8px;
+        }
+        .modal-close:hover { color: #fff; transform: rotate(90deg); }
+        .modal-items {
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+            align-items: center;
+            flex-wrap: wrap;
+            margin: 12px 0 8px;
+        }
+        .modal-item {
+            flex: 0 1 auto;
+            max-width: 240px;
+            min-width: 120px;
+        }
+        .modal-item img {
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            object-fit: contain;
+            background: #1a0e00;
+            border: 5px solid #ffd700;
+            box-shadow: 0 0 40px #ffd70066;
+            display: block;
+            margin: 0 auto 10px;
+        }
+        .modal-item .name {
+            font-weight: 700;
+            font-size: 20px;
+            color: #ffd700;
+            text-shadow: 0 2px 8px rgba(255, 215, 0, 0.3);
+        }
+        .modal-item .desc {
+            font-size: 14px;
+            opacity: 0.9;
+            margin-top: 4px;
+            line-height: 1.4;
+        }
+        .modal-plus {
+            font-size: 34px;
+            color: #ffd700;
+            display: flex;
+            align-items: center;
+            font-weight: 700;
+            padding: 0 6px;
+        }
+        .modal-btn {
+            margin-top: 20px;
+            padding: 14px 36px;
+            background: #ffd700;
+            border: none;
+            border-radius: 40px;
+            font-weight: 700;
+            font-size: 18px;
+            color: #1a1a2e;
+            cursor: pointer;
+            transition: 0.2s;
+            box-shadow: 0 4px 20px rgba(255, 215, 0, 0.5);
+            width: 100%;
+            max-width: 240px;
+            touch-action: manipulation;
+        }
+        .modal-btn:hover { transform: scale(1.04); background: #ffe44d; }
+        .modal-btn:active { transform: scale(0.96); }
+
+        .modal-badge.unique {
+            background: linear-gradient(135deg, #ffd700, #ff6ec7, #ffd700);
+            background-size: 200% 200%;
+            animation: shimmer 2s ease-in-out infinite;
+            display: inline-block;
+            padding: 6px 20px;
+            border-radius: 40px;
+            font-weight: 800;
+            font-size: 16px;
+            color: #1a1a2e;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            box-shadow: 0 0 30px #ffd70077;
+            margin-bottom: 12px;
+        }
+        @keyframes shimmer {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        .modal-unicorn {
+            border: 5px solid #ff6ec7 !important;
+            box-shadow: 0 0 50px #ff6ec7aa !important;
+        }
+
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideUp { from { transform: translateY(40px) scale(0.92); opacity: 0; } to { transform: translateY(0) scale(1); opacity: 1; } }
+
+        @media (max-width: 768px) {
+            body { padding: 8px; }
+            .game-wrapper { gap: 14px; }
+            .wheel-container { max-width: 340px; }
+            .spin-btn { max-width: 240px; padding: 16px 20px; font-size: 20px; }
+            .nav-btn { padding: 14px 16px; font-size: 16px; min-width: 100px; max-width: 160px; }
+            .spins-info { font-size: 16px; padding: 4px 16px; max-width: 240px; }
+
+            .modal {
+                padding: 20px 16px 18px;
+                max-width: 100%;
+                border-radius: 24px;
+            }
+            .modal-items {
+                flex-direction: column;
+                gap: 14px;
+                margin: 8px 0;
+            }
+            .modal-item {
+                max-width: 220px;
+                min-width: 100px;
+                flex: 1 1 auto;
+            }
+            .modal-item img {
+                width: 170px;
+                height: 170px;
+            }
+            .modal-item .name { font-size: 18px; }
+            .modal-item .desc { font-size: 14px; }
+            .modal-plus {
+                font-size: 28px;
+                padding: 4px 0;
+                transform: rotate(90deg);
+            }
+            .modal-btn {
+                font-size: 17px;
+                padding: 14px 24px;
+                max-width: 200px;
+                margin-top: 16px;
+            }
+            .modal-badge.unique {
+                font-size: 14px;
+                padding: 4px 16px;
+            }
+            .pointer {
+                top: -6px;
+                border-left-width: 14px;
+                border-right-width: 14px;
+                border-top-width: 26px;
+            }
+            .pointer::after {
+                top: -28px;
+                width: 10px;
+                height: 10px;
+            }
+            .tooltip { display: none !important; }
+        }
+
+        @media (max-width: 480px) {
+            .wheel-container { max-width: 280px; }
+            .spin-btn { max-width: 200px; font-size: 18px; padding: 14px 16px; }
+            .nav-btn { font-size: 14px; padding: 12px 12px; min-width: 80px; max-width: 140px; }
+            .spins-info { font-size: 14px; max-width: 200px; }
+            .modal-item img {
+                width: 140px;
+                height: 140px;
+            }
+            .modal-item .name { font-size: 16px; }
+            .modal-item .desc { font-size: 13px; }
+            .modal-plus { font-size: 24px; }
+            .modal-btn { font-size: 16px; padding: 12px 20px; max-width: 180px; }
+        }
+
+        @media (max-width: 380px) {
+            .wheel-container { max-width: 230px; }
+            .spin-btn { font-size: 16px; padding: 12px 12px; max-width: 170px; }
+            .modal-item img {
+                width: 120px;
+                height: 120px;
+            }
+            .modal-item .name { font-size: 14px; }
+            .modal-item .desc { font-size: 12px; }
+            .modal-plus { font-size: 20px; }
+        }
+
+        @media (min-width: 769px) {
+            .modal-items { flex-direction: row; }
+            .modal-plus { transform: none; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="game-wrapper">
+        <div class="wheel-container" id="wheelContainer">
+            <canvas id="wheelCanvas" width="600" height="600"></canvas>
+            <div class="pointer" id="pointer"></div>
+        </div>
+
+        <div class="spins-info" id="spinsInfo">🎯 Осталось круток: <span id="spinsCount">2</span></div>
+
+        <button class="spin-btn" id="spinBtn">🎡 Крутить</button>
+        <div class="nav-buttons">
+            <a href="index.html" class="nav-btn">📖 Дневник</a>
+        </div>
+    </div>
+
+    <div class="tooltip" id="tooltip">
+        <div class="tt-title" id="ttTitle"></div>
+        <div class="tt-desc" id="ttDesc"></div>
+    </div>
+
+    <div class="modal-overlay" id="modalOverlay">
+        <div class="modal">
+            <button class="modal-close" id="modalClose">&times;</button>
+            <div class="modal-items" id="modalItems"></div>
+            <button class="modal-btn" id="modalBtn">Отлично!</button>
+        </div>
+    </div>
+
+    <script>
+        // ============================================================
+        // 0. ОГРАНИЧЕНИЕ НА 2 КРУТКИ В СУТКИ
+        // ============================================================
+        const MAX_SPINS_PER_DAY = 2;
+        const STORAGE_KEY = 'wheel_spins';
+
+        function getSpinsData() {
+            try {
+                const raw = localStorage.getItem(STORAGE_KEY);
+                if (raw) {
+                    const data = JSON.parse(raw);
+                    const today = new Date().toISOString().slice(0, 10);
+                    if (data.date === today) {
+                        return data;
+                    } else {
+                        return { date: today, count: 0 };
+                    }
+                }
+            } catch (e) { /* ignore */ }
+            const today = new Date().toISOString().slice(0, 10);
+            return { date: today, count: 0 };
+        }
+
+        function saveSpinsData(data) {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+        }
+
+        function canSpin() {
+            const data = getSpinsData();
+            return data.count < MAX_SPINS_PER_DAY;
+        }
+
+        function getRemainingSpins() {
+            const data = getSpinsData();
+            return Math.max(0, MAX_SPINS_PER_DAY - data.count);
+        }
+
+        function incrementSpins() {
+            const data = getSpinsData();
+            data.count += 1;
+            saveSpinsData(data);
+            updateSpinsDisplay();
+            if (data.count >= MAX_SPINS_PER_DAY) {
+                spinBtn.disabled = true;
+                spinBtn.textContent = '⛔ Лимит исчерпан';
+            }
+        }
+
+        function updateSpinsDisplay() {
+            const remaining = getRemainingSpins();
+            document.getElementById('spinsCount').textContent = remaining;
+            if (remaining === 0) {
+                spinBtn.disabled = true;
+                spinBtn.textContent = '⛔ Лимит исчерпан';
+            } else {
+                spinBtn.disabled = false;
+                spinBtn.textContent = '🎡 Крутить';
+            }
+        }
+
+        // ============================================================
+        // 1. МАССИВЫ С ДАННЫМИ
+        // ============================================================
+
+        const drinks = [
+            { label: 'Коффе', image: './fortuna/drinks/coffee.jpg', desc: 'Помни, зерна негры собирают где-то' },
+            { label: 'Burn', image: './fortuna/drinks/burn.jpg', desc: 'Смотри там осторожнее' },
+            { label: 'Байкал', image: './fortuna/drinks/baikal.jpg', desc: 'Озеро грубо говоря выпей' },
+            { label: 'Чупа-чупс', image: './fortuna/drinks/chupa_shups.jpg', desc: 'Напиток от чупа чупса, никогда такой не пил' },
+            { label: 'Чудо с шоколадом', image: './fortuna/drinks/chudo_shokolad_coctail.jpg', desc: 'Cockтейль чудо с чоколадом' },
+            { label: 'Чудо клубника', image: './fortuna/drinks/chudo_kubnica_coctail.jpg', desc: 'Cockтейль чудо с клубникой' },
+            { label: 'Кола обычная', image: './fortuna/drinks/cola.jpg', desc: 'За забудь сказать спасибо американец' },
+            { label: 'Кола карамель', image: './fortuna/drinks/cola_caramel.jpg', desc: 'А вот это я бы сам попробовал' },
+            { label: 'Кола дыня', image: './fortuna/drinks/cola_dinia.jpg', desc: 'У меня такого эксклюзива нету(' },
+            { label: 'Далковский', image: './fortuna/dalkovckii.jpg', desc: 'Алкоголь это плохо Кать' },
+            { label: 'Маунти Дью', image: './fortuna/drinks/dew.jpg', desc: 'Никогда я его не пробовал' },
+            { label: 'Dr Pepper', image: './fortuna/drinks/dr_pepper.jpg', desc: 'USA! USA! USA!' },
+            { label: 'Адреналин Раш', image: './fortuna/drinks/adrenalin_rush.jpg', desc: 'Адреналин или эпинефрин?' },
+            { label: 'Драйва', image: './fortuna/drinks/drive.jpg', desc: 'Энергия для драйва' },
+            { label: 'Дюшес', image: './fortuna/drinks/duchec.jpg', desc: 'Прямиком из СССР' },
+            { label: 'Монстер енерджи', image: './fortuna/drinks/energy.jpg', desc: 'Максимум бодрости' },
+            { label: 'Эпика клубника', image: './fortuna/drinks/epica_kubnica.jpg', desc: 'А я что не клубничка?' },
+            { label: 'Эпика персик', image: './fortuna/drinks/epica_persik_mara.jpg', desc: 'Персиковый рай, ну ну' },
+            { label: 'Фанта', image: './fortuna/drinks/fanta.jpg', desc: 'Фанта местного разлива' },
+            { label: 'Fuse чай', image: './fortuna/drinks/fuse_tea.jpg', desc: 'Холодный чай' },
+            { label: 'Гранатовый сок', image: './fortuna/drinks/granat_sok.jpg', desc: 'Гранатовый сок' },
+            { label: 'Ice тиа', image: './fortuna/drinks/ice_tea.jpg', desc: 'такая же холодная по отношению ко мне' },
+            { label: 'Jack Daniels', image: './fortuna/drinks/jack-daniels.jpg', desc: 'Бухать строго без парней, только со мной' },
+            { label: 'Jaguar', image: './fortuna/drinks/jaguar.jpg', desc: 'Энергия хищника(наверное)' },
+            { label: 'Jim Beam', image: './fortuna/drinks/jim_beam.jpg', desc: 'Бурбон, без парней' },
+            { label: 'Кефир', image: './fortuna/drinks/kefir.jpg', desc: 'Кисломолочный продукт' },
+            { label: 'Квас', image: './fortuna/drinks/kvas.jpg', desc: 'Холодным лучше всего его пить' },
+            { label: 'Липтон персик', image: './fortuna/drinks/lipton_persik.jpg', desc: 'Персиковый чай, и почему его так любят?' },
+            { label: 'Лит энергетик', image: './fortuna/drinks/lit.jpg', desc: 'Не знаю, я такой не пил' },
+            { label: 'Мартини', image: './fortuna/drinks/martini.jpg', desc: 'Итальянский(или местный разлив)' },
+            { label: 'Минералка', image: './fortuna/drinks/mineral.jpg', desc: 'Минеральная вода, просто вода короче' },
+            { label: 'Молоко 2.5%', image: './fortuna/drinks/moloko2_5.jpg', desc: 'Молоко из под коровы' },
+            { label: 'Мохито', image: './fortuna/drinks/moxito.jpg', desc: 'Смотри не перепей' },
+            { label: 'Наша игра', image: './fortuna/drinks/nasha_igra.jpg', desc: 'Есть пробитие!' },
+            { label: 'Redbull', image: './fortuna/drinks/redbull.jpg', desc: 'Где мои крылья?' },
+            { label: 'Ряжянка', image: './fortuna/drinks/ryashanka.jpg', desc: 'Кисломолочная, а лучше всего с сахаром' },
+            { label: 'Швепс', image: './fortuna/drinks/schwepes.jpg', desc: 'Не люблю его' },
+            { label: 'Снежок', image: './fortuna/drinks/sneshok.jpg', desc: 'У меня такое не продается' },
+            { label: 'Ананасовый сок', image: './fortuna/drinks/sok_ananas.jpg', desc: 'Это мне его надо пить перед встречей с тобой' },
+            { label: 'Апельсиновый сок', image: './fortuna/drinks/sok_apelcin.jpg', desc: 'Апельсиновый сок просто сок' },
+            { label: 'Яблочный сок', image: './fortuna/drinks/sok_apple.jpg', desc: 'Яблочный сок из гнилых яблок' },
+            { label: 'Мультфруктовый сок', image: './fortuna/drinks/sok_multi.jpg', desc: 'Все намешали' },
+            { label: 'Томатный сок', image: './fortuna/drinks/sok_tomat.jpg', desc: 'Томатный сок' },
+            { label: 'Виноградный сок', image: './fortuna/drinks/sok_vinograd.jpg', desc: 'Очень вкусный сок (возможно)' },
+            { label: 'Вишневый сок', image: './fortuna/drinks/sok_visnia.jpg', desc: 'Вишнёвый сок, лучше черешни поесть' },
+            { label: 'Спрайт', image: './fortuna/drinks/sprite.jpg', desc: 'Оригинальный из местного подвального разлива' },
+            { label: 'Tornado Energy', image: './fortuna/drinks/tornado_energy.jpg', desc: 'Могу показать в постели торнадо' }
+        ];
+
+        const foods = [
+            { label: 'Сухарики 3 корочки', image: './fortuna/food/3_korochki.jpg', desc: 'Со времен школы их не ел' },
+            { label: 'Банан', image: './fortuna/food/banana.jpg', desc: 'Спелый банан, который мартышки обжают' },
+            { label: 'Фруктовые чипсы', image: './fortuna/food/chips_fruct.jpg', desc: 'Ну я не любитель особый поесть их' },
+            { label: 'Kinder Country', image: './fortuna/food/kinder_country.jpg', desc: 'Надо будет самим их тоже попробовать' },
+            { label: 'Мармеладные слайсы', image: './fortuna/food/marmelad_slice.jpg', desc: 'Видел их, но чет не покупал' },
+            { label: 'Oreo', image: './fortuna/food/oreo.jpg', desc: 'Нужно сначало в молоко макнуть' },
+            { label: 'Консервированный ананс', image: './fortuna/food/ananas.jpg', desc: 'Смотри, выбирай такую у которой есть язычок' },
+            { label: 'Bounty', image: './fortuna/food/bounty.jpg', desc: 'Кокос, дай мне куснуть' },
+            { label: 'ChokoBoy грибочки', image: './fortuna/food/chokoBoy_grib.jpg', desc: 'Ну их можно есть, но не на постоянку' },
+            { label: 'Фисташки', image: './fortuna/food/fistashki.jpg', desc: 'Фисташки, дорогие я скорее люблю халву с ними' },
+            { label: 'Kinder ломтик', image: './fortuna/food/kinder_lomtic.jpg', desc: 'Шоколадный батончик, от немцев' },
+            { label: 'Мармелад', image: './fortuna/food/marmelad.jpg', desc: 'Мармеладные мишки' },
+            { label: 'Milka карамель', image: './fortuna/food/milka_caramel.jpg', desc: 'Молочный шоколад от молочной мумумумум' },
+            { label: 'Орешки со сгущенкой', image: './fortuna/food/orex.jpg', desc: 'Их лучше всего с чаем кушать' },
+            { label: 'Рулет со сгущенкой', image: './fortuna/food/rulet_sguchenka.jpg', desc: 'Рулет со сгущёнкой, у меня уже слюни текут от того как я все это делаю' },
+            { label: 'Tuc', image: './fortuna/food/tuc.jpg', desc: 'Крекеры которые очень легко ломаются' },
+            { label: 'Яблоко', image: './fortuna/food/apple.jpg', desc: 'Яблоко, которое дали еве' },
+            { label: 'Сырок Александр Б.Ю.', image: './fortuna/food/cheese_Aleksandrov.jpg', desc: 'У нас такой диковинки нету' },
+            { label: 'Чупа чупс', image: './fortuna/food/chupa_shups.jpg', desc: 'Леденец, который надо облизывать' },
+            { label: 'Питахайя', image: './fortuna/food/fruct_dragon.jpg', desc: 'Драконий фрукт от дейнерис драконорожденной' },
+            { label: 'Клубника', image: './fortuna/food/kubnica.jpg', desc: 'Ты и клубника одно то самое слово' },
+            { label: 'Mars', image: './fortuna/food/mars.jpg', desc: 'Марс нападает! ААААА' },
+            { label: 'Милки Вэй', image: './fortuna/food/milkyWay.jpg', desc: 'Чтобы со мной поделилась, я тебе потом новый куплю по больше' },
+            { label: 'Памело', image: './fortuna/food/pamelo.jpg', desc: 'Помело, не помню ел я его или нет' },
+            { label: 'Skittles', image: './fortuna/food/skittles.jpg', desc: 'Разноцветные драже которые очень мало и не покупаешь ими' },
+            { label: 'Twix', image: './fortuna/food/twix.jpg', desc: 'Могли бы и больше палочек засунуть' },
+            { label: 'Арахис', image: './fortuna/food/araxis.jpg', desc: 'Орешки, бывают соленные с беконом и много какие еще' },
+            { label: 'Сыр косичка', image: './fortuna/food/cheese_kosihka.jpg', desc: 'Сыр косичка, люблю его кусать много и заглатывать' },
+            { label: 'Круасан', image: './fortuna/food/croussan.jpg', desc: 'Люблю с абрикосовым джемом' },
+            { label: 'Грейпфрут', image: './fortuna/food/grapefruits.jpg', desc: 'Грейпфрут, один из цитрусовых' },
+            { label: 'Lays с крабом', image: './fortuna/food/lays_crub.jpg', desc: 'Чипсыыыыы, неет, не забирай у меня их Кать' },
+            { label: 'Max Chips с курицей', image: './fortuna/food/max_chips_kurica.jpg', desc: 'Чипсы в виде пластинок с курицей' },
+            { label: 'Max Fun', image: './fortuna/food/mux_fun.jpg', desc: 'Взрывная карамель, взял от альпенголд' },
+            { label: 'Picnic', image: './fortuna/food/picnic.jpg', desc: 'Пикник, ну такое я бы лучше взял сникерс' },
+            { label: 'Сникерс', image: './fortuna/food/snickers.jpg', desc: 'Не тормози, сникерсни' },
+            { label: 'Виноград', image: './fortuna/food/vinograd.jpg', desc: 'Виноград фиолетовый или синий' },
+            { label: 'Babyfox', image: './fortuna/food/babyfox.jpg', desc: 'Беги покупай давай, а то Серёже надо будет уделить время' },
+            { label: 'Chio Rio', image: './fortuna/food/chio_rio.jpg', desc: 'Надо будет найти у себя и купить' },
+            { label: 'Яйцо Киндер', image: './fortuna/food/eggs_kinder.jpg', desc: 'Не понял в чем их смысл' },
+            { label: 'Киндер буено', image: './fortuna/food/kinder_bueno.jpg', desc: 'ТУтутуут, просто у меня тут музыка прикольная заиграла' },
+            { label: 'Эмемдемс', image: './fortuna/food/m&ms.jpg', desc: 'Красный и желтый челы это мы?' },
+            { label: 'Max Chips с луком и сметаной', image: './fortuna/food/max_chips_luk.jpg', desc: 'Ну у меня тут есть похожее, но я почти не беру' },
+            { label: 'Nuts', image: './fortuna/food/nuts.jpg', desc: 'Были перед глазами, но чет не купил' },
+            { label: 'Пончик', image: './fortuna/food/ponchik.jpg', desc: 'Пончик, который любит гомер симпсон' },
+            { label: 'Step', image: './fortuna/food/step.jpg', desc: 'Какието чоколадные конфеты' },
+            { label: 'Yota', image: './fortuna/food/vinograd.jpg', desc: 'Чтобы не грустила купи его!!!!' }
+        ];
+
+        const prizes = [
+            { label: 'Фереро роше', image: './fortuna/food/ferrero_roshe.jpg', desc: 'Шоколадные, а мне ? Пожайлуста' },
+            { label: 'Рафаэльки', image: './fortuna/food/raffaelo.jpg', desc: 'Ну вообщем, разрешаю тебе сегодня их купить. Будь я рядом я сам их тебе купил' },
+            { label: 'Merci', image: './fortuna/food/merci.jpg', desc: 'Таким тебя надо задаривать' },
+            { label: 'Toffifee', image: './fortuna/food/toffifee.jpg', desc: 'Кушай, приятного тофифиедения' }
+        ];
+
+        // ----- ВСЕ КОМБИНАЦИИ (напиток + еда) -----
+        const allCombos = [];
+        drinks.forEach(d => {
+            foods.forEach(f => {
+                allCombos.push({
+                    label: `${d.label} + ${f.label}`,
+                    drink: d,
+                    food: f,
+                    color: `hsl(${Math.random() * 360}, 70%, 55%)`
+                });
+            });
+        });
+
+        console.log(`🍾 Напитков: ${drinks.length}, продуктов: ${foods.length}, призов: ${prizes.length}`);
+        console.log(`🔀 Всего комбинаций: ${allCombos.length}`);
+
+        // ============================================================
+        // 2. КОЛЕСО — 16 СЕКТОРОВ (1 уникальный приз + 15 комбинаций)
+        // ============================================================
+        const canvas = document.getElementById('wheelCanvas');
+        const ctx = canvas.getContext('2d');
+        const spinBtn = document.getElementById('spinBtn');
+        const pointerEl = document.getElementById('pointer');
+
+        const SEGMENTS = 16;
+        const arc = (2 * Math.PI) / SEGMENTS;
+        const centerX = 300, centerY = 300;
+        const radius = 280;
+
+        const UNIQUE_INDEX = 0;
+
+        let currentRotation = 0;
+        let isSpinning = false;
+        let currentSegments = [];
+        let lastSegmentIndex = -1;
+        let currentUniquePrize = null;
+
+        function initRandomSegments() {
+            const segments = [];
+            const prize = prizes[Math.floor(Math.random() * prizes.length)];
+            currentUniquePrize = prize;
+            segments.push({
+                label: '⭐ ПРИЗ',
+                isUnique: true,
+                prize: prize,
+                solidColor: '#e8b800'
+            });
+
+            const shuffled = [...allCombos].sort(() => Math.random() - 0.5);
+            for (let i = 0; i < Math.min(SEGMENTS - 1, shuffled.length); i++) {
+                const combo = shuffled[i];
+                segments.push({
+                    label: combo.label,
+                    isUnique: false,
+                    drink: combo.drink,
+                    food: combo.food,
+                    solidColor: combo.color
+                });
+            }
+            while (segments.length < SEGMENTS) {
+                const fallback = allCombos[0];
+                segments.push({
+                    label: fallback.label,
+                    isUnique: false,
+                    drink: fallback.drink,
+                    food: fallback.food,
+                    solidColor: fallback.color
+                });
+            }
+            currentSegments = segments;
+            return segments;
+        }
+
+        let animTime = 0;
+
+        function drawWheel(rotation, segments, time) {
+            ctx.clearRect(0, 0, 600, 600);
+            ctx.shadowColor = 'rgba(0,0,0,0.4)';
+            ctx.shadowBlur = 20;
+            ctx.shadowOffsetX = 0;
+            ctx.shadowOffsetY = 8;
+
+            for (let i = 0; i < segments.length; i++) {
+                const start = i * arc + rotation;
+                const end = start + arc;
+                const seg = segments[i];
+
+                ctx.beginPath();
+                ctx.moveTo(centerX, centerY);
+                ctx.arc(centerX, centerY, radius, start, end);
+                ctx.closePath();
+
+                if (seg.isUnique) {
+                    const hue = (time * 0.02) % 360;
+                    const grad = ctx.createRadialGradient(centerX, centerY, 40, centerX, centerY, radius);
+                    grad.addColorStop(0, `hsl(${hue}, 100%, 70%)`);
+                    grad.addColorStop(0.5, `hsl(${hue + 30}, 90%, 60%)`);
+                    grad.addColorStop(1, `hsl(${hue + 60}, 80%, 40%)`);
+                    ctx.fillStyle = grad;
+                    ctx.shadowColor = `hsla(${hue}, 100%, 70%, 0.6)`;
+                    ctx.shadowBlur = 40;
+                } else {
+                    ctx.fillStyle = seg.solidColor || '#555';
+                    ctx.shadowBlur = 20;
+                }
+                ctx.fill();
+                ctx.shadowBlur = 0;
+
+                if (seg.isUnique) {
+                    const mid = i * arc + arc / 2 + rotation;
+                    const starR = radius * 0.32;
+                    const sx = centerX + Math.cos(mid) * starR;
+                    const sy = centerY + Math.sin(mid) * starR;
+                    ctx.shadowBlur = 0;
+                    ctx.font = '48px sans-serif';
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillStyle = '#fff';
+                    ctx.shadowColor = `hsla(${(time * 0.03) % 360}, 100%, 70%, 0.9)`;
+                    ctx.shadowBlur = 30;
+                    ctx.fillText('⭐', sx, sy);
+                }
+            }
+
+            ctx.shadowBlur = 0;
+
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillStyle = '#fff';
+            ctx.font = 'bold 11px "Segoe UI", sans-serif';
+            ctx.shadowColor = 'rgba(0,0,0,0.9)';
+            ctx.shadowBlur = 8;
+
+            for (let i = 0; i < segments.length; i++) {
+                const seg = segments[i];
+                const mid = i * arc + arc / 2 + rotation;
+                const tr = radius * 0.65;
+                const x = centerX + Math.cos(mid) * tr;
+                const y = centerY + Math.sin(mid) * tr;
+
+                ctx.save();
+                ctx.translate(x, y);
+                let rot = mid;
+                if (mid > Math.PI / 2 && mid < 3 * Math.PI / 2) rot += Math.PI;
+                ctx.rotate(rot);
+
+                let label = seg.label;
+                if (label.length > 22) label = label.slice(0, 20) + '…';
+                ctx.fillStyle = '#fff';
+                ctx.shadowColor = 'rgba(0,0,0,0.9)';
+                ctx.shadowBlur = 10;
+                ctx.fillText(label, 0, 0);
+                ctx.restore();
+            }
+
+            ctx.shadowBlur = 0;
+            const grad = ctx.createRadialGradient(centerX, centerY, 10, centerX, centerY, 50);
+            grad.addColorStop(0, '#ffd700');
+            grad.addColorStop(1, '#b8860b');
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, 40, 0, 2 * Math.PI);
+            ctx.fillStyle = grad;
+            ctx.fill();
+            ctx.strokeStyle = '#fff';
+            ctx.lineWidth = 4;
+            ctx.stroke();
+        }
+
+        function renderWheel(rotation, segments) {
+            const time = performance.now() || 0;
+            drawWheel(rotation, segments, time);
+        }
+
+        // ============================================================
+        // 3. СБРОС / ОБНОВЛЕНИЕ КОЛЕСА
+        // ============================================================
+        function resetWheel() {
+            initRandomSegments();
+            lastSegmentIndex = -1;
+            renderWheel(currentRotation, currentSegments);
+            pointerEl.classList.remove('hit');
+        }
+
+        // ============================================================
+        // 4. УДАРЫ СТРЕЛКИ
+        // ============================================================
+        function getCurrentSegmentIndex(rotation) {
+            let angle = rotation % (2 * Math.PI);
+            if (angle < 0) angle += 2 * Math.PI;
+            let raw = (-Math.PI / 2 - angle) % (2 * Math.PI);
+            if (raw < 0) raw += 2 * Math.PI;
+            return Math.floor(raw / arc) % SEGMENTS;
+        }
+
+        function hitPointer() {
+            pointerEl.classList.remove('hit');
+            void pointerEl.offsetWidth;
+            pointerEl.classList.add('hit');
+            playTickSound();
+        }
+
+        let audioCtx = null;
+        function initAudio() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+        }
+        function playTickSound() {
+            try {
+                const now = audioCtx.currentTime;
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.frequency.value = 800 + Math.random() * 400;
+                osc.type = 'sine';
+                gain.gain.setValueAtTime(0.1, now);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.08);
+                osc.start(now);
+                osc.stop(now + 0.08);
+            } catch (e) { /* ignore */ }
+        }
+
+        // ============================================================
+        // 5. ВРАЩЕНИЕ (с проверкой лимита)
+        // ============================================================
+        function spinWheel() {
+            if (isSpinning) return;
+
+            if (!canSpin()) {
+                alert('❌ Вы исчерпали лимит круток на сегодня (2). Попробуйте завтра!');
+                return;
+            }
+
+            isSpinning = true;
+            spinBtn.disabled = true;
+            initAudio();
+
+            let targetIndex;
+if (Math.random() < 1/3) {
+    targetIndex = UNIQUE_INDEX;
+} else {
+    targetIndex = Math.floor(Math.random() * (SEGMENTS - 1)) + 1;
+}
+
+            const targetCombo = (targetIndex === UNIQUE_INDEX) ?
+                (() => {
+                    const p = prizes[Math.floor(Math.random() * prizes.length)];
+                    return { label: '⭐ ПРИЗ', isUnique: true, prize: p, solidColor: '#e8b800' };
+                })() :
+                (() => {
+                    const c = allCombos[Math.floor(Math.random() * allCombos.length)];
+                    return { label: c.label, isUnique: false, drink: c.drink, food: c.food, solidColor: c.color };
+                })();
+
+            const extraSpins = 5 + Math.random() * 4;
+            let targetRotation = -Math.PI / 2 - (targetIndex * arc + arc / 2) + 2 * Math.PI * extraSpins;
+            const startRotation = currentRotation;
+            let delta = targetRotation - startRotation;
+            let deltaNorm = delta % (2 * Math.PI);
+            if (deltaNorm < 0) deltaNorm += 2 * Math.PI;
+            const finalRotation = startRotation + deltaNorm + 2 * Math.PI * (extraSpins + 1);
+
+            const duration = 5000 + Math.random() * 2000;
+            const startTime = performance.now();
+
+            let swapped = false;
+            lastSegmentIndex = -1;
+
+            function animate(time) {
+                const elapsed = time - startTime;
+                const progress = Math.min(elapsed / duration, 1);
+                const eased = 1 - Math.pow(1 - progress, 4);
+                const current = startRotation + (finalRotation - startRotation) * eased;
+                currentRotation = current;
+
+                if (!swapped && progress < 0.05) {
+                    swapped = true;
+                    const newSegs = [...currentSegments];
+                    newSegs[targetIndex] = targetCombo;
+                    currentSegments = newSegs;
+                    if (targetIndex === UNIQUE_INDEX && targetCombo.prize) {
+                        currentUniquePrize = targetCombo.prize;
+                    }
+                }
+
+                const currentIdx = getCurrentSegmentIndex(current);
+                if (lastSegmentIndex === -1) {
+                    lastSegmentIndex = currentIdx;
+                } else if (currentIdx !== lastSegmentIndex) {
+                    lastSegmentIndex = currentIdx;
+                    if (progress < 1) {
+                        hitPointer();
+                    }
+                }
+
+                drawWheel(current, currentSegments, time);
+
+                if (progress < 1) {
+                    requestAnimationFrame(animate);
+                } else {
+                    const finalSegs = [...currentSegments];
+                    finalSegs[targetIndex] = targetCombo;
+                    currentSegments = finalSegs;
+                    if (targetIndex === UNIQUE_INDEX && targetCombo.prize) {
+                        currentUniquePrize = targetCombo.prize;
+                    }
+                    currentRotation = finalRotation;
+                    drawWheel(finalRotation, currentSegments, performance.now());
+
+                    const winnerIdx = getCurrentSegmentIndex(finalRotation);
+                    const winner = currentSegments[winnerIdx];
+                    showModal(winner, winnerIdx);
+
+                    incrementSpins();
+
+                    isSpinning = false;
+                    spinBtn.disabled = false;
+                    updateSpinsDisplay();
+                    pointerEl.classList.remove('hit');
+                }
+            }
+            requestAnimationFrame(animate);
+        }
+
+        // ============================================================
+        // 6. ТУЛТИП
+        // ============================================================
+        const tooltip = document.getElementById('tooltip');
+        const ttTitle = document.getElementById('ttTitle');
+        const ttDesc = document.getElementById('ttDesc');
+
+        function getSegmentIndexFromMouse(e) {
+            const rect = canvas.getBoundingClientRect();
+            const scaleX = canvas.width / rect.width;
+            const scaleY = canvas.height / rect.height;
+            const mx = (e.clientX - rect.left) * scaleX;
+            const my = (e.clientY - rect.top) * scaleY;
+            const dx = mx - centerX, dy = my - centerY;
+            if (Math.sqrt(dx*dx + dy*dy) > radius) return -1;
+            let angle = Math.atan2(dy, dx);
+            if (angle < 0) angle += 2 * Math.PI;
+            let raw = (angle - currentRotation) % (2 * Math.PI);
+            if (raw < 0) raw += 2 * Math.PI;
+            return Math.floor(raw / arc) % SEGMENTS;
+        }
+        function updateTooltip(e) {
+            if (isSpinning) { tooltip.classList.remove('visible'); return; }
+            const idx = getSegmentIndexFromMouse(e);
+            if (idx === -1 || !currentSegments[idx]) { tooltip.classList.remove('visible'); return; }
+            const seg = currentSegments[idx];
+            if (seg.isUnique) {
+                ttTitle.textContent = '⭐ УНИКАЛЬНЫЙ ПРИЗ!';
+                ttDesc.textContent = seg.prize ? seg.prize.label + ' — ' + seg.prize.desc : 'Эксклюзив!';
+            } else {
+                ttTitle.textContent = seg.label;
+                ttDesc.textContent = (seg.drink ? seg.drink.desc : '') + ' + ' + (seg.food ? seg.food.desc : '');
+            }
+            tooltip.style.left = (e.clientX + 16) + 'px';
+            tooltip.style.top = (e.clientY - 10) + 'px';
+            const rect = tooltip.getBoundingClientRect();
+            if (rect.right > window.innerWidth) tooltip.style.left = (e.clientX - rect.width - 16) + 'px';
+            if (rect.bottom > window.innerHeight) tooltip.style.top = (e.clientY - rect.height - 10) + 'px';
+            tooltip.classList.add('visible');
+        }
+        function hideTooltip() { tooltip.classList.remove('visible'); }
+        canvas.addEventListener('mousemove', updateTooltip);
+        canvas.addEventListener('mouseleave', hideTooltip);
+
+        // ============================================================
+        // 7. МОДАЛКА
+        // ============================================================
+        const overlay = document.getElementById('modalOverlay');
+        const modalItems = document.getElementById('modalItems');
+        const modalClose = document.getElementById('modalClose');
+        const modalBtn = document.getElementById('modalBtn');
+
+        function showModal(seg, idx) {
+            const isUnique = seg.isUnique || idx === UNIQUE_INDEX;
+            if (isUnique && seg.prize) {
+                const p = seg.prize;
+                modalItems.innerHTML = `
+                    <div style="width:100%; text-align:center; margin-bottom: 6px;">
+                        <span class="modal-badge unique">🌟 УНИКАЛЬНЫЙ ПРИЗ</span>
+                    </div>
+                    <div class="modal-item" style="flex:1; max-width:260px; margin:0 auto;">
+                        <img src="${p.image}" alt="${p.label}" class="modal-unicorn" onerror="this.src='https://picsum.photos/seed/${p.label}/200/200'" />
+                        <div class="name" style="font-size:24px;">${p.label}</div>
+                        <div class="desc" style="font-size:16px; opacity:1;">${p.desc}</div>
+                    </div>
+                `;
+            } else {
+                const d = seg.drink;
+                const f = seg.food;
+                if (d && f) {
+                    modalItems.innerHTML = `
+                        <div class="modal-item">
+                            <img src="${d.image}" alt="${d.label}" onerror="this.src='https://picsum.photos/seed/${d.label}/200/200'" />
+                            <div class="name">${d.label}</div>
+                            <div class="desc">${d.desc}</div>
+                        </div>
+                        <div class="modal-plus">+</div>
+                        <div class="modal-item">
+                            <img src="${f.image}" alt="${f.label}" onerror="this.src='https://picsum.photos/seed/${f.label}/200/200'" />
+                            <div class="name">${f.label}</div>
+                            <div class="desc">${f.desc}</div>
+                        </div>
+                    `;
+                } else {
+                    modalItems.innerHTML = `<div class="modal-item"><div class="name">${seg.label}</div></div>`;
+                }
+            }
+            overlay.classList.add('active');
+        }
+
+        function hideModal() {
+            overlay.classList.remove('active');
+            resetWheel();
+        }
+
+        modalClose.addEventListener('click', hideModal);
+        modalBtn.addEventListener('click', hideModal);
+        overlay.addEventListener('click', (e) => {
+            if (e.target === overlay) hideModal();
+        });
+
+        // ============================================================
+        // 8. ЗАПУСК
+        // ============================================================
+        spinBtn.addEventListener('click', spinWheel);
+        initRandomSegments();
+        renderWheel(0, currentSegments);
+        updateSpinsDisplay();
+
+        function idleAnimation() {
+            if (!isSpinning) {
+                renderWheel(currentRotation, currentSegments);
+            }
+            requestAnimationFrame(idleAnimation);
+        }
+        idleAnimation();
+
+        window.addDrink = function(d) { drinks.push(d); rebuildAll(); };
+        window.addFood = function(f) { foods.push(f); rebuildAll(); };
+        window.addPrize = function(p) { prizes.push(p); rebuildAll(); };
+        function rebuildAll() {
+            allCombos.length = 0;
+            drinks.forEach(d => {
+                foods.forEach(f => {
+                    allCombos.push({
+                        label: `${d.label} + ${f.label}`,
+                        drink: d,
+                        food: f,
+                        color: `hsl(${Math.random()*360}, 70%, 55%)`
+                    });
+                });
+            });
+            initRandomSegments();
+            renderWheel(currentRotation, currentSegments);
+            console.log(`🔄 Обновлено. Комбинаций: ${allCombos.length}`);
+        }
+
+        console.log('🎡 Колесо запущено! 16 секторов, 1 уникальный приз.');
+        console.log('📱 Оптимизировано для мобильных устройств.');
+        console.log(`⏳ Лимит: ${MAX_SPINS_PER_DAY} крутки в сутки.`);
+    </script>
+</body>
+</html>
