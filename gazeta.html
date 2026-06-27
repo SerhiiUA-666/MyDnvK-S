@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=920, user-scalable=yes">
     <title>ГАЗЕТА</title>
-<link rel="icon" type="image/png" href="gazeta/gazeta.png">
+    <link rel="icon" type="image/png" href="gazeta/gazeta.png">
     <link href="https://fonts.googleapis.com/css2?family=Pangolin&family=Comic+Neue:wght@400;700&display=swap" rel="stylesheet">
     
     <style>
@@ -13,11 +13,16 @@
         * { box-sizing: border-box; }
 
         body {
-            background-color: #ffde59;
-            background-image: radial-gradient(#ffbd59 20%, transparent 20%);
-            background-size: 30px 30px;
+            background-color: #b3d9ff;
+            /* Различные узоры вместо точек: диагональные полосы + сетка из горизонтальных/вертикальных линий */
+            background-image: 
+                repeating-linear-gradient(45deg, rgba(127, 191, 255, 0.4) 0px, rgba(127, 191, 255, 0.4) 2px, transparent 2px, transparent 20px),
+                repeating-linear-gradient(-45deg, rgba(127, 191, 255, 0.4) 0px, rgba(127, 191, 255, 0.4) 2px, transparent 2px, transparent 20px),
+                repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.2) 0px, rgba(255, 255, 255, 0.2) 1px, transparent 1px, transparent 30px),
+                repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.2) 0px, rgba(255, 255, 255, 0.2) 1px, transparent 1px, transparent 30px);
+            background-size: 40px 40px, 40px 40px, 30px 30px, 30px 30px;
             margin: 0;
-            padding: 30px 0; /* Убрали боковые отступы для точного центрирования */
+            padding: 30px 0;
             display: flex;
             justify-content: center;
             align-items: flex-start;
@@ -25,21 +30,21 @@
             font-family: 'Comic Neue', cursive;
         }
 
-        /* --- ГЛАВНЫЙ ЛИСТ ГАЗЕТЫ (Жесткая ширина и центрирование) --- */
+        /* --- ГЛАВНЫЙ ЛИСТ ГАЗЕТЫ --- */
         .newspaper-sheet {
             position: relative;
-            background-color: #fffdf0;
-            width: 850px; 
-            margin: 0 auto; /* Строгое центрирование внутри viewport */
-            border: 6px solid #333;
+            background-color: #f0f8ff;
+            width: 850px;
+            margin: 0 auto;
+            border: 6px solid #1f618d;
             border-radius: 4px;
             padding: 30px;
-            box-shadow: 12px 12px 0px #333;
+            box-shadow: 12px 12px 0px #1f618d;
             transform: rotate(-0.3deg);
             overflow: hidden;
         }
 
-        /* --- ДЕТАЛЬ: КОФЕЙНОЕ ПЯТНО НА ПОЛЯХ --- */
+        /* --- ДЕТАЛЬ: КОФЕЙНОЕ ПЯТНО --- */
         .coffee-stain {
             position: absolute;
             top: 15px;
@@ -61,13 +66,13 @@
             border-radius: 50%;
         }
 
-        /* --- ДЕТАЛЬ: КРАСНАЯ ПЕЧАТЬ ОДОБРЕНИЯ --- */
+        /* --- ДЕТАЛЬ: ПЕЧАТЬ ОДОБРЕНИЯ --- */
         .editorial-seal {
             position: absolute;
             bottom: 180px;
             right: 20px;
-            border: 4px dashed #ff5757;
-            color: #ff5757;
+            border: 4px dashed #2e86c1;
+            color: #2e86c1;
             font-family: 'Pangolin', cursive;
             font-size: 14px;
             font-weight: bold;
@@ -87,10 +92,10 @@
             opacity: 1;
         }
 
-        /* --- ШАПКА ГАЗЕТЫ (MASTHEAD) --- */
+        /* --- ШАПКА ГАЗЕТЫ --- */
         .newspaper-header {
             text-align: center;
-            border-bottom: 4px double #333;
+            border-bottom: 4px double #1f618d;
             padding-bottom: 15px;
             margin-bottom: 20px;
         }
@@ -102,44 +107,44 @@
             font-family: 'Pangolin', cursive;
             font-weight: bold;
             font-size: 13px;
-            color: #555;
+            color: #1f618d;
             text-transform: uppercase;
-            border-bottom: 2px solid #333;
+            border-bottom: 2px solid #1f618d;
             padding-bottom: 5px;
             margin-bottom: 15px;
             flex-wrap: wrap;
             gap: 10px;
         }
 
-        /* --- УЛУЧШЕННЫЙ ПЕРЕКЛЮЧАТЕЛЬ СО СТРЕЛОЧКАМИ --- */
         .edition-nav-container {
             display: flex;
             align-items: center;
             gap: 8px;
-            background: #fffdf0;
-            border: 2px solid #333;
+            background: #f0f8ff;
+            border: 2px solid #1f618d;
             border-radius: 6px;
             padding: 2px 6px;
-            box-shadow: 2px 2px 0px #333;
+            box-shadow: 2px 2px 0px #1f618d;
         }
         
         .btn-nav {
-            background: #ffde59;
-            border: 2px solid #333;
+            background: #85c1e9;
+            border: 2px solid #1f618d;
             border-radius: 4px;
             cursor: pointer;
             font-size: 14px;
             font-weight: bold;
             padding: 2px 8px;
             transition: all 0.1s ease;
+            color: #1f618d;
         }
         .btn-nav:active:not(:disabled) {
             transform: scale(0.9);
         }
         .btn-nav:disabled {
-            background: #eee;
-            color: #aaa;
-            border-color: #aaa;
+            background: #ccc;
+            color: #888;
+            border-color: #888;
             cursor: not-allowed;
         }
 
@@ -147,7 +152,7 @@
             font-family: 'Pangolin', cursive;
             font-weight: bold;
             font-size: 13px;
-            color: #333;
+            color: #1f618d;
             min-width: 140px;
             text-align: center;
         }
@@ -159,7 +164,7 @@
             align-items: flex-end;
             cursor: pointer;
         }
-        .barcode span { background: #333; width: 2px; height: 100%; transition: height 0.1s;}
+        .barcode span { background: #1f618d; width: 2px; height: 100%; transition: height 0.1s;}
         .barcode span.thick { width: 4px; }
         .barcode span.thin { width: 1px; }
         .barcode:active span { height: 50%; }
@@ -167,7 +172,7 @@
         .newspaper-header h1 {
             font-family: 'Pangolin', cursive;
             font-size: 56px;
-            color: #ff5757;
+            color: #1f618d;
             margin: 0;
             text-shadow: 3px 3px 0px #333, -1px -1px 0px #333, 1px -1px 0px #333, -1px 1px 0px #333;
             letter-spacing: 2px;
@@ -177,7 +182,7 @@
             font-size: 15px;
             font-style: italic;
             font-weight: bold;
-            color: #444;
+            color: #1f618d;
             margin-top: 5px;
         }
 
@@ -185,14 +190,15 @@
             display: inline-flex;
             align-items: center;
             gap: 5px;
-            background: #eee;
+            background: #e3f0fa;
             padding: 2px 8px;
             border-radius: 12px;
-            border: 1px solid #ccc;
+            border: 1px solid #85c1e9;
             font-size: 12px;
+            color: #1f618d;
         }
 
-        /* --- ГАЗЕТНАЯ СЕТКА (Всегда в две колонки) --- */
+        /* --- ГАЗЕТНАЯ СЕТКА --- */
         .newspaper-grid {
             display: grid;
             grid-template-columns: 2fr 1fr;
@@ -200,7 +206,7 @@
         }
 
         .main-stories {
-            border-right: 2px dashed #333;
+            border-right: 2px dashed #1f618d;
             padding-right: 25px;
         }
 
@@ -209,7 +215,7 @@
         .story h2 {
             font-family: 'Pangolin', cursive;
             font-size: 24px;
-            color: #333;
+            color: #1f618d;
             margin: 0 0 10px 0;
             line-height: 1.2;
         }
@@ -220,21 +226,21 @@
             float: left;
             margin-right: 6px;
             margin-top: -4px;
-            color: #ff5757;
+            color: #1f618d;
             text-shadow: 2px 2px 0px #333;
         }
 
         .story p {
             font-size: 15px;
             line-height: 1.5;
-            color: #444;
+            color: #1f618d;
             margin: 8px 0 0 0;
             font-weight: 700;
         }
 
         .media-box {
             width: 100%;
-            border: 4px solid #333;
+            border: 4px solid #1f618d;
             border-radius: 8px;
             overflow: hidden;
             background: #fff;
@@ -243,7 +249,7 @@
             position: relative;
         }
 
-        /* --- КРУПНЫЙ УДОБНЫЙ ПОЛЗУНОК ЛЕНТЫ --- */
+        /* --- СЛАЙДЕР --- */
         .news-slider {
             display: flex;
             overflow-x: auto;
@@ -257,59 +263,64 @@
             height: 16px;
         }
         .news-slider::-webkit-scrollbar-track { 
-            background: #fffdf0; 
-            border: 3px solid #333; 
+            background: #f0f8ff; 
+            border: 3px solid #1f618d; 
             border-radius: 8px;
         }
         .news-slider::-webkit-scrollbar-thumb { 
-            background: #ff5757; 
-            border: 3px solid #333; 
+            background: #2e86c1; 
+            border: 3px solid #1f618d; 
             border-radius: 5px;
             cursor: grab;
         }
         .news-slider::-webkit-scrollbar-thumb:active {
-            background: #e04444;
+            background: #1f618d;
             cursor: grabbing;
         }
         
         .slide-card {
             flex: 0 0 85%;
             background: #fff;
-            border: 2px solid #333;
+            border: 2px solid #1f618d;
             border-radius: 6px;
             padding: 12px;
             scroll-snap-align: center;
         }
+        .slide-card h4 {
+            margin:0;
+            color: #1f618d;
+        }
 
-        /* --- БОКОВАЯ ПАНЕЛЬ И ВИДЖЕТЫ --- */
+        /* --- БОКОВАЯ ПАНЕЛЬ --- */
         .side-panel .widget {
             background: #fff;
-            border: 3px solid #333;
+            border: 3px solid #1f618d;
             border-radius: 12px;
             padding: 15px;
             margin-bottom: 25px;
-            box-shadow: 4px 4px 0px #333;
+            box-shadow: 4px 4px 0px #1f618d;
         }
 
-        .widget.horoscope { background-color: #f0faff; transform: rotate(-1deg); }
-        .widget.lottery { background-color: #fff4e6; transform: rotate(1deg); }
-        .widget.weekly-spec { background-color: #f1fff0; transform: rotate(0.5deg); }
+        .widget.horoscope { background-color: #eaf4fc; transform: rotate(-1deg); }
+        .widget.lottery { background-color: #e8f0fe; transform: rotate(1deg); }
+        .widget.weekly-spec { background-color: #e3f0fa; transform: rotate(0.5deg); }
         
-        .widget h3 { font-family: 'Pangolin', cursive; margin: 0 0 8px 0; font-size: 18px; text-align: center; }
+        .widget h3 { font-family: 'Pangolin', cursive; margin: 0 0 8px 0; font-size: 18px; text-align: center; color: #1f618d; }
 
         .btn-action {
-            display: block; width: 100%; background: #76e150; border: 3px solid #333;
+            display: block; width: 100%; background: #3498db;
+            border: 3px solid #1f618d;
             border-radius: 8px; padding: 8px; font-family: 'Pangolin', cursive; font-size: 15px;
-            font-weight: bold; color: white; cursor: pointer; box-shadow: 0 4px 0px #333;
+            font-weight: bold; color: white; cursor: pointer; box-shadow: 0 4px 0px #1f618d;
             text-shadow: 1px 1px 0px rgba(0,0,0,0.2); transition: all 0.1s ease; margin-top: 10px;
         }
-        .btn-action:active { box-shadow: 0 1px 0px #333; transform: translateY(3px); }
+        .btn-action:active { box-shadow: 0 1px 0px #1f618d; transform: translateY(3px); }
         
         /* Защитный слой лотереи */
         .scratch-card {
             background: #999;
             color: transparent;
-            border: 2px dashed #333;
+            border: 2px dashed #1f618d;
             border-radius: 6px;
             padding: 12px;
             text-align: center;
@@ -321,30 +332,30 @@
             background-image: repeating-linear-gradient(45deg, transparent, transparent 5px, rgba(255,255,255,0.15) 5px, rgba(255,255,255,0.15) 10px);
         }
         .scratch-card.revealed {
-            background: #ffeaa7;
-            color: #2d3436;
+            background: #d4e6f1;
+            color: #1f618d;
             border-style: dashed;
             cursor: default;
             background-image: none;
         }
 
-        .prediction-box { margin-top: 10px; min-height: 45px; font-size: 13px; text-align: center; font-style: italic; color: #555; }
+        .prediction-box { margin-top: 10px; min-height: 45px; font-size: 13px; text-align: center; font-style: italic; color: #1f618d; }
 
-        /* Поле ввода загадки */
         .weekly-input-field {
             width: 100%;
             padding: 8px;
             font-family: 'Pangolin', cursive;
             font-size: 15px;
-            border: 2px solid #333;
+            border: 2px solid #1f618d;
             border-radius: 6px;
             text-align: center;
-            background: #fffdf0;
+            background: #f0f8ff;
+            color: #1f618d;
         }
 
         .coupon {
             background: #fffbe6;
-            border: 3px dashed #ff5757;
+            border: 3px dashed #2e86c1;
             border-radius: 8px;
             padding: 12px;
             text-align: center;
@@ -361,13 +372,14 @@
             transform: translateY(5px) rotate(0deg);
         }
         .coupon-scissors { position: absolute; top: -12px; left: 10px; font-size: 16px; }
+        .coupon h4 { color: #2e86c1; }
 
-        /* --- КРАСИВЫЕ СРЫВНЫЕ ОБЪЯВЛЕНИЯ С ПОДДЕРЖКОЙ ФОТО --- */
+        /* --- ОБЪЯВЛЕНИЯ --- */
         .tear-ads-container {
             margin-top: 30px;
-            border: 3px solid #333;
-            background: #e9e3d3;
-            box-shadow: 4px 4px 0px #333, inset 0 0 20px rgba(0,0,0,0.05);
+            border: 3px solid #1f618d;
+            background: #d6eaf8;
+            box-shadow: 4px 4px 0px #1f618d, inset 0 0 20px rgba(0,0,0,0.05);
             border-radius: 6px;
             padding-bottom: 10px;
         }
@@ -378,12 +390,12 @@
             justify-content: center;
             gap: 20px;
             padding: 15px 20px;
-            background: #fffdf0;
+            background: #f0f8ff;
             box-shadow: 0 2px 5px rgba(0,0,0,0.05);
             margin: 10px;
-            border: 1px solid #d4cbb3;
+            border: 1px solid #aed6f1;
             transform: rotate(-0.5deg);
-            border-bottom: 2px solid #a69b82;
+            border-bottom: 2px solid #85c1e9;
             min-height: 100px;
         }
 
@@ -403,6 +415,7 @@
             text-align: center;
             font-weight: bold;
             flex: 1;
+            color: #1f618d;
         }
         
         .tear-slips {
@@ -418,7 +431,7 @@
             text-align: center;
             background: linear-gradient(to bottom, #ffffff 0%, #f9f9f9 100%);
             border: 1px solid #ccc;
-            border-top: 4px dashed #bbb;
+            border-top: 4px dashed #85c1e9;
             padding: 15px 5px;
             font-size: 13px;
             font-weight: bold;
@@ -432,13 +445,14 @@
                         opacity 0.3s ease, 
                         border-top-color 0.2s;
             user-select: none;
+            color: #1f618d;
         }
         
         .tear-slip:hover {
             background: #fffdf0;
-            color: #ff5757;
+            color: #2e86c1;
             transform: rotate(-3deg) scale(1.02);
-            border-top-color: #ff5757;
+            border-top-color: #2e86c1;
             box-shadow: 3px 5px 8px rgba(0,0,0,0.2);
         }
         
@@ -448,7 +462,7 @@
             pointer-events: none;
         }
 
-        /* --- КАСТОМНЫЕ МОДАЛЬНЫЕ ОКНА --- */
+        /* --- МОДАЛЬНЫЕ ОКНА --- */
         .modal-overlay {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
@@ -464,14 +478,14 @@
             display: flex;
         }
         .modal-box {
-            background: #fffdf0;
-            border: 5px solid #333;
+            background: #f0f8ff;
+            border: 5px solid #1f618d;
             border-radius: 12px;
             padding: 25px;
             max-width: 420px;
             width: 100%;
             text-align: center;
-            box-shadow: 10px 10px 0px #333;
+            box-shadow: 10px 10px 0px #1f618d;
             transform: scale(0.8) rotate(-1deg);
             transition: transform 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
@@ -482,7 +496,7 @@
             font-family: 'Pangolin', cursive;
             font-size: 18px;
             font-weight: bold;
-            color: #333;
+            color: #1f618d;
             margin: 0 0 15px 0;
             line-height: 1.4;
         }
@@ -535,7 +549,7 @@
                     <p id="main-story-text">...</p>
                 </article>
 
-                <hr style="border: none; border-top: 2px dashed #333; margin: 20px 0;">
+                <hr style="border: none; border-top: 2px dashed #1f618d; margin: 20px 0;">
 
                 <article class="story">
                     <h2>🚀 Короткие сводки</h2>
@@ -550,31 +564,31 @@
                 
                 <div class="widget lottery">
                     <h3>🎟️ Еженедельная Лотерея</h3>
-                    <p style="font-size: 11px; text-align: center; margin: 0 0 8px 0;">Сотри защитный слой:</p>
+                    <p style="font-size: 11px; text-align: center; margin: 0 0 8px 0; color: #1f618d;">Сотри защитный слой:</p>
                     <div class="scratch-card" id="scratch-ticket">ПОТЕРЕТЬ МОНЕТКОЙ</div>
                 </div>
 
                 <div class="widget horoscope">
                     <h3>🔮 Космическая тайна</h3>
-                    <p style="font-size: 12px; text-align: center; margin: 0 0 5px 0;">Узнай что говорят звезды:</p>
+                    <p style="font-size: 12px; text-align: center; margin: 0 0 5px 0; color: #1f618d;">Узнай что говорят звезды:</p>
                     <button class="btn-action" id="get-prediction">Узнать тайну ✨</button>
                     <div class="prediction-box" id="prediction-text">Звезды пока молчат...</div>
                 </div>
 
                 <div class="widget weekly-spec">
                     <h3>🧩 Загадка Недели</h3>
-                    <p id="weekly-riddle-text" style="font-size: 13px; margin: 5px 0 10px 0; text-align: center; font-weight: bold; line-height: 1.4;">...</p>
+                    <p id="weekly-riddle-text" style="font-size: 13px; margin: 5px 0 10px 0; text-align: center; font-weight: bold; line-height: 1.4; color: #1f618d;">...</p>
                     
                     <input type="text" id="weekly-answer-input" class="weekly-input-field" placeholder="Твой ответ...">
-                    <button class="btn-action" id="weekly-check-btn" style="background: #57b9ff;">Проверить догадку</button>
+                    <button class="btn-action" id="weekly-check-btn" style="background: #2e86c1;">Проверить догадку</button>
                     
-                    <div id="weekly-result-msg" style="font-size: 12px; text-align: center; margin-top: 8px; font-weight: bold; min-height: 18px;"></div>
+                    <div id="weekly-result-msg" style="font-size: 12px; text-align: center; margin-top: 8px; font-weight: bold; min-height: 18px; color: #1f618d;"></div>
                 </div>
 
                 <div class="coupon" id="newspaper-coupon" title="Нажмите, чтобы отрезать купон">
                     <span class="coupon-scissors">✂️------------------</span>
-                    <h4 id="coupon-title" style="margin: 5px 0 0 0; font-family: 'Pangolin', cursive; color: #ff5757;">...</h4>
-                    <p id="coupon-desc" style="font-size: 11px; margin: 3px 0 0 0; font-weight: bold;">...</p>
+                    <h4 id="coupon-title" style="margin: 5px 0 0 0; font-family: 'Pangolin', cursive; color: #2e86c1;">...</h4>
+                    <p id="coupon-desc" style="font-size: 11px; margin: 3px 0 0 0; font-weight: bold; color: #1f618d;">...</p>
                 </div>
 
             </aside>
@@ -595,7 +609,7 @@
     <div class="modal-overlay" id="custom-alert-modal">
         <div class="modal-box">
             <div class="modal-message" id="modal-alert-text">Сообщение редакции</div>
-            <button class="btn-action" id="modal-close-btn" style="background: #ff5757; max-width: 160px; margin: 10px auto 0 auto;">Отлично! 👍</button>
+            <button class="btn-action" id="modal-close-btn" style="background: #2e86c1; max-width: 160px; margin: 10px auto 0 auto;">Отлично! 👍</button>
         </div>
     </div>
 
@@ -604,14 +618,42 @@
             
             // ===================================================================
             //  БАЗА ДАННЫХ ВЫПУСКОВ
-            //  Добавлен параметр adImage (ссылка на фото). Если его нет - выводится только текст.
             // ===================================================================
             const editionsDB = [
                 {
+                    id: "week_26",
+                    displayName: "Неделя 26 🐈",
+                    availableFrom: "2026-06-27 22:30:00", 
+                    mainTitle: "СЕНСАЦИЯ,ЕКАТЕРИНА ОБОЖАЕТ ПИТЬ ЭНЕРГЕТИКИ ",
+                    mainLead: "Наш корресподент сидя в кустах сумел заснять, как Екатерина покупает энергетик в магазе и при этом начала ОБОРАЧИВАТЬСЯ, чтобы никто не увидел",
+                    mainImage: "gazeta/content2w_1.jpg",
+                    mainText: "В наше время энергетики стали популярными у нашей молодежи благодаря его эффекту кофеина, выпил и ты уже получил заряд бодрости. И так само поступила сегодняшняя наша героиня Екатерина, корресподент нашей газеты получил информаци от некого анонима, который находился в кинозале во время просмотра фильм Бруно. Данный агент дал подробную информацию про место и время где будет происходить покупка напитка.",
+                    riddle: "Что может одновременно путешествовать по всему миру, но при этом вечно оставаться в одном и том же углу?",
+                    answer: "марка",
+                    sliderNews: [
+                        { title: "Аномальная жара", text: "С понедельника в Кривом Роге начнется жара за +35 градусов по цельсию." },
+                        { title: "Фисташки", text: "Цены на фисташке в Украине выше по миру в среднем в 2-3 раза от средней цены." },
+                        { title: "Алкоголь", text: "Цены на алкоголь растут, а значит растет количество алкашей по стране." }
+                    ],
+                    lotteryPrize: "«Я СДАЮСЬ» Ты выиграла в любом споре на ближайшие 24 часа. Признаю твою правоту во всём!",
+                    predictions: ["Смотри по сторонам и ешь все сладкое"],
+                    couponTitle: "ЕЩЁ 15 МИНУТОК",
+                    couponDesc: "Я тихонько встаю по будильнику, делаю тебе чай и охраняю твой утренний сон от любых раздражающих звуков.",
+                    adBoardText: "Продам перфоратор для крупных стен, дает право утром долбить стены. Возможен торг.",
+                    adImage: "gazeta/perf.png", 
+                    tearSlips: [
+                        { label: "Курорт", msg: "Курортный отдых на пляжах Индии, звоните по +925825825" },
+                        { label: "Заказ еды на дом", msg: "В течении суток доставим все что угодно, и даже людей с другой страны" },
+                        { label: "Телефон", msg: "Продам полностью разбитый и не рабочий телефон" },
+                        { label: "Работа", msg: "Работа на дому, нужно играть в Free Fire 24 на 7" },
+                        { label: "Сантехник", msg: "Сантехник Серёжа прочистит ваши трубы мощно и качественно. Звонить в любое время" }
+                    ]
+                },
+                {
                     id: "week_25",
                     displayName: "Неделя 25 🐈",
-                    availableFrom: "2026-06-21 00:00:00", 
-                    mainTitle: "Контмейкер делает все больше и больше контента",
+                    availableFrom: "2026-06-26 00:00:00", 
+                    mainTitle: "Контентмейкер делает все больше и больше контента",
                     mainLead: "В течении несколько дней он сумел превратить сайт в мини экосистему, и продолжает развивать",
                     mainImage: "gazeta/content1w_1.jpg",
                     mainText: "Произошла одна очень интересная история, некого парня так вдохновила одна девушка, что он решил сделать сайт, на котором вылаживает свои мысли, истории и абсолютно все что угодно из его жизни. Наш корресподент продолжит следить за этой парочкой и будет сообщать каждую интересную деталь с их жизни.",
@@ -675,44 +717,37 @@
                 const data = activeEditions[index];
                 if (!data) return;
 
-                // 1. Шапка и Главная статья
                 $('#current-edition-name').text(data.displayName);
                 $('#main-story-title').text(data.mainTitle);
                 $('#main-story-lead').text(data.mainLead);
                 $('#main-story-media').attr('src', data.mainImage);
                 $('#main-story-text').html(data.mainText);
 
-                // 2. Загадка
                 $('#weekly-riddle-text').text(data.riddle);
                 weeklyCorrectAnswer = data.answer;
-                $('#weekly-answer-input').val('').attr('disabled', false).css('background', '#fffdf0');
+                $('#weekly-answer-input').val('').attr('disabled', false).css('background', '#f0f8ff');
                 $('#weekly-check-btn').attr('disabled', false).css('opacity', '1');
                 $('#weekly-result-msg').text('');
 
-                // 3. Слайдер новостей
                 const $slider = $('#dynamic-news-slider');
                 $slider.empty();
                 data.sliderNews.forEach(item => {
                     $slider.append(`
                         <div class="slide-card">
-                            <h4 style="margin:0; color:#ff5757;">${item.title}</h4>
+                            <h4>${item.title}</h4>
                             <p style="font-size:13px; margin:5px 0 0 0;">${item.text}</p>
                         </div>
                     `);
                 });
 
-                // 4. Лотерея
                 $('#scratch-ticket').removeClass('revealed').text('ПОТЕРЕТЬ МОНЕТКОЙ');
 
-                // 5. Гороскоп
                 $('#prediction-text').text('Звезды пока молчат...');
 
-                // 6. Купон
                 $('#newspaper-coupon').removeClass('torn');
                 $('#coupon-title').text(data.couponTitle);
                 $('#coupon-desc').text(data.couponDesc);
 
-                // 7. Стенд объявлений (Текст + Картинка)
                 $('#ad-board-text').text(data.adBoardText);
                 
                 if (data.adImage && data.adImage.trim() !== "") {
@@ -727,12 +762,11 @@
                     $tearSlipsContainer.append(`<div class="tear-slip" data-msg="${slip.msg}">${slip.label}</div>`);
                 });
 
-                // Управление кнопками навигации
                 $('#prev-edition-btn').attr('disabled', index >= activeEditions.length - 1);
                 $('#next-edition-btn').attr('disabled', index <= 0);
             }
 
-            // --- ИНИЦИАЛИЗАЦИЯ СИСТЕМЫ ---
+            // --- ИНИЦИАЛИЗАЦИЯ ---
             updateAvailableEditions();
             currentIndex = 0; 
             loadEdition(currentIndex);
@@ -750,7 +784,7 @@
                 }
             });
 
-            // --- ДЕЛЕГИРОВАННЫЕ ИНТЕРАКТИВНЫЕ СОБЫТИЯ ---
+            // --- ИНТЕРАКТИВНЫЕ СОБЫТИЯ ---
 
             // Проверка загадки
             $('#weekly-check-btn').click(function() {
@@ -784,7 +818,7 @@
                     .fadeIn(400);
             });
 
-            // Купон (отрыв)
+            // Купон
             $('#newspaper-coupon').click(function() {
                 if(!$(this).hasClass('torn')){
                     $(this).addClass('torn');
