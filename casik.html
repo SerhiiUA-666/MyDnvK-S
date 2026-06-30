@@ -1010,7 +1010,7 @@
         <div class="display-panel">
             <div class="info-box">
                 <div class="info-label">💰 Баланс</div>
-                <div class="info-value" id="balance">10000 🪙</div>
+                <div class="info-value" id="balance">25000 🪙</div>
             </div>
             <div class="info-box">
                 <div class="info-label">🎯 Ставка</div>
@@ -1044,7 +1044,7 @@
             </div>
 
             <div id="risk-panel" class="risk-panel hidden">
-                <p>🎲 Выигрыш: <span id="win-amount">0</span> 🪙! Удвоить? (шанс 50%)</p>
+                <p>🎲 Выигрыш: <span id="win-amount">0</span> 🪙! Удвоить? (шанс 65%)</p>
                 <div class="risk-buttons">
                     <button class="risk-btn success" onclick="playRisk(true)">⚡ Рискнуть</button>
                     <button class="risk-btn collect" onclick="playRisk(false)">✅ Забрать</button>
@@ -1140,35 +1140,38 @@
     const auth = firebase.auth();
     const database = firebase.database();
 
-    // === ОПТИМИЗИРОВАННЫЕ КОНСТАНТЫ ===
+    // === ОПТИМИЗИРОВАННЫЕ КОНСТАНТЫ (повышенные шансы и выплаты) ===
     const SYMBOLS = ['🍒', '🍋', '💎', '💩', '🐱', '⭐', '🎰', '❄️', '☃️'];
     const SYMBOL_WEIGHTS = {
-        '🍒': 30,
-        '🍋': 25,
-        '💎': 5,
-        '💩': 20,
-        '🐱': 12,
-        '⭐': 8,
-        '🎰': 2,
-        '❄️': 5,
-        '☃️': 4
+        '🍒': 18,   // было 30
+        '🍋': 16,   // было 25
+        '💎': 10,   // было 5
+        '💩': 14,   // было 20
+        '🐱': 20,   // было 12
+        '⭐': 18,   // было 8
+        '🎰': 6,    // было 2
+        '❄️': 8,    // было 5
+        '☃️': 6     // было 4
     };
     const TOTAL_WEIGHT = Object.values(SYMBOL_WEIGHTS).reduce((a, b) => a + b, 0);
 
+    // Увеличенные выплаты (×1.8–2.5)
     const PAYOUTS = {
-        '🍒': { pair: 0.5, triple: 1.5, four: 8, five: 25 },
-        '🍋': { pair: 0.7, triple: 2, four: 12, five: 30 },
-        '💎': { pair: 0.7, triple: 12, four: 35, five: 100 },
-        '💩': { pair: 0.3, triple: 1, four: 5, five: 15 },
-        '🐱': { pair: 0.7, triple: 20, four: 60, five: 150 },
-        '⭐': { pair: 0.7, triple: 16, four: 45, five: 120 },
-        '🎰': { pair: 1.0, triple: 30, four: 100, five: 300 }
+        '🍒': { pair: 1.0, triple: 3.0, four: 14, five: 40 },
+        '🍋': { pair: 1.2, triple: 4.0, four: 18, five: 50 },
+        '💎': { pair: 1.5, triple: 20, four: 60, five: 150 },
+        '💩': { pair: 0.6, triple: 2.0, four: 8, five: 25 },
+        '🐱': { pair: 1.5, triple: 35, four: 90, five: 220 },
+        '⭐': { pair: 1.5, triple: 28, four: 70, five: 180 },
+        '🎰': { pair: 2.0, triple: 50, four: 150, five: 400 }
     };
 
-    const LOW_SYMBOLS = ['🍒', '🍋', '💩'];
+    // Убраны низкие символы из "штрафных" – теперь все пары дают выигрыш
+    const LOW_SYMBOLS = [];
+
     const REEL_SYMBOL_COUNT = 15;
 
-    let balance = 10000;
+    let balance = 25000;   // увеличен стартовый баланс
     let bet = 10;
     let isSpinning = false;
     let currentWin = 0;
@@ -1180,7 +1183,7 @@
     let fastAnimation = true;
 
     let riskWinAmount = 0;
-    let riskChance = 0.5;
+    let riskChance = 0.65; // шанс удвоения повышен до 65%
 
     let freeSpinsActive = false;
     let freeSpinsLeft = 0;
@@ -1432,7 +1435,7 @@
 
     function applyUserData(data) {
         if (!data) return;
-        balance = data.balance ?? 10000;
+        balance = data.balance ?? 25000;
         bet = data.bet ?? 10;
         jackpot = data.jackpot ?? 0;
         stats = data.stats || { spins: 0, wins: 0, maxWin: 0, totalBet: 0, totalWin: 0 };
@@ -1491,7 +1494,7 @@
                 const data = await loadUserData(user.uid);
                 if (data) applyUserData(data);
                 else {
-                    balance = 10000;
+                    balance = 25000;
                     bet = 10;
                     jackpot = 50;
                     stats = { spins:0, wins:0, maxWin:0, totalBet:0, totalWin:0 };
@@ -1542,7 +1545,7 @@
             document.getElementById('logout-btn').style.display = 'none';
             spinBtn.disabled = true;
             authModal.classList.add('active');
-            balance = 10000;
+            balance = 25000;
             bet = 10;
             jackpot = 0;
             stats = { spins:0, wins:0, maxWin:0, totalBet:0, totalWin:0 };
@@ -1598,7 +1601,7 @@
             dailyBonusBtn.textContent = '✅ Бонус получен сегодня';
         } else {
             dailyBonusBtn.disabled = false;
-            dailyBonusBtn.textContent = '🎁 Забрать бонус (20 000 🪙)';
+            dailyBonusBtn.textContent = '🎁 Забрать бонус (50 000 🪙)';
         }
     }
 
@@ -1614,12 +1617,12 @@
             msgDisplay.className = 'message-display lose';
             return;
         }
-        balance += 20000;
+        balance += 50000;
         lastBonusDate = today;
         updateUI();
         updateDailyBonusButton();
         saveUserData();
-        msgDisplay.textContent = '🎉 Вы получили ежедневный бонус 20 000 🪙!';
+        msgDisplay.textContent = '🎉 Вы получили ежедневный бонус 50 000 🪙!';
         msgDisplay.className = 'message-display win';
         fireConfetti(25);
         playWinSound();
@@ -1760,7 +1763,7 @@
             balance -= bet;
             stats.spins++;
             stats.totalBet += bet;
-            jackpot += Math.floor(bet * 0.05);
+            jackpot += Math.floor(bet * 0.10); // увеличен сбор джекпота до 10%
         } else {
             stats.spins++;
         }
@@ -1866,7 +1869,8 @@
             else basicSymbols.push(sym);
         });
 
-        if (scatterCount >= 3 && !freeSpinsActive) {
+        // Активация фриспинов теперь при 2+ ☃️
+        if (scatterCount >= 2 && !freeSpinsActive) {
             freeSpinsActive = true;
             freeSpinsLeft = FREE_SPINS_COUNT;
             updateFreeSpinsUI();
@@ -1875,7 +1879,7 @@
             fireConfetti(25);
             playJackpotSound();
             saveUserData();
-        } else if (scatterCount >= 3 && freeSpinsActive) {
+        } else if (scatterCount >= 2 && freeSpinsActive) {
             freeSpinsLeft += FREE_SPINS_COUNT;
             updateFreeSpinsUI();
             msgDisplay.textContent = `🎉 Ещё ${FREE_SPINS_COUNT} фриспинов! (x${FREE_SPINS_MULTIPLIER})`;
@@ -1935,9 +1939,7 @@
                 } else if (count >= 2) {
                     mult = PAYOUTS[sym]?.pair || 0;
                 }
-                if (count === 2 && LOW_SYMBOLS.includes(sym) && reelsCount >= 4) {
-                    mult = 0;
-                }
+                // Убрано условие LOW_SYMBOLS – теперь все пары дают выигрыш
 
                 if (mult > 0 && (count > bestCount || (count === bestCount && mult > bestMult))) {
                     bestCount = count;
@@ -2013,7 +2015,6 @@
     function showRiskGame() {
         if (currentWin > 0 && riskEnabled && !autoSpinActive && !freeSpinsActive) {
             riskWinAmount = currentWin;
-            riskChance = 0.5;
             winAmountSpan.textContent = riskWinAmount;
             document.querySelector('.risk-panel p').innerHTML = 
                 `🎲 Выигрыш: <span id="win-amount">${riskWinAmount}</span> 🪙! Удвоить? (шанс ${Math.round(riskChance*100)}%)`;
@@ -2042,7 +2043,8 @@
 
         if (Math.random() < riskChance) {
             riskWinAmount *= 2;
-            riskChance = Math.max(0.05, riskChance - 0.1);
+            // шанс падает медленнее
+            riskChance = Math.max(0.15, riskChance - 0.05);
             winAmountSpan.textContent = riskWinAmount;
             document.querySelector('.risk-panel p').innerHTML = 
                 `🎲 Выигрыш: <span id="win-amount">${riskWinAmount}</span> 🪙! Удвоить? (шанс ${Math.round(riskChance*100)}%)`;
@@ -2220,11 +2222,7 @@
             if (reelsCount >= 4) line += `4: ${pay.four}x  `;
             if (reelsCount >= 3) {
                 line += `3: ${pay.triple}x  `;
-                if (reelsCount <= 3 || !LOW_SYMBOLS.includes(sym)) {
-                    line += `2: ${pay.pair}x`;
-                } else {
-                    line += `2: 0 (не даёт выигрыш)`;
-                }
+                line += `2: ${pay.pair}x`;
             } else {
                 line += `3: ${pay.triple}x  2: ${pay.pair}x`;
             }
@@ -2232,9 +2230,8 @@
         }
         msg += '\n🎰 ТРИ и более 🎰 = ДЖЕКПОТ (прогрессивный)!';
         msg += '\n❄️ Wild заменяет любой основной символ (кроме ☃️ и 🎰 для джекпота).';
-        msg += '\n☃️ Scatter: 3+ активируют 5 бесплатных вращений с x2 ко всем выигрышам.';
-        msg += '\n\n⚠️ Для 4 и 5 барабанов: пары младших символов (🍒, 🍋, 💩) не приносят выигрыша.';
-        msg += '\n💎🐱⭐🎰 – увеличены выплаты за 3, 4 и 5 одинаковых (особенно за 5)!';
+        msg += '\n☃️ Scatter: 2+ активируют 5 бесплатных вращений с x2 ко всем выигрышам.';
+        msg += '\n\n✨ Теперь ВСЕ пары дают выигрыш! Шансы на фриспины увеличены.';
         await showInfoModal('📋 Таблица выплат', msg, false);
         closeInfoModal();
     }
